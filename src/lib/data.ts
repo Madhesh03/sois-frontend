@@ -1,0 +1,151 @@
+export const I = {
+  heroModel:
+    "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1000&h=1300&fit=crop&auto=format&q=85",
+  heroSlide2:
+    "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=1000&h=1300&fit=crop&auto=format&q=85",
+  heroSlide3:
+    "https://images.unsplash.com/photo-1633934542430-0905ccb5f050?w=1000&h=1300&fit=crop&auto=format&q=85",
+  ringWhite:
+    "https://images.unsplash.com/photo-1590703160323-ac5d3fc14089?w=600&h=700&fit=crop&auto=format&q=85",
+  earrings:
+    "https://images.unsplash.com/photo-1692521248622-98a1da77b673?w=600&h=700&fit=crop&auto=format&q=85",
+  necklace:
+    "https://images.unsplash.com/photo-1610661022658-5068c4d8f286?w=600&h=700&fit=crop&auto=format&q=85",
+  bracelets:
+    "https://images.unsplash.com/photo-1680775334280-adbda8e82fcd?w=600&h=700&fit=crop&auto=format&q=85",
+  anklets:
+    "https://images.unsplash.com/photo-1669975107668-efe29cd49789?w=600&h=700&fit=crop&auto=format&q=85",
+  heartPend:
+    "https://images.unsplash.com/photo-1588444968576-f8fe92ce56fd?w=600&h=700&fit=crop&auto=format&q=85",
+  prod1:
+    "https://images.unsplash.com/photo-1616294208582-c2a6d73b467b?w=600&h=720&fit=crop&auto=format&q=85",
+  prod2:
+    "https://images.unsplash.com/photo-1639660680788-bf160240864e?w=600&h=720&fit=crop&auto=format&q=85",
+  prod3:
+    "https://images.unsplash.com/photo-1764591576264-ad2e0e4e793c?w=600&h=720&fit=crop&auto=format&q=85",
+  prod4:
+    "https://images.unsplash.com/photo-1676329947145-99145926d3eb?w=600&h=720&fit=crop&auto=format&q=85",
+  brandStoryImg:
+    "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&h=1000&fit=crop&auto=format&q=85",
+  editorial:
+    "https://images.unsplash.com/photo-1637325334678-de0b8af22304?w=1400&h=700&fit=crop&auto=format&q=85",
+  craftClose:
+    "https://images.unsplash.com/photo-1620656798579-1984d9e87df7?w=1000&h=1200&fit=crop&auto=format&q=85",
+  commitmentMain:
+    "https://plus.unsplash.com/premium_photo-1664301272309-f81590c07d23?w=700&h=1100&fit=crop&auto=format&q=85",
+  commitmentTexture:
+    "https://images.unsplash.com/photo-1624588057318-5f1b2eb81012?w=700&h=460&fit=crop&auto=format&q=85",
+  signatureModel:
+    "https://images.unsplash.com/photo-1631965004544-1762fc696476?w=1400&h=1000&fit=crop&auto=format&q=85",
+} as const;
+
+export const products = [
+  {
+    name: "Crescent Moon Pendant",
+    subtitle: "Sterling Silver · 925",
+    price: "₹1,299",
+    original: "₹1,599",
+    tag: "Best Seller",
+    img: I.prod1,
+    isNew: false,
+    categories: ["All", "Best Sellers"],
+  },
+  {
+    name: "Celestial Stack Ring",
+    subtitle: "Sterling Silver · 925",
+    price: "₹899",
+    original: null,
+    tag: "New",
+    img: I.prod2,
+    isNew: true,
+    categories: ["All", "New Arrivals"],
+  },
+  {
+    name: "Cascade Hoop Earrings",
+    subtitle: "Sterling Silver · 925",
+    price: "₹749",
+    original: "₹999",
+    tag: "Sale",
+    img: I.prod3,
+    isNew: false,
+    categories: ["All", "On Sale"],
+  },
+  {
+    name: "Starlight Chain Bracelet",
+    subtitle: "Sterling Silver · 925",
+    price: "₹1,099",
+    original: null,
+    tag: "New",
+    img: I.prod4,
+    isNew: true,
+    categories: ["All", "New Arrivals"],
+  },
+  {
+    name: "Luminous Signet Ring",
+    subtitle: "Sterling Silver · 925",
+    price: "₹1,199",
+    original: "₹1,499",
+    tag: "Best Seller",
+    img: I.prod1,
+    isNew: false,
+    categories: ["All", "Best Sellers"],
+  },
+  {
+    name: "Ethereal Drop Earrings",
+    subtitle: "Sterling Silver · 925",
+    price: "₹899",
+    original: "₹1,199",
+    tag: "Sale",
+    img: I.prod2,
+    isNew: false,
+    categories: ["All", "On Sale"],
+  },
+  {
+    name: "Twisted Rope Necklace",
+    subtitle: "Sterling Silver · 925",
+    price: "₹1,499",
+    original: null,
+    tag: "New",
+    img: I.prod3,
+    isNew: true,
+    categories: ["All", "New Arrivals"],
+  },
+  {
+    name: "Cubic Charm Bracelet",
+    subtitle: "Sterling Silver · 925",
+    price: "₹999",
+    original: "₹1,299",
+    tag: "Sale",
+    img: I.prod4,
+    isNew: false,
+    categories: ["All", "On Sale"],
+  },
+] as const;
+
+export const productMeta = [
+  { badge: "Signature Edition", detail: "Hand-finished · Tarnish-resistant" },
+  { badge: "Everyday Essential", detail: "Adjustable fit · Nickel-free" },
+  { badge: "Statement Piece", detail: "Rhodium-plated · Hypoallergenic" },
+  { badge: "Limited Batch", detail: "Hand-finished · Nickel-free" },
+  { badge: "Premium Quality", detail: "Timeless design · Durable finish" },
+  { badge: "Daily Wear", detail: "Comfort fit · Versatile style" },
+  { badge: "Luxury Finish", detail: "Polished · Tarnish-resistant" },
+  { badge: "Artisan Crafted", detail: "Hand-finished · Unique detail" },
+] as const;
+
+export const siteConfig = {
+  name: "SOIS",
+  title: "SOIS — Premium 925 Sterling Silver Jewellery",
+  description:
+    "Shop hallmarked 925 sterling silver jewellery from SOIS. Handcrafted rings, earrings, necklaces, bracelets & anklets — free shipping on orders ₹999+, 30-day returns.",
+  url: "https://sois.in",
+  locale: "en_IN",
+  keywords: [
+    "sterling silver jewellery",
+    "925 silver",
+    "silver rings",
+    "silver earrings",
+    "SOIS jewellery",
+    "hallmarked silver India",
+  ],
+} as const;

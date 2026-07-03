@@ -1,0 +1,347 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ShoppingBag,
+  Heart,
+  Share2,
+  Minus,
+  Plus,
+  Star,
+  ChevronRight,
+  Truck,
+  ShieldCheck,
+  RefreshCw,
+} from "lucide-react";
+import { Product, formatPrice, getCategoryBySlug } from "@/lib/catalog";
+import { T } from "@/lib/tokens";
+import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { ProductCard } from "@/components/store/ProductCard";
+
+function Stars({ rating }: { rating: number }) {
+  return (
+    <span style={{ display: "inline-flex", gap: 1 }} aria-hidden="true">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          size={14}
+          color={T.forest}
+          fill={i <= Math.round(rating) ? T.forest : "none"}
+        />
+      ))}
+    </span>
+  );
+}
+
+export function ProductDetail({
+  product,
+  related,
+}: {
+  product: Product;
+  related: Product[];
+}) {
+  const { items, addToCart, updateQuantity, setCheckoutStep } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+
+  const [activeImage, setActiveImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [openSection, setOpenSection] = useState<string | null>("details");
+  const [shareMsg, setShareMsg] = useState("");
+
+  const wished = isInWishlist(product.id);
+  const category = getCategoryBySlug(product.category);
+  const discount = product.originalPrice
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100
+      )
+    : 0;
+
+  const payload = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    image: product.images[0],
+  };
+
+  const addChosenQuantity = () => {
+    const existing = items.find((i) => i.id === product.id)?.quantity ?? 0;
+    addToCart(payload);
+    updateQuantity(product.id, existing + quantity);
+  };
+
+  const handleBuyNow = () => {
+    addChosenQuantity();
+    setCheckoutStep("shipping");
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product.name, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareMsg("Link copied");
+        setTimeout(() => setShareMsg(""), 2000);
+      }
+    } catch {
+      /* user dismissed the share sheet */
+    }
+  };
+
+  const sections: { key: string; title: string; body: React.ReactNode }[] = [
+    {
+      key: "details",
+      title: "Product Details",
+      body: <p style={{ margin: 0, lineHeight: 1.7 }}>{product.description}</p>,
+    },
+    {
+      key: "specs",
+      title: "Specifications",
+      body: (
+        <dl className="sois-spec-list">
+          {product.specifications.map((s) => (
+            <div key={s.label} className="sois-spec-row">
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
+            </div>
+          ))}
+          <div className="sois-spec-row">
+            <dt>SKU</dt>
+            <dd>{product.sku}</dd>
+          </div>
+        </dl>
+      ),
+    },
+    {
+      key: "silver",
+      title: "Sterling Silver Details",
+      body: (
+        <p style={{ margin: 0, lineHeight: 1.7 }}>{product.silverDetails}</p>
+      ),
+    },
+    {
+      key: "care",
+      title: "Care Instructions",
+      body: (
+        <ul className="sois-care-list">
+          {product.care.map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
+      ),
+    },
+  ];
+
+  return (
+    <div className="sois-pdp">
+      {/* Breadcrumb */}
+      <nav className="sois-breadcrumb" aria-label="Breadcrumb">
+        <Link href="/">Home</Link>
+        <ChevronRight size={13} />
+        <Link href="/shop">Shop</Link>
+        {category && (
+          <>
+            <ChevronRight size={13} />
+            <Link href={`/category/${category.slug}`}>{category.name}</Link>
+          </>
+        )}
+        <ChevronRight size={13} />
+        <span aria-current="page">{product.name}</span>
+      </nav>
+
+      <div className="sois-pdp-grid">
+        {/* Gallery */}
+        <div className="sois-pdp-gallery">
+          <div className="sois-pdp-main-img">
+            <Image
+              src={product.images[activeImage]}
+              alt={product.name}
+              fill
+              sizes="(max-width: 900px) 100vw, 50vw"
+              style={{ objectFit: "cover" }}
+              priority
+            />
+            {product.badge && (
+              <span
+                className="sois-pcard-tag"
+                style={{
+                  background: product.isNew ? T.forest : "rgba(255,255,255,0.94)",
+                  color: product.isNew ? T.sage : T.forest,
+                }}
+              >
+                {product.badge.toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="sois-pdp-thumbs">
+            {product.images.map((img, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`View image ${i + 1}`}
+                className={`sois-pdp-thumb${i === activeImage ? " active" : ""}`}
+                onClick={() => setActiveImage(i)}
+              >
+                <Image
+                  src={img}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  style={{ objectFit: "cover" }}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Info */}
+        <div className="sois-pdp-info">
+          <div className="sois-pdp-sub">{product.subtitle}</div>
+          <h1 className="sois-pdp-name">{product.name}</h1>
+
+          <div className="sois-pdp-rating">
+            <Stars rating={product.rating} />
+            <span>
+              {product.rating.toFixed(1)} · {product.reviewCount} reviews
+            </span>
+          </div>
+
+          <div className="sois-pdp-price-row">
+            <span className="sois-pdp-price">{formatPrice(product.price)}</span>
+            {product.originalPrice && (
+              <span className="sois-pdp-orig">
+                {formatPrice(product.originalPrice)}
+              </span>
+            )}
+            {discount > 0 && (
+              <span className="sois-pdp-save">Save {discount}%</span>
+            )}
+          </div>
+
+          <div className="sois-pdp-sku">SKU: {product.sku}</div>
+
+          <div
+            className="sois-pdp-stock"
+            style={{ color: product.inStock ? T.forest : "#d4183d" }}
+          >
+            <span
+              className="sois-pdp-stock-dot"
+              style={{ background: product.inStock ? T.forest : "#d4183d" }}
+            />
+            {product.inStock ? "In stock — ships within 24h" : "Out of stock"}
+          </div>
+
+          {/* Quantity + actions */}
+          <div className="sois-pdp-actions">
+            <div className="sois-pdp-qty" aria-label="Quantity">
+              <button
+                type="button"
+                aria-label="Decrease quantity"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              >
+                <Minus size={16} />
+              </button>
+              <span>{quantity}</span>
+              <button
+                type="button"
+                aria-label="Increase quantity"
+                onClick={() => setQuantity((q) => q + 1)}
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="sois-pdp-add"
+              disabled={!product.inStock}
+              onClick={addChosenQuantity}
+            >
+              <ShoppingBag size={16} /> Add to Bag
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="sois-pdp-buy"
+            disabled={!product.inStock}
+            onClick={handleBuyNow}
+          >
+            Buy Now
+          </button>
+
+          <div className="sois-pdp-secondary">
+            <button
+              type="button"
+              onClick={() => addToWishlist(payload)}
+              className={wished ? "active" : ""}
+            >
+              <Heart size={16} fill={wished ? T.forest : "none"} />
+              {wished ? "Wishlisted" : "Wishlist"}
+            </button>
+            <button type="button" onClick={handleShare}>
+              <Share2 size={16} />
+              {shareMsg || "Share"}
+            </button>
+          </div>
+
+          {/* Trust row */}
+          <div className="sois-pdp-trust">
+            <span>
+              <Truck size={16} /> Free shipping over ₹999
+            </span>
+            <span>
+              <RefreshCw size={16} /> 30-day returns
+            </span>
+            <span>
+              <ShieldCheck size={16} /> Hallmarked 925
+            </span>
+          </div>
+
+          {/* Accordion */}
+          <div className="sois-pdp-accordion">
+            {sections.map((s) => {
+              const open = openSection === s.key;
+              return (
+                <div key={s.key} className="sois-acc-item">
+                  <button
+                    type="button"
+                    className="sois-acc-head"
+                    aria-expanded={open}
+                    onClick={() => setOpenSection(open ? null : s.key)}
+                  >
+                    {s.title}
+                    <Plus
+                      size={16}
+                      style={{
+                        transform: open ? "rotate(45deg)" : "none",
+                        transition: "transform 0.2s ease",
+                      }}
+                    />
+                  </button>
+                  {open && <div className="sois-acc-body">{s.body}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Related */}
+      {related.length > 0 && (
+        <section className="sois-pdp-related">
+          <h2 className="sois-pdp-related-title">You may also like</h2>
+          <div className="sois-grid">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}

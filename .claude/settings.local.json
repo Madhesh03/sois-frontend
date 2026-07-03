@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(run)",
+      "Skill(run:*)",
+      "Read(/home/digicoffer/.npm/_npx/**)",
+      "Bash(rm -f /home/digicoffer/.npm/_npx/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1000&h=1300&fit=crop&auto=format&q=85\" --max-time 8)",
+      "Bash(curl -s --max-time 8 -o \"photo-1596944924616-7b38e7cfac36.jpg\" \"https://images.unsplash.com/photo-1596944924616-7b38e7cfac36?w=400&h=500&fit=crop&auto=format&q=60\")",
+      "Bash(curl -s --max-time 8 -o \"photo-1531995811006-35cb42e1a022.jpg\" \"https://images.unsplash.com/photo-1531995811006-35cb42e1a022?w=400&h=500&fit=crop&auto=format&q=60\")",
+      "Bash(curl -s -o /dev/null -w \"craft: %{http_code}\\\\n\" --max-time 8 \"https://images.unsplash.com/photo-1620656798579-1984d9e87df7?w=1000&h=1200&fit=crop&auto=format&q=85\")",
+      "Bash(curl -s -o /dev/null -w \"style: %{http_code}\\\\n\" --max-time 8 \"https://images.unsplash.com/photo-1599459183200-59c7687a0275?w=1400&h=1000&fit=crop&auto=format&q=85\")",
+      "Bash(npx tsc *)",
+      "Bash(find / -iname \"chromium-cli\" -type d 2>/dev/null | head; find / -iname \"*chromium-cli*\" 2>/dev/null | grep -v node_modules | head -20; ls /tmp/claude-1000/bundled-skills/2.1.197/ 2>/dev/null)",
+      "Read(//tmp/claude-1000/bundled-skills/2.1.197/**)",
+      "Bash(npx playwright *)",
+      "Bash(node /tmp/claude-1000/-home-digicoffer-SOIS-Homepage-Design-Concepts/5e6ec72b-1f3d-4452-a221-0431201869f4/scratchpad/shot.js)",
+      "Bash(cp /tmp/claude-1000/-home-digicoffer-SOIS-Homepage-Design-Concepts/5e6ec72b-1f3d-4452-a221-0431201869f4/scratchpad/shot.js \"/home/digicoffer/SOIS/Homepage Design Concepts/.shot.js\")",
+      "Bash(node .shot.js)"
+    ]
+  }
+}

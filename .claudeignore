@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Build
+dist/
+build/
+coverage/
+
+# Git & IDE
+.git/
+.vscode/
+.idea/
+
+# Cache
+.cache/
+.turbo/
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# TypeScript
+*.tsbuildinfo
+
+# Tests
+tests/
+__tests__/
+playwright/
+playwright-report/
+test-results/

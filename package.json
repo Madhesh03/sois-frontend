@@ -1,0 +1,28 @@
+{
+  "name": "sois-homepage",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.15",
+    "@radix-ui/react-alert-dialog": "^1.1.18",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "0.487.0",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.7.0"
+  }
+}
