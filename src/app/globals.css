@@ -82,12 +82,19 @@ video {
 .sois-hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
+  /* Size to the content instead of forcing a full viewport, so the image
+     column no longer leaves empty space under the shorter text column. */
+  min-height: auto;
+  /* White background so the top-padding reserved for the fixed nav blends into
+     the white header instead of exposing a grey (#FAFAFA) band beneath it. */
+  background: #fff;
   padding-top: 118px;
 }
 
 .sois-hero-image {
-  min-height: 500px;
+  /* No fixed floor on desktop: the grid row is driven by the text column, so
+     the image matches the left-side content height exactly (no overhang). */
+  min-height: 0;
 }
 
 /* ─── Category grid (desktop) ─── */
@@ -506,23 +513,183 @@ video {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 80px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .sois-commitment-mosaic {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 320px 220px;
+  grid-template-rows: 1.7fr 1fr;
   gap: 4px;
+  height: 100%;
+  min-height: 544px;
 }
 
 .sois-mosaic-main {
   grid-row: 1 / 3;
-  min-height: 544px;
+  min-height: 0;
 }
 
 .sois-mosaic-secondary {
   min-height: 220px;
+}
+
+/* ══ Quality You Can Feel — mobile-first feature grid ══ */
+.sois-quality {
+  padding: 56px 20px;
+}
+.sois-quality-head {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 28px;
+}
+.sois-quality-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: #115e59;
+  margin-bottom: 12px;
+}
+.sois-quality-eyebrow-rule {
+  width: 18px;
+  height: 2px;
+  background: #115e59;
+}
+.sois-quality-title {
+  font-size: clamp(1.7rem, 6vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0a0a0a;
+  line-height: 1.08;
+  margin: 0 0 12px;
+}
+.sois-quality-intro {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #4b5563;
+  margin: 0;
+}
+.sois-quality-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.sois-quality-card {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.sois-quality-card:hover {
+  border-color: #cde8dd;
+  box-shadow: 0 10px 24px rgba(17, 94, 89, 0.08);
+  transform: translateY(-2px);
+}
+.sois-quality-card:nth-child(5) {
+  grid-column: 1 / -1;
+}
+.sois-quality-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #eaf5ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.sois-quality-card-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0a0a0a;
+  line-height: 1.25;
+  margin: 0 0 6px;
+}
+.sois-quality-card-desc {
+  font-size: 0.73rem;
+  line-height: 1.55;
+  color: #6b7280;
+  margin: 0;
+  max-width: 22ch;
+}
+.sois-quality-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: #e8e8e8;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 28px;
+}
+.sois-quality-stat {
+  background: #ffffff;
+  padding: 20px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sois-quality-stat-num {
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-weight: 800;
+  color: #115e59;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.sois-quality-stat-lbl {
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  .sois-quality {
+    padding: 72px 40px;
+  }
+  .sois-quality-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .sois-quality-card {
+    padding: 26px 20px;
+  }
+  .sois-quality-card:nth-child(5) {
+    grid-column: auto;
+  }
+  .sois-quality-card-title {
+    font-size: 0.88rem;
+  }
+  .sois-quality-card-desc {
+    font-size: 0.77rem;
+  }
+  .sois-quality-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .sois-quality {
+    padding: 96px 56px;
+  }
+  .sois-quality-head {
+    margin-bottom: 44px;
+  }
+  .sois-quality-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+  }
+  .sois-quality-intro {
+    font-size: 0.98rem;
+  }
 }
 
 /* ─── Personalisation (desktop) ─── */
@@ -533,19 +700,16 @@ video {
 
 .sois-personalisation {
   background: #1d3638;
-  background-image: radial-gradient(circle at 88% 16%, rgba(17, 94, 89, 0.55) 0%, transparent 52%);
-  padding: 80px 88px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 72px;
-  align-items: center;
+  background-image: radial-gradient(circle at 50% 0%, rgba(17, 94, 89, 0.5) 0%, transparent 60%);
+  padding: 84px 56px;
   border-radius: 6px;
   overflow: hidden;
+  text-align: center;
 }
 
 .sois-personalisation-content {
-  max-width: 520px;
-  min-width: 0;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .sois-personalisation-ctas {
@@ -553,6 +717,7 @@ video {
   gap: 14px;
   margin-top: 34px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .sois-personalise-btn-primary {
@@ -593,83 +758,89 @@ video {
   background: rgba(206, 232, 210, 0.06);
 }
 
-.sois-personalise-preview {
-  width: 360px;
-  min-width: 0;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(206, 232, 210, 0.16);
-  border-radius: 16px;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+/* ── Jewellery Care Guide ── */
+.sois-care-wrap {
+  background: #fafafa;
+  padding: 88px 56px 96px;
 }
-
-.sois-personalise-preview-head {
+.sois-care {
+  background: #1d3638;
+  background-image: radial-gradient(circle at 50% 0%, rgba(17, 94, 89, 0.5) 0%, transparent 60%);
+  padding: 84px 56px;
+  border-radius: 6px;
+  overflow: hidden;
+  text-align: center;
+}
+.sois-care-content {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.sois-care-sub {
+  margin-bottom: 44px;
+}
+.sois-care-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px 48px;
+  text-align: left;
+}
+.sois-care-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+.sois-care-icon {
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.sois-personalise-preview-label {
-  font-size: 0.58rem;
-  letter-spacing: 0.26em;
-  color: rgba(206, 232, 210, 0.6);
-  font-weight: 700;
-}
-
-.sois-personalise-preview-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #34d399;
-  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18);
-}
-
-.sois-personalise-plate {
-  background: linear-gradient(135deg, #f2f4f6 0%, #cdd3da 38%, #9aa2ac 58%, #e2e6ea 100%);
-  border-radius: 12px;
-  padding: 32px 22px;
-  text-align: center;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.7), 0 14px 34px rgba(0, 0, 0, 0.35);
-}
-
-.sois-personalise-plate-name {
-  display: block;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2.1rem;
-  font-weight: 600;
-  color: #363b42;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 -1px 1px rgba(0, 0, 0, 0.18);
-}
-
-.sois-personalise-plate-sub {
-  display: block;
-  margin-top: 8px;
-  font-size: 0.68rem;
-  letter-spacing: 0.34em;
-  color: #5b626c;
-  font-weight: 600;
-}
-
-.sois-personalise-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   justify-content: center;
+  color: #d1fae5;
+  background: rgba(209, 250, 229, 0.08);
+  border: 1px solid rgba(209, 250, 229, 0.22);
+}
+.sois-care-text {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: rgba(206, 232, 210, 0.82);
+  margin: 6px 0 0;
 }
 
-.sois-personalise-chips span {
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
-  color: rgba(206, 232, 210, 0.82);
-  border: 1px solid rgba(206, 232, 210, 0.22);
-  border-radius: 999px;
-  padding: 6px 13px;
+@media (max-width: 767px) {
+  .sois-care-wrap {
+    padding: 30px 14px 38px;
+  }
+  .sois-care {
+    padding: 34px 20px;
+    border-radius: 14px;
+  }
+  .sois-care-sub {
+    margin-bottom: 26px;
+  }
+  .sois-care-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    text-align: left;
+  }
+  .sois-care-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+  .sois-care-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .sois-care-text {
+    margin: 0;
+    max-width: none;
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
 }
+
 
 /* ─── Brand Story (desktop) ─── */
 .sois-story-grid {
@@ -1196,18 +1367,7 @@ video {
   }
 
   .sois-personalisation {
-    padding: 56px 48px;
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-
-  .sois-personalisation-content {
-    max-width: none;
-  }
-
-  .sois-personalise-preview {
-    width: 100%;
-    max-width: 420px;
+    padding: 56px 40px;
   }
 
   .sois-personalisation-ctas {
@@ -1339,10 +1499,9 @@ video {
     grid-template-columns: repeat(4, 1fr);
   }
 
-  /* Personalisation — fuller, more balanced dark CTA band on desktop */
+  /* Personalisation — fuller dark CTA band on desktop */
   .sois-personalisation {
-    padding: 88px 96px;
-    gap: 80px;
+    padding: 92px 96px;
   }
 }
 
@@ -1436,7 +1595,9 @@ video {
 
   /* ── Section rhythm ── */
   .sois-section {
-    padding: 52px 20px;
+    /* Half the vertical padding so two stacked sections leave a 52px gap
+       (26 + 26) — matching the band-adjacent gaps for a uniform rhythm. */
+    padding: 26px 20px;
   }
 
   .sois-section-header {
@@ -1712,6 +1873,9 @@ video {
   /* ── Editorial break ── */
   .sois-editorial {
     height: 280px;
+    /* Full-bleed band carries its own 26px gap so the boundaries with the
+       (now 26px-padded) sections above and below stay at 52px. */
+    margin: 26px 0;
   }
 
   /* ── Products section ── */
@@ -1745,6 +1909,8 @@ video {
 
   .sois-commitment-mosaic {
     grid-template-rows: 220px 150px;
+    height: auto;
+    min-height: 0;
     border-radius: 8px;
     overflow: hidden;
   }
@@ -1755,22 +1921,12 @@ video {
 
   /* ── Personalisation section ── */
   .sois-personalisation-wrap {
-    padding: 48px 20px 52px;
+    padding: 26px 20px 26px;
   }
 
   .sois-personalisation {
-    padding: 40px 24px;
+    padding: 44px 24px;
     border-radius: 12px;
-    gap: 32px;
-  }
-
-  .sois-personalise-preview {
-    padding: 24px;
-    max-width: none;
-  }
-
-  .sois-personalise-plate-name {
-    font-size: 1.8rem;
   }
 
   .sois-personalisation-ctas {
@@ -1829,7 +1985,7 @@ video {
 
   /* ── Newsletter ── */
   .sois-newsletter-wrap {
-    padding: 0 20px 52px;
+    padding: 26px 20px 52px;
   }
 
   .sois-newsletter {
@@ -1965,6 +2121,25 @@ video {
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 40px 16px;
+  overflow: hidden;
+  max-height: 96px;
+  opacity: 1;
+  transition: max-height 0.35s ease, opacity 0.25s ease, padding-bottom 0.35s ease;
+}
+
+/* Hidden while scrolled — search bar shows only at the top of the page */
+.sois-hdr-row2.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+}
+
+/* When the live-search dropdown is open, let it spill past row2's clip box
+   (row2 uses overflow:hidden for the scroll-collapse animation). The dropdown
+   only renders while the search is focused, so the collapse is unaffected. */
+.sois-hdr-row2:has(.sois-search-dropdown) {
+  overflow: visible;
 }
 
 /* Left group */
@@ -2009,12 +2184,31 @@ video {
   flex-shrink: 0;
 }
 .sois-hdr-logo-name {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.6rem;
+  font-family: var(--font-logo), Georgia, "Times New Roman", serif;
+  font-size: 2rem;
   font-weight: 600;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.22em;
   color: #115e59;
-  padding-left: 0.24em;
+  padding-left: 0.22em;
+}
+.sois-hdr-logo-o {
+  position: relative;
+  display: inline-block;
+}
+.sois-hdr-logo-spark {
+  position: absolute;
+  width: 0.52em;
+  height: 0.52em;
+  /* Sparkle's centre is welded to the O's top-right rim (~1:30 on the ring):
+     translate(50%,-50%) makes the centre land at (right-edge − right, top),
+     so top/right place that centre on the stroke. All em-based, so the weld
+     holds at every logo size. (right also absorbs the O's 0.22em trailing
+     letter-spacing.) */
+    top: 0.3em;
+    right: 0.29em;
+  transform: translate(50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(174, 123, 48, 0.35));
 }
 .sois-hdr-logo-sub {
   display: flex;
@@ -2156,6 +2350,146 @@ video {
 }
 .sois-search-btn:hover {
   background: #0a0a0a;
+}
+
+/* ── Live search dropdown ── */
+.sois-search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+}
+.sois-search-wrap .sois-search {
+  max-width: none;
+  margin: 0;
+}
+.sois-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  box-shadow: 0 20px 54px rgba(10, 10, 10, 0.16);
+  z-index: 200;
+  overflow: hidden;
+  max-height: min(72vh, 560px);
+  overflow-y: auto;
+}
+.sois-search-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.sois-search-quick-label {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-style: italic;
+}
+.sois-search-quick-term {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #115e59;
+}
+.sois-search-quick-term:hover {
+  text-decoration: underline;
+}
+.sois-search-results {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+}
+.sois-search-result {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.sois-search-result:hover,
+.sois-search-result.active {
+  background: #f4f7f5;
+}
+.sois-search-result-img {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f3f4f6;
+}
+.sois-search-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.sois-search-result-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0a0a0a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sois-search-result-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sois-search-result-orig {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+.sois-search-result-now {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #115e59;
+}
+.sois-search-empty {
+  padding: 30px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.88rem;
+}
+.sois-search-viewall {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px;
+  background: #fafafa;
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #115e59;
+  transition: background 0.2s ease;
+}
+.sois-search-viewall:hover {
+  background: #eef4f1;
 }
 
 /* Tablet */
@@ -2440,25 +2774,10 @@ video {
 .sois-listing-layout {
   display: block;
 }
-@media (min-width: 1024px) {
-  .sois-listing-layout {
-    display: grid;
-    grid-template-columns: 236px 1fr;
-    gap: 40px;
-    align-items: start;
-  }
-}
 
-/* Sidebar filters (desktop) */
+/* Filters are dropdown-only (drawer) on every viewport — no desktop sidebar. */
 .sois-filters {
   display: none;
-}
-@media (min-width: 1024px) {
-  .sois-filters {
-    display: block;
-    position: sticky;
-    top: 140px;
-  }
 }
 .sois-filters-inner {
   display: flex;
@@ -2561,11 +2880,6 @@ video {
   font-weight: 600;
   color: #0a0a0a;
   cursor: pointer;
-}
-@media (min-width: 1024px) {
-  .sois-filter-toggle {
-    display: none;
-  }
 }
 .sois-filter-count {
   background: #115e59;
@@ -2797,6 +3111,79 @@ video {
 }
 .sois-pdp-thumb.active {
   border-color: #115e59;
+}
+
+/* ── Gallery: 360° video + prev/next nav ── */
+.sois-pdp-main-img {
+  outline: none;
+}
+.sois-pdp-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #0a0a0a;
+}
+.sois-pdp-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(17, 94, 89, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  color: #115e59;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 0 6px 18px rgba(10, 10, 10, 0.16);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.sois-pdp-nav:hover {
+  background: #ffffff;
+}
+.sois-pdp-nav-prev {
+  left: 12px;
+}
+.sois-pdp-nav-next {
+  right: 12px;
+}
+.sois-pdp-nav-prev:hover {
+  transform: translateY(-50%) translateX(-2px);
+}
+.sois-pdp-nav-next:hover {
+  transform: translateY(-50%) translateX(2px);
+}
+.sois-pdp-360-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(17, 94, 89, 0.92);
+  color: #d1fae5;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.sois-pdp-thumb-360 {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.45);
+  color: #ffffff;
 }
 .sois-pdp-sub {
   font-size: 0.72rem;
@@ -4419,4 +4806,102 @@ video {
 .sois-acct-empty svg {
   color: #d1d5db;
   margin-bottom: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   About Us
+   ═══════════════════════════════════════════════════════════════ */
+.sois-about {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 8px 20px 80px;
+}
+@media (min-width: 768px) {
+  .sois-about {
+    padding: 16px 40px 104px;
+  }
+}
+.sois-about-lead {
+  font-size: clamp(1.05rem, 2.4vw, 1.28rem);
+  line-height: 1.75;
+  color: #0a0a0a;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+.sois-about-block {
+  margin-top: 48px;
+}
+.sois-about-eyebrow {
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  color: #115e59;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+.sois-about-block h2 {
+  font-size: clamp(1.4rem, 3.2vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0a0a0a;
+  line-height: 1.15;
+  margin: 0 0 18px;
+}
+.sois-about-block p {
+  font-size: 0.96rem;
+  line-height: 1.95;
+  color: #4b5563;
+  margin: 0 0 16px;
+}
+.sois-about-block p:last-child {
+  margin-bottom: 0;
+}
+.sois-about-mission {
+  margin-top: 56px;
+  background: #1d3638;
+  background-image: radial-gradient(circle at 50% 0%, rgba(17, 94, 89, 0.5) 0%, transparent 62%);
+  border-radius: 8px;
+  padding: 56px 44px;
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .sois-about-mission {
+    padding: 44px 26px;
+  }
+}
+.sois-about-mission .sois-about-eyebrow {
+  color: #d1fae5;
+}
+.sois-about-mission h2 {
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0 0 18px;
+}
+.sois-about-mission p {
+  font-size: 0.98rem;
+  line-height: 1.95;
+  color: rgba(206, 232, 210, 0.82);
+  max-width: 620px;
+  margin: 0 auto;
+}
+.sois-about-tagline {
+  margin-top: 56px;
+  text-align: center;
+}
+.sois-about-tagline-rule {
+  width: 40px;
+  height: 2px;
+  background: #99f6e4;
+  margin: 0 auto 20px;
+}
+.sois-about-tagline span {
+  display: block;
+  font-size: clamp(1.15rem, 3vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: #115e59;
+  line-height: 1.3;
 }

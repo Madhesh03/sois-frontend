@@ -36,19 +36,59 @@ export function Header() {
         }}
       >
         {/* Logo */}
-        <a
-          href="/"
-          style={{
-            fontSize: "0.85rem",
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            color: T.forest,
-            textDecoration: "none",
-            textTransform: "uppercase",
-          }}
-        >
-          SOIS
-        </a>
+<a
+  href="/"
+  style={{
+    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
+    color: T.forest,
+    fontFamily: '"Cormorant Garamond", serif',
+    fontSize: "2.1rem",
+    fontWeight: 500,
+    letterSpacing: "0.18em",
+    lineHeight: 1,
+  }}
+>
+  <span>S</span>
+
+  <span
+    style={{
+      position: "relative",
+      display: "inline-block",
+      margin: "0 0.04em",
+    }}
+  >
+    O
+
+    {/* Premium SVG Sparkle */}
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      style={{
+        position: "absolute",
+        top: "-6px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        overflow: "visible",
+      }}
+    >
+      <path
+        fill="#D4AF37"
+        d="M12 2
+           C12.7 7 17 11.3 22 12
+           C17 12.7 12.7 17 12 22
+           C11.3 17 7 12.7 2 12
+           C7 11.3 11.3 7 12 2Z"
+      />
+    </svg>
+  </span>
+
+  <span style={{ marginLeft: "0.08em" }}>I</span>
+
+  <span style={{ marginLeft: "0.18em" }}>S</span>
+</a>
 
         {/* Actions */}
         <div
@@ -126,7 +166,7 @@ export function Header() {
             onMouseLeave={(e) => {
               e.currentTarget.style.color = T.muted;
             }}
-            aria-label="Shopping cart"
+            aria-label="Shopping bag"
           >
             <ShoppingBag size={20} />
             {cartCount > 0 && (

@@ -1,33 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ShoppingBag, Search, Heart, User, Menu, X, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { ShoppingBag, Search, Heart, User, Menu, X, ChevronDown, ArrowRight } from "lucide-react";
 import { T } from "@/lib/tokens";
+import { searchProducts, formatPrice, type Product } from "@/lib/catalog";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 
 const navLinks: { label: string; href: string }[] = [
+  { label: "Home", href: "/" },
   { label: "Collections", href: "/shop" },
-  { label: "New Arrivals", href: "/shop" },
-  { label: "Best Sellers", href: "/shop" },
-  { label: "About", href: "/" },
+  { label: "New Arrivals", href: "/shop?filter=new" },
+  { label: "Best Sellers", href: "/shop?filter=best" },
+  { label: "About", href: "/about" },
 ];
-const categories = ["All Categories", "Rings", "Earrings", "Necklaces", "Bracelets", "Anklets"];
+const categories = ["All Categories", "Rings", "Earrings", "Necklaces", "Bracelets", "Anklets", "Sets"];
 const categorySlugs: Record<string, string> = {
   Rings: "rings",
   Earrings: "earrings",
   Necklaces: "necklaces",
   Bracelets: "bracelets",
   Anklets: "anklets",
+  Sets: "sets",
 };
+const QUICK_TERMS = ["Rings", "Necklaces", "Bracelets", "Earrings", "Gifts"];
+const MAX_RESULTS = 6;
 
 export function Nav({ scrolled }: { scrolled: boolean }) {
+  const pathname = usePathname();
+  // Reflect the active category route in the selector so it survives a search
+  // navigation (the Nav remounts on route change, which otherwise resets it).
+  const categoryFromPath = useMemo(() => {
+    const match = pathname?.match(/^\/category\/([^/?#]+)/);
+    if (!match) return "All Categories";
+    const found = Object.entries(categorySlugs).find(([, slug]) => slug === match[1]);
+    return found ? found[0] : "All Categories";
+  }, [pathname]);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [searchCat, setSearchCat] = useState("All Categories");
+  const [searchCat, setSearchCat] = useState(categoryFromPath);
+
+  // Keep the selector in sync when the route's category changes (e.g. when the
+  // Nav instance is preserved across category→category navigations).
+  useEffect(() => {
+    setSearchCat(categoryFromPath);
+  }, [categoryFromPath]);
   const closeMenu = () => {
     // Move focus out before the menu becomes aria-hidden, so a focused link
     // isn't left inside a hidden region (accessibility warning).
@@ -38,19 +60,81 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
   };
   const router = useRouter();
 
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   const { openModal, isAuthenticated, user } = useAuth();
   const { openCart, getItemCount } = useCart();
   const { openWishlist, getWishlistCount } = useWishlist();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Live results as the user types — scoped to the selected category, capped for the dropdown.
+  const results = useMemo<Product[]>(() => {
+    const q = query.trim();
+    if (!q) return [];
+    let list = searchProducts(q);
+    const slug = categorySlugs[searchCat];
+    if (slug) list = list.filter((p) => p.category === slug);
+    return list.slice(0, MAX_RESULTS);
+  }, [query, searchCat]);
+
+  // Reset the keyboard highlight whenever the result set changes.
+  useEffect(() => setActiveIndex(-1), [query, searchCat]);
+
+  // Close the dropdown on an outside click.
+  useEffect(() => {
+    if (!searchFocused) return;
+    const onDown = (e: MouseEvent) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [searchFocused]);
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
     const slug = categorySlugs[searchCat];
     const base = slug ? `/category/${slug}` : "/shop";
     const qs = params.toString();
     router.push(qs ? `${base}?${qs}` : base);
+    setSearchFocused(false);
     closeMenu();
+  };
+
+  const goToProduct = (p: Product) => {
+    router.push(`/product/${p.slug}`);
+    setSearchFocused(false);
+    setQuery("");
+  };
+
+  const applyQuickTerm = (term: string) => {
+    setQuery(term.toLowerCase());
+    setSearchFocused(true);
+    searchInputRef.current?.focus();
+  };
+
+  const onSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setSearchFocused(false);
+      searchInputRef.current?.blur();
+      return;
+    }
+    if (!results.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => (i + 1) % results.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => (i <= 0 ? results.length - 1 : i - 1));
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
+      goToProduct(results[activeIndex]);
+    }
   };
 
   const cartCount = getItemCount();
@@ -114,7 +198,26 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
 
           {/* Logo — centered */}
           <a href="/" aria-label="SOIS Home" className="sois-hdr-logo">
-            <span className="sois-hdr-logo-name">SOIS</span>
+            <span className="sois-hdr-logo-name">
+              S
+              <span className="sois-hdr-logo-o">
+                O
+                <svg className="sois-hdr-logo-spark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="soisSparkGold" x1="12" y1="1" x2="12" y2="23" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#F1D390" />
+                      <stop offset="0.5" stopColor="#D8B25C" />
+                      <stop offset="1" stopColor="#AE7B30" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M12 1C12.6 7.2 16.8 11.4 23 12C16.8 12.6 12.6 16.8 12 23C11.4 16.8 7.2 12.6 1 12C7.2 11.4 11.4 7.2 12 1Z"
+                    fill="url(#soisSparkGold)"
+                  />
+                </svg>
+              </span>
+              IS
+            </span>
             <span className="sois-hdr-logo-sub">
               <span className="sois-hdr-logo-rule" />
               STERLING SILVER
@@ -149,7 +252,7 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
 
             <button
               type="button"
-              aria-label={`Shopping cart with ${cartCount} items`}
+              aria-label={`Shopping bag with ${cartCount} items`}
               className="sois-hdr-icon sois-touch-target"
               onClick={openCart}
             >
@@ -161,39 +264,118 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
           </div>
         </div>
 
-        {/* ───── Row 2: full-width search bar ───── */}
-        <div className="sois-hdr-row2">
-          <form className="sois-search" role="search" onSubmit={handleSearch}>
-            <div className="sois-search-cat">
-              <select
-                aria-label="Product category"
-                value={searchCat}
-                onChange={(e) => setSearchCat(e.target.value)}
-              >
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} color={T.muted} className="sois-search-cat-caret" />
-            </div>
+        {/* ───── Row 2: full-width search bar with live results ───── */}
+        {/* Collapses out of view once the page is scrolled; visible only at the top. */}
+        <div className={`sois-hdr-row2${scrolled ? " collapsed" : ""}`}>
+          <div className="sois-search-wrap" ref={searchWrapRef}>
+            <form className="sois-search" role="search" onSubmit={handleSearch}>
+              <div className="sois-search-cat">
+                <select
+                  aria-label="Product category"
+                  value={searchCat}
+                  onChange={(e) => setSearchCat(e.target.value)}
+                >
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={14} color={T.muted} className="sois-search-cat-caret" />
+              </div>
 
-            <span className="sois-search-divider" aria-hidden="true" />
+              <span className="sois-search-divider" aria-hidden="true" />
 
-            <input
-              type="search"
-              className="sois-search-input"
-              placeholder="Search for products"
-              aria-label="Search for products"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+              <input
+                ref={searchInputRef}
+                type="search"
+                className="sois-search-input"
+                placeholder="Search for products"
+                aria-label="Search for products"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onKeyDown={onSearchKeyDown}
+                autoComplete="off"
+                role="combobox"
+                aria-expanded={searchFocused}
+                aria-controls="sois-search-dropdown"
+              />
 
-            <button type="submit" className="sois-search-btn" aria-label="Search">
-              <Search size={18} color={T.white} strokeWidth={2.2} />
-            </button>
-          </form>
+              <button type="submit" className="sois-search-btn" aria-label="Search">
+                <Search size={18} color={T.white} strokeWidth={2.2} />
+              </button>
+            </form>
+
+            {searchFocused && (
+              <div className="sois-search-dropdown" id="sois-search-dropdown">
+                <div className="sois-search-quick">
+                  <span className="sois-search-quick-label">Quick search:</span>
+                  {QUICK_TERMS.map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      className="sois-search-quick-term"
+                      onClick={() => applyQuickTerm(term)}
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+
+                {query.trim() &&
+                  (results.length > 0 ? (
+                    <ul className="sois-search-results">
+                      {results.map((p, i) => (
+                        <li key={p.id}>
+                          <button
+                            type="button"
+                            className={`sois-search-result${i === activeIndex ? " active" : ""}`}
+                            onClick={() => goToProduct(p)}
+                            onMouseEnter={() => setActiveIndex(i)}
+                          >
+                            <span className="sois-search-result-img">
+                              <Image
+                                src={p.images[0]}
+                                alt={p.name}
+                                fill
+                                sizes="54px"
+                                style={{ objectFit: "cover" }}
+                              />
+                            </span>
+                            <span className="sois-search-result-info">
+                              <span className="sois-search-result-name">{p.name}</span>
+                              <span className="sois-search-result-price">
+                                {p.originalPrice && (
+                                  <span className="sois-search-result-orig">
+                                    {formatPrice(p.originalPrice)}
+                                  </span>
+                                )}
+                                <span className="sois-search-result-now">{formatPrice(p.price)}</span>
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="sois-search-empty">
+                      No products found for &ldquo;{query.trim()}&rdquo;.
+                    </div>
+                  ))}
+
+                {query.trim() && results.length > 0 && (
+                  <button
+                    type="button"
+                    className="sois-search-viewall"
+                    onClick={() => handleSearch()}
+                  >
+                    View All <ArrowRight size={15} />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -218,7 +400,7 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
             </Link>
           ))}
           <div className="sois-mobile-menu-divider" />
-          {["Rings", "Earrings", "Necklaces", "Bracelets", "Anklets"].map((c) => (
+          {["Rings", "Earrings", "Necklaces", "Bracelets", "Anklets", "Sets"].map((c) => (
             <Link
               key={c}
               href={`/category/${categorySlugs[c]}`}

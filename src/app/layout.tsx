@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
 import { siteConfig } from "@/lib/data";
 import { ClientProviders } from "@/app/ClientProviders";
 import "./globals.css";
@@ -9,6 +9,14 @@ const plusJakarta = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
   variable: "--font-plus-jakarta",
+});
+
+// Elegant display serif used for the SOIS wordmark in the header.
+const logoFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+  variable: "--font-logo",
 });
 
 export const viewport: Viewport = {
@@ -60,7 +68,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={plusJakarta.variable}>
+    <html lang="en" className={`${plusJakarta.variable} ${logoFont.variable}`}>
       <body className={plusJakarta.className}>
         <ClientProviders>
           {children}

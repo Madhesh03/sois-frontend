@@ -16,6 +16,7 @@ export type CategorySlug =
   | "necklaces"
   | "bracelets"
   | "anklets"
+  | "sets"
   | "gifts";
 
 export interface Category {
@@ -40,6 +41,8 @@ export interface Product {
   originalPrice: number | null;
   sku: string;
   images: string[];
+  /** Optional 360° spin video shown as an extra media item in the gallery. */
+  video360?: string;
   description: string;
   specifications: ProductSpec[];
   silverDetails: string;
@@ -85,6 +88,12 @@ export const categories: Category[] = [
     image: I.anklets,
   },
   {
+    slug: "sets",
+    name: "Sets",
+    tagline: "Matching pieces, made to wear together",
+    image: I.necklace,
+  },
+  {
     slug: "gifts",
     name: "Gift Collections",
     tagline: "Curated sets for every occasion",
@@ -111,6 +120,7 @@ interface Seed {
   images: string[];
   description: string;
   specs: ProductSpec[];
+  video360?: string;
   inStock?: boolean;
   isNew?: boolean;
   isBestSeller?: boolean;
@@ -146,6 +156,7 @@ function build(seeds: Seed[]): Product[] {
       originalPrice: onSale ? s.originalPrice! : null,
       sku: `SOIS-${catCode}-${String(i + 1).padStart(3, "0")}`,
       images: s.images,
+      video360: s.video360,
       description: s.description,
       specifications: [
         { label: "Metal", value: "925 Sterling Silver" },
@@ -164,6 +175,11 @@ function build(seeds: Seed[]): Product[] {
     };
   });
 }
+
+// Placeholder 360° turntable footage — swap these for real product spin videos
+// when available. Any MP4/WebM URL (or local /public asset) works.
+const VIDEO_360_SAMPLE =
+  "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4";
 
 const seeds: Seed[] = [
   // ── Rings ──
@@ -297,6 +313,7 @@ const seeds: Seed[] = [
     price: 1299,
     originalPrice: 1599,
     images: [I.prod1, I.necklace, I.prod4],
+    video360: VIDEO_360_SAMPLE,
     description:
       "A softly polished crescent suspended on a fine cable chain — our signature pendant and a lasting favourite.",
     specs: [
@@ -409,6 +426,7 @@ const seeds: Seed[] = [
     category: "anklets",
     price: 649,
     images: [I.anklets, I.prod3, I.prod1],
+    video360: VIDEO_360_SAMPLE,
     description:
       "Tiny silver beads strung on a fine chain for a barely-there anklet that catches the sun with every step.",
     specs: [
@@ -433,6 +451,54 @@ const seeds: Seed[] = [
     ],
     rating: 4.6,
     reviewCount: 39,
+  },
+
+  // ── Sets ──
+  {
+    name: "Radiance Necklace & Earring Set",
+    category: "sets",
+    price: 1899,
+    originalPrice: 2299,
+    images: [I.necklace, I.earrings, I.prod2],
+    description:
+      "A matching pendant necklace and drop earrings designed to be worn together — an effortless, coordinated look in hallmarked sterling silver.",
+    specs: [
+      { label: "Set Includes", value: "Necklace + Earrings" },
+      { label: "Chain Length", value: "16 in + 2 in extender" },
+    ],
+    isBestSeller: true,
+    rating: 4.9,
+    reviewCount: 84,
+  },
+  {
+    name: "Aurora Bridal Jewellery Set",
+    category: "sets",
+    price: 3299,
+    originalPrice: 3999,
+    images: [I.heartPend, I.necklace, I.ringWhite],
+    description:
+      "A three-piece set — necklace, earrings and a matching ring — crafted for weddings and special moments that deserve a coordinated shine.",
+    specs: [
+      { label: "Set Includes", value: "Necklace + Earrings + Ring" },
+      { label: "Sizing", value: "Ring available 6–9" },
+    ],
+    isNew: true,
+    rating: 4.9,
+    reviewCount: 47,
+  },
+  {
+    name: "Everyday Layering Set",
+    category: "sets",
+    price: 1499,
+    images: [I.prod3, I.necklace, I.prod1],
+    description:
+      "Two complementary chains made to layer beautifully, plus a pair of studs — your everyday stack, ready to wear straight from the box.",
+    specs: [
+      { label: "Set Includes", value: "2 Chains + Studs" },
+      { label: "Finish", value: "Rhodium-plated · Tarnish-resistant" },
+    ],
+    rating: 4.7,
+    reviewCount: 63,
   },
 
   // ── Gift Collections ──

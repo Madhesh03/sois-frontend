@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Instagram, Heart, MessageCircle, ChevronDown } from "lucide-react";
 import { T } from "@/lib/tokens";
 
-const footerBg = "#0E1A1B";
+const footerBg = "#1d3638";
+const footerBgImage = "radial-gradient(circle at 50% 0%, rgba(17, 94, 89, 0.5) 0%, transparent 60%)";
 const textFaint = "rgba(206,232,210,0.42)";
 const textMid = "rgba(206,232,210,0.62)";
 
@@ -41,10 +42,8 @@ export function Footer() {
     {
       heading: "Company",
       links: [
-        { label: "About SOIS", href: "#" },
-        { label: "Our Story", href: "#" },
-        { label: "Press", href: "#" },
-        { label: "Careers", href: "#" },
+        { label: "About SOIS", href: "/about" },
+        { label: "Our Story", href: "/about" },
         { label: "Sustainability", href: "#" },
       ],
     },
@@ -66,7 +65,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="sois-footer" style={{ background: footerBg }}>
+    <footer className="sois-footer" style={{ background: footerBg, backgroundImage: footerBgImage }}>
       <div className="sois-footer-accent" style={{ background: `linear-gradient(90deg, ${T.forest} 0%, ${T.sage} 45%, rgba(206,232,210,0.12) 100%)` }} />
 
       <div className="sois-footer-main">
@@ -122,7 +121,7 @@ export function Footer() {
       </div>
 
       <div className="sois-footer-contact">
-        <a href="mailto:hello@sois.in" className="sois-footer-contact-item">hello@sois.in</a>
+        <a href="mailto:support@soisstore.com" className="sois-footer-contact-item">support@soisstore.com</a>
         <span className="sois-footer-contact-sep">·</span>
         <a href="tel:+919876543210" className="sois-footer-contact-item">+91 98765 43210</a>
       </div>

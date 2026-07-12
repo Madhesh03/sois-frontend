@@ -37,7 +37,7 @@ export default function ReturnPolicyPage() {
       <h2>How to Return</h2>
       <ol>
         <li>
-          Contact us at <a href="mailto:hello@sois.in">hello@sois.in</a> with
+          Contact us at <a href="mailto:support@soisstore.com">support@soisstore.com</a> with
           your order number and reason for return.
         </li>
         <li>Our team will share a return authorisation and instructions.</li>

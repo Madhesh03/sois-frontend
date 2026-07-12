@@ -1,10 +1,21 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import { getAllProducts } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { X, Heart, ShoppingBag } from "lucide-react";
+
+// Resolve a product's detail-page path from its name. Falls back to a slugified
+// name if the item isn't found in the catalogue (keeps the link valid).
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+function productHref(name: string): string {
+  const match = getAllProducts().find((p) => p.name === name);
+  return `/product/${match ? match.slug : slugify(name)}`;
+}
 
 export function WishlistDrawer() {
   const { items, wishlistOpen, closeWishlist, removeFromWishlist } =
@@ -136,13 +147,18 @@ export function WishlistDrawer() {
                     borderBottom: `1px solid ${T.border}`,
                   }}
                 >
-                  <div
+                  <Link
+                    href={productHref(item.name)}
+                    onClick={closeWishlist}
+                    aria-label={`View ${item.name}`}
                     style={{
                       width: 80,
                       height: 80,
                       background: T.surface,
                       borderRadius: 8,
                       overflow: "hidden",
+                      flexShrink: 0,
+                      display: "block",
                     }}
                   >
                     <img
@@ -154,19 +170,29 @@ export function WishlistDrawer() {
                         objectFit: "cover",
                       }}
                     />
-                  </div>
+                  </Link>
 
                   <div style={{ flex: 1 }}>
-                    <h4
-                      style={{
-                        fontSize: "0.9rem",
-                        fontWeight: 600,
-                        color: T.ink,
-                        margin: "0 0 4px 0",
-                      }}
+                    <Link
+                      href={productHref(item.name)}
+                      onClick={closeWishlist}
+                      style={{ textDecoration: "none" }}
                     >
-                      {item.name}
-                    </h4>
+                      <h4
+                        onMouseEnter={(e) => (e.currentTarget.style.color = T.forest)}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = T.ink)}
+                        style={{
+                          fontSize: "0.9rem",
+                          fontWeight: 600,
+                          color: T.ink,
+                          margin: "0 0 4px 0",
+                          cursor: "pointer",
+                          transition: "color 0.2s ease",
+                        }}
+                      >
+                        {item.name}
+                      </h4>
+                    </Link>
                     <p
                       style={{
                         fontSize: "0.85rem",

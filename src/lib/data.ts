@@ -123,14 +123,14 @@ export const products = [
 ] as const;
 
 export const productMeta = [
-  { badge: "Signature Edition", detail: "Hand-finished · Tarnish-resistant" },
+  { badge: "Signature Edition", detail: "Precision-crafted · Tarnish-resistant" },
   { badge: "Everyday Essential", detail: "Adjustable fit · Nickel-free" },
   { badge: "Statement Piece", detail: "Rhodium-plated · Hypoallergenic" },
-  { badge: "Limited Batch", detail: "Hand-finished · Nickel-free" },
+  { badge: "Limited Batch", detail: "Precision-crafted · Nickel-free" },
   { badge: "Premium Quality", detail: "Timeless design · Durable finish" },
   { badge: "Daily Wear", detail: "Comfort fit · Versatile style" },
   { badge: "Luxury Finish", detail: "Polished · Tarnish-resistant" },
-  { badge: "Artisan Crafted", detail: "Hand-finished · Unique detail" },
+  { badge: "Artisan Crafted", detail: "Detailed finish · Unique detail" },
 ] as const;
 
 export const siteConfig = {

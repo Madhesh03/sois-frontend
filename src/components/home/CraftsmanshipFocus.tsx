@@ -6,8 +6,8 @@ import { T } from "@/lib/tokens";
 export function CraftsmanshipFocus() {
   const specs = [
     { label: "Material", detail: "925 sterling silver, hallmark-certified on every piece" },
-    { label: "Finish", detail: "Hand-polished and sealed with an anti-tarnish coating" },
-    { label: "Exclusivity", detail: "Small-batch runs, designed and finished in-house" },
+    { label: "Finish", detail: "Sealed with a protective anti-tarnish coating" },
+    { label: "Exclusivity", detail: "Small-batch runs, designed and made in-house" },
   ];
 
   return (

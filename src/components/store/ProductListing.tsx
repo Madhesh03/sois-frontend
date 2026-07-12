@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X, Check } from "lucide-react";
 import { ProductCard } from "@/components/store/ProductCard";
@@ -56,14 +56,34 @@ export function ProductListing({
   showCategoryFilter = true,
   query,
 }: ProductListingProps) {
-  const [filters, setFilters] = useState<FilterState>(emptyFilters);
-  const [sort, setSort] = useState<SortKey>("featured");
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   // Read the live URL query so searching while already on this page re-filters
   // immediately (falls back to the server-provided prop for the first render).
   const searchParams = useSearchParams();
   const q = (searchParams.get("q") ?? query ?? "").trim().toLowerCase();
+
+  // A `?filter=` param (from the header menu) preselects a collection filter:
+  // "new" → New Arrivals, "best" → Best Sellers, "sale" → On Sale.
+  const filterParam = searchParams.get("filter");
+  const collectionBadges = useMemo<FilterState["badges"]>(
+    () =>
+      filterParam === "new" || filterParam === "best" || filterParam === "sale"
+        ? [filterParam]
+        : [],
+    [filterParam]
+  );
+
+  const [filters, setFilters] = useState<FilterState>({
+    ...emptyFilters,
+    badges: collectionBadges,
+  });
+  const [sort, setSort] = useState<SortKey>("featured");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Re-apply the collection filter whenever the header link changes it (the
+  // listing stays mounted across /shop?filter=… navigations).
+  useEffect(() => {
+    setFilters((f) => ({ ...f, badges: collectionBadges }));
+  }, [collectionBadges]);
 
   const results = useMemo(() => {
     let base = products;
@@ -195,11 +215,6 @@ export function ProductListing({
 
   return (
     <div className="sois-listing-layout">
-      {/* Desktop sidebar */}
-      <aside className="sois-filters" aria-label="Product filters">
-        {filterPanel}
-      </aside>
-
       <div className="sois-listing-main">
         <div className="sois-listing-toolbar">
           <button

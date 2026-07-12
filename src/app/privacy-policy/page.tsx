@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
 
       <h2>Cookies</h2>
       <p>
-        We use cookies to keep your cart and session working, remember your
+        We use cookies to keep your bag and session working, remember your
         preferences, and understand site usage. You can control cookies through
         your browser settings, though some features may not function without
         them.
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
       <h2>Contact</h2>
       <p>
         For any privacy questions or requests, email us at{" "}
-        <a href="mailto:hello@sois.in">hello@sois.in</a>.
+        <a href="mailto:support@soisstore.com">support@soisstore.com</a>.
       </p>
     </LegalPage>
   );

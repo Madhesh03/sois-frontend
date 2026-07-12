@@ -55,7 +55,7 @@ export default function RefundPolicyPage() {
       <p>
         If you haven’t received your refund within the expected time, please
         first check with your bank or payment provider. If you still need help,
-        contact us at <a href="mailto:hello@sois.in">hello@sois.in</a>.
+        contact us at <a href="mailto:support@soisstore.com">support@soisstore.com</a>.
       </p>
     </LegalPage>
   );

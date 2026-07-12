@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { I } from "@/lib/data";
 import { T } from "@/lib/tokens";
@@ -20,7 +20,7 @@ export function Hero() {
 
   return (
     <section className="sois-hero" aria-labelledby="hero-heading">
-      <div className="sois-hero-text" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "72px 64px 72px 72px", position: "relative", background: T.white }}>
+      <div className="sois-hero-text" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "48px 64px 44px 72px", position: "relative", background: T.white }}>
         <Eyebrow>STERLING SILVER JEWELLERY · EST. 2024</Eyebrow>
 
         <h1
@@ -55,9 +55,9 @@ export function Hero() {
           925 sterling silver pieces designed for the modern wardrobe — from everyday essentials to statement pieces crafted to outlast every trend.
         </p>
 
-        <div className="sois-hero-ctas" style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 64, flexWrap: "wrap" }}>
+        <div className="sois-hero-ctas" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           <a
-            href="#"
+            href="/shop"
             className="sois-touch-target sois-hero-cta-primary"
             style={{
               background: T.forest,
@@ -73,25 +73,6 @@ export function Hero() {
             }}
           >
             SHOP NOW <ArrowRight size={13} />
-          </a>
-          <a
-            href="#"
-            className="sois-touch-target sois-hero-cta-secondary"
-            style={{
-              color: T.forest,
-              padding: "16px 28px",
-              fontSize: "0.74rem",
-              letterSpacing: "0.12em",
-              fontWeight: 600,
-              textDecoration: "none",
-              border: `1px solid ${T.sageDark}`,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              background: "transparent",
-            }}
-          >
-            <Play size={12} fill={T.forest} color={T.forest} /> View Lookbook
           </a>
         </div>
       </div>

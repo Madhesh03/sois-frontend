@@ -14,7 +14,7 @@ function CartView() {
     return (
       <div style={{ textAlign: "center", padding: "40px 20px" }}>
         <p style={{ fontSize: "0.95rem", color: T.muted, marginBottom: 24 }}>
-          Your cart is empty
+          Your bag is empty
         </p>
         <p style={{ fontSize: "0.85rem", color: T.faint }}>
           Add items to get started shopping
@@ -879,7 +879,7 @@ export function CartModal() {
 
   return (
     <>
-      <Modal isOpen={cartOpen} onClose={closeCart} title="Shopping Cart" size="md">
+      <Modal isOpen={cartOpen} onClose={closeCart} title="Shopping Bag" size="md">
         <CartView />
       </Modal>
 
@@ -888,7 +888,7 @@ export function CartModal() {
         onClose={closeCheckout}
         title={
           checkoutStep === "cart"
-            ? "Review Cart"
+            ? "Review Bag"
             : checkoutStep === "shipping"
               ? "Shipping Address"
               : checkoutStep === "payment"

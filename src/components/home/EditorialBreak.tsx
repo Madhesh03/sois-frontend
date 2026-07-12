@@ -49,7 +49,7 @@ export function EditorialBreak() {
           The New Gold
         </h2>
         <a
-          href="#"
+          href="/shop"
           className="sois-touch-target"
           style={{
             background: T.sage,

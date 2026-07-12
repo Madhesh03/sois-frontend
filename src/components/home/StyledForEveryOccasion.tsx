@@ -187,7 +187,7 @@ export function StyledForEveryOccasion() {
       {/* CTA */}
       <div style={{ textAlign: "center", marginTop: 36 }}>
         <a
-          href="#"
+          href="/shop"
           style={{
             display: "inline-flex",
             alignItems: "center",

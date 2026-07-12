@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Home } from "lucide-react";
 import { Nav } from "@/components/home/Nav";
 import { Footer } from "@/components/home/Footer";
 import { CartDrawer } from "@/components/drawers/CartDrawer";
@@ -30,12 +28,6 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
       <div className="sois-root" style={{ background: T.bg, color: T.ink }}>
         <Nav scrolled={scrolled} />
         <main id="main-content" className="sois-store-main">
-          <div className="sois-backhome-bar">
-            <Link href="/" className="sois-backhome">
-              <Home size={15} />
-              Back to Home
-            </Link>
-          </div>
           {children}
         </main>
         <Footer />

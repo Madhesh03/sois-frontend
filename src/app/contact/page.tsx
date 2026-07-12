@@ -65,7 +65,7 @@ export default function ContactPage() {
             <Mail size={18} />
             <div>
               <span className="sois-contact-label">Email</span>
-              <a href="mailto:hello@sois.in">hello@sois.in</a>
+              <a href="mailto:support@soisstore.com">support@soisstore.com</a>
             </div>
           </div>
           <div className="sois-contact-item">

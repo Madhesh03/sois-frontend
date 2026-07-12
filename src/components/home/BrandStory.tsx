@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { I } from "@/lib/data";
 import { T } from "@/lib/tokens";
@@ -27,17 +28,20 @@ export function BrandStory() {
             The SOIS Story
           </h2>
           <p style={{ fontSize: "0.95rem", lineHeight: 1.9, color: T.muted, marginBottom: 20, maxWidth: 460 }}>
-            SOIS began with a simple frustration: jewellery that looked precious but couldn&apos;t survive a real life. We set out to make sterling silver that keeps up — worn in the shower, on flights, through everyday chaos, without losing its shine.
+            SOIS was founded by two sisters who believe jewellery should do more than complete an outfit — it should celebrate the person wearing it.
           </p>
           <p style={{ fontSize: "0.95rem", lineHeight: 1.9, color: T.muted, marginBottom: 40, maxWidth: 460 }}>
-            Every design starts on paper in our studio and ends up on someone&apos;s wrist, neck, or ear — meant to be lived in, not locked away.
+            More than a brand, we&apos;re a community that celebrates individuality. Every piece is designed to become part of your story — a symbol of love, strength, and unforgettable moments.
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <Link
+            href="/about"
+            style={{ display: "inline-flex", alignItems: "center", gap: 14, textDecoration: "none" }}
+          >
             <div style={{ width: 32, height: 1, background: T.sageDark }} />
             <span style={{ fontSize: "0.78rem", color: T.forest, fontWeight: 700, letterSpacing: "0.02em" }}>
-              Designed in-studio, worn everywhere
+              Be Yourself. Own Your Shine.
             </span>
-          </div>
+          </Link>
         </div>
       </div>
     </section>

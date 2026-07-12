@@ -19,7 +19,17 @@ export default async function ShopPage({
 }) {
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q : undefined;
+  const filter = typeof sp.filter === "string" ? sp.filter : undefined;
   const products = getAllProducts();
+
+  const FILTER_TITLES: Record<string, string> = {
+    new: "New Arrivals",
+    best: "Best Sellers",
+    sale: "On Sale",
+  };
+  const heroTitle = q
+    ? `Results for “${q}”`
+    : (filter && FILTER_TITLES[filter]) || "Shop All Jewellery";
 
   return (
     <StoreShell>
@@ -30,9 +40,7 @@ export default async function ShopPage({
           <span aria-current="page">Shop</span>
         </nav>
         <div className="sois-page-hero-eyebrow">THE COLLECTION</div>
-        <h1 className="sois-page-hero-title">
-          {q ? `Results for “${q}”` : "Shop All Jewellery"}
-        </h1>
+        <h1 className="sois-page-hero-title">{heroTitle}</h1>
         <p className="sois-page-hero-sub">
           Hallmarked 925 sterling silver, handcrafted for everyday luxury.
         </p>

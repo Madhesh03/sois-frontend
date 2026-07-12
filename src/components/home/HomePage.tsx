@@ -10,7 +10,7 @@ import { Products } from "@/components/home/Products";
 import { StyledForEveryOccasion } from "@/components/home/StyledForEveryOccasion";
 import { CraftsmanshipFocus } from "@/components/home/CraftsmanshipFocus";
 import { Commitment } from "@/components/home/Commitment";
-import { Personalisation } from "@/components/home/Personalisation";
+import { JewelleryCareGuide } from "@/components/home/JewelleryCareGuide";
 import { BrandStory } from "@/components/home/BrandStory";
 import { Faq } from "@/components/home/Faq";
 import { Newsletter } from "@/components/home/Newsletter";
@@ -75,7 +75,7 @@ export function HomePage() {
           <StyledForEveryOccasion />
           <CraftsmanshipFocus />
           <Commitment />
-          <Personalisation />
+          <JewelleryCareGuide />
           <BrandStory />
           <Faq />
           <Newsletter />

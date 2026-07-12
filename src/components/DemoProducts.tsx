@@ -254,7 +254,7 @@ export function DemoProducts() {
                   e.currentTarget.style.background = T.forest;
                 }}
               >
-                <ShoppingBag size={14} /> Add to Cart
+                <ShoppingBag size={14} /> Add to Bag
               </button>
             </div>
           </div>

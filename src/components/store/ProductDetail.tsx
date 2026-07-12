@@ -10,10 +10,12 @@ import {
   Minus,
   Plus,
   Star,
+  ChevronLeft,
   ChevronRight,
   Truck,
   ShieldCheck,
   RefreshCw,
+  Rotate3d,
 } from "lucide-react";
 import { Product, formatPrice, getCategoryBySlug } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
@@ -58,6 +60,15 @@ export function ProductDetail({
         ((product.originalPrice - product.price) / product.originalPrice) * 100
       )
     : 0;
+
+  // Gallery media = product images plus an optional 360° video as the last item.
+  const media: { type: "image" | "video"; src: string }[] = [
+    ...product.images.map((src) => ({ type: "image" as const, src })),
+    ...(product.video360 ? [{ type: "video" as const, src: product.video360 }] : []),
+  ];
+  const activeMedia = media[activeImage] ?? media[0];
+  const goPrev = () => setActiveImage((i) => (i - 1 + media.length) % media.length);
+  const goNext = () => setActiveImage((i) => (i + 1) % media.length);
 
   const payload = {
     id: product.id,
@@ -156,16 +167,43 @@ export function ProductDetail({
       <div className="sois-pdp-grid">
         {/* Gallery */}
         <div className="sois-pdp-gallery">
-          <div className="sois-pdp-main-img">
-            <Image
-              src={product.images[activeImage]}
-              alt={product.name}
-              fill
-              sizes="(max-width: 900px) 100vw, 50vw"
-              style={{ objectFit: "cover" }}
-              priority
-            />
-            {product.badge && (
+          <div
+            className="sois-pdp-main-img"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (media.length < 2) return;
+              if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                goPrev();
+              } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                goNext();
+              }
+            }}
+          >
+            {activeMedia.type === "video" ? (
+              <video
+                key={activeMedia.src}
+                className="sois-pdp-video"
+                src={activeMedia.src}
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+              />
+            ) : (
+              <Image
+                src={activeMedia.src}
+                alt={product.name}
+                fill
+                sizes="(max-width: 900px) 100vw, 50vw"
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            )}
+
+            {product.badge && activeMedia.type === "image" && (
               <span
                 className="sois-pcard-tag"
                 style={{
@@ -176,23 +214,55 @@ export function ProductDetail({
                 {product.badge.toUpperCase()}
               </span>
             )}
+
+            {activeMedia.type === "video" && (
+              <span className="sois-pdp-360-badge">
+                <Rotate3d size={14} /> 360° View
+              </span>
+            )}
+
+            {media.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="sois-pdp-nav sois-pdp-nav-prev"
+                  aria-label="Previous media"
+                  onClick={goPrev}
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  type="button"
+                  className="sois-pdp-nav sois-pdp-nav-next"
+                  aria-label="Next media"
+                  onClick={goNext}
+                >
+                  <ChevronRight size={22} />
+                </button>
+              </>
+            )}
           </div>
           <div className="sois-pdp-thumbs">
-            {product.images.map((img, i) => (
+            {media.map((m, i) => (
               <button
                 key={i}
                 type="button"
-                aria-label={`View image ${i + 1}`}
+                aria-label={m.type === "video" ? "View 360° video" : `View image ${i + 1}`}
                 className={`sois-pdp-thumb${i === activeImage ? " active" : ""}`}
                 onClick={() => setActiveImage(i)}
               >
                 <Image
-                  src={img}
+                  src={m.type === "video" ? product.images[0] : m.src}
                   alt=""
                   fill
                   sizes="80px"
                   style={{ objectFit: "cover" }}
                 />
+                {m.type === "video" && (
+                  <span className="sois-pdp-thumb-360">
+                    <Rotate3d size={16} />
+                  </span>
+                )}
               </button>
             ))}
           </div>
