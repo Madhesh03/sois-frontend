@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Instagram, Heart, MessageCircle, ChevronDown } from "lucide-react";
 import { T } from "@/lib/tokens";
 
-const footerBg = "#1d3638";
-const footerBgImage = "radial-gradient(circle at 50% 0%, rgba(17, 94, 89, 0.5) 0%, transparent 60%)";
+const footerBg = "#20302f";
+const footerBgImage = "radial-gradient(circle at 50% 0%, rgba(17, 94, 89, 0.16) 0%, transparent 62%)";
 const textFaint = "rgba(206,232,210,0.42)";
 const textMid = "rgba(206,232,210,0.62)";
 
@@ -66,7 +66,7 @@ export function Footer() {
 
   return (
     <footer className="sois-footer" style={{ background: footerBg, backgroundImage: footerBgImage }}>
-      <div className="sois-footer-accent" style={{ background: `linear-gradient(90deg, ${T.forest} 0%, ${T.sage} 45%, rgba(206,232,210,0.12) 100%)` }} />
+      <div className="sois-footer-accent" style={{ background: `linear-gradient(90deg, rgba(17,94,89,0.55) 0%, rgba(153,246,228,0.35) 45%, rgba(206,232,210,0.06) 100%)` }} />
 
       <div className="sois-footer-main">
         <div className="sois-footer-brand">
