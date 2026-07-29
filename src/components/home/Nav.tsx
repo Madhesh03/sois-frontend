@@ -157,73 +157,60 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
           transition: "box-shadow 0.35s ease, background 0.35s ease",
         }}
       >
-        {/* ───── Row 1: hamburger · logo · account icons ───── */}
+        {/* ───── Row 1: logo (far left) · nav links · account icons ───── */}
         <div className="sois-hdr-row1">
-          {/* Left group: hamburger (mobile) + desktop links */}
-          <div className="sois-hdr-left">
-            <button
-              type="button"
-              className="sois-hdr-menu-btn sois-touch-target"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
-              onClick={() => setMenuOpen((o) => !o)}
-            >
-              {menuOpen ? <X size={22} color={T.forest} strokeWidth={2.4} /> : <Menu size={22} color={T.forest} strokeWidth={2} />}
-            </button>
+          {/* Hamburger — mobile only, far left */}
+          <button
+            type="button"
+            className="sois-hdr-menu-btn sois-touch-target"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {menuOpen ? <X size={22} color={T.forest} strokeWidth={2.4} /> : <Menu size={22} color={T.forest} strokeWidth={2} />}
+          </button>
 
-            <div className="sois-hdr-links">
-              {navLinks.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="nav-link"
-                  style={{
-                    fontSize: "0.74rem",
-                    letterSpacing: "0.08em",
-                    fontWeight: 500,
-                    color: T.muted,
-                    textDecoration: "none",
-                    transition: "color 0.2s",
-                    textTransform: "uppercase",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = T.forest)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = T.muted)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Logo — centered */}
+          {/* Logo — far left (transparent wordmark, background stripped) */}
           <a href="/" aria-label="SOIS Home" className="sois-hdr-logo">
-            <span className="sois-hdr-logo-name">
-              S
-              <span className="sois-hdr-logo-o">
-                O
-                <svg className="sois-hdr-logo-spark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="soisSparkGold" x1="12" y1="1" x2="12" y2="23" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#F1D390" />
-                      <stop offset="0.5" stopColor="#D8B25C" />
-                      <stop offset="1" stopColor="#AE7B30" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M12 1C12.6 7.2 16.8 11.4 23 12C16.8 12.6 12.6 16.8 12 23C11.4 16.8 7.2 12.6 1 12C7.2 11.4 11.4 7.2 12 1Z"
-                    fill="url(#soisSparkGold)"
-                  />
-                </svg>
-              </span>
-              IS
-            </span>
+            <Image
+              className="sois-hdr-logo-img"
+              src="/sois-logo.png"
+              alt="SOIS"
+              width={1106}
+              height={402}
+              priority
+            />
             <span className="sois-hdr-logo-sub">
               <span className="sois-hdr-logo-rule" />
               STERLING SILVER
               <span className="sois-hdr-logo-rule" />
             </span>
           </a>
+
+          {/* Desktop nav links — left-aligned beside the logo */}
+          <div className="sois-hdr-links">
+            {navLinks.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="nav-link"
+                style={{
+                  fontSize: "0.74rem",
+                  letterSpacing: "0.08em",
+                  fontWeight: 500,
+                  color: T.muted,
+                  textDecoration: "none",
+                  transition: "color 0.2s",
+                  textTransform: "uppercase",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = T.forest)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = T.muted)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
 
           {/* Right group: account icons */}
           <div className="sois-hdr-actions">

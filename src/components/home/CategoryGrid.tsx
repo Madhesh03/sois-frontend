@@ -1,9 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { I } from "@/lib/data";
 import { T } from "@/lib/tokens";
+
+// Two-row category grid (4 × 2 on desktop). Slugs map to existing routes so
+// functionality is unchanged — Pendant Chains lives under necklaces, the gift
+// box under /category/gifts. Only the presentation is new.
+const CATEGORIES: { label: string; href: string; img: string; meta: string }[] = [
+  { label: "All Products", href: "/shop", img: I.prod1, meta: "Shop everything" },
+  { label: "Rings", href: "/category/rings", img: I.ringWhite, meta: "24 styles" },
+  { label: "Earrings", href: "/category/earrings", img: I.earrings, meta: "38 styles" },
+  { label: "Necklaces", href: "/category/necklaces", img: I.necklace, meta: "31 styles" },
+  { label: "Pendant Chains", href: "/category/necklaces", img: I.heartPend, meta: "22 styles" },
+  { label: "Bracelets", href: "/category/bracelets", img: I.bracelets, meta: "19 styles" },
+  { label: "Sets", href: "/category/sets", img: I.signatureModel, meta: "12 curated sets" },
+  { label: "Surprise / Gift Box", href: "/category/gifts", img: I.editorial, meta: "Curated gifting" },
+];
 
 export function CategoryGrid() {
   return (
@@ -12,7 +26,7 @@ export function CategoryGrid() {
         <div>
           <Eyebrow>EXPLORE</Eyebrow>
           <h2 id="categories-heading" style={{ fontSize: "clamp(1.6rem, 3vw, 2.1rem)", fontWeight: 800, letterSpacing: "-0.025em", color: T.ink }}>
-            Browse by Category
+            Explore by Category
           </h2>
         </div>
         <Link
@@ -37,50 +51,29 @@ export function CategoryGrid() {
         </Link>
       </div>
 
-      <div className="sois-cat-grid">
-        <Link href="/category/rings" className="cat-tile sois-cat-hero" style={{ position: "relative", overflow: "hidden", cursor: "pointer", background: T.surface, textDecoration: "none" }}>
-          <Image className="cat-img" src={I.ringWhite} alt="Rings" fill sizes="(max-width: 767px) 100vw, 40vw" style={{ objectFit: "cover", transition: "transform 0.55s ease" }} />
-          <div className="cat-overlay" style={{ position: "absolute", inset: 0, background: "rgba(29,54,56,0.32)", opacity: 0, transition: "opacity 0.35s" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "28px" }}>
-            <div style={{ background: T.white, display: "inline-block", padding: "10px 18px", borderLeft: `3px solid ${T.forest}` }}>
-              <div style={{ fontSize: "1rem", fontWeight: 800, color: T.forest, letterSpacing: "-0.01em" }}>Rings</div>
-              <div style={{ fontSize: "0.64rem", color: T.muted, marginTop: 2, fontWeight: 600 }}>24 styles →</div>
-            </div>
-          </div>
-        </Link>
-
-        {[
-          { label: "Earrings", slug: "earrings", count: 38, img: I.earrings },
-          { label: "Necklaces", slug: "necklaces", count: 31, img: I.necklace },
-          { label: "Bracelets", slug: "bracelets", count: 19, img: I.bracelets },
-          { label: "Anklets", slug: "anklets", count: 12, img: I.anklets },
-        ].map(({ label, slug, count, img }) => (
-          <Link key={label} href={`/category/${slug}`} className="cat-tile sois-cat-tile" style={{ position: "relative", overflow: "hidden", cursor: "pointer", background: T.surface, textDecoration: "none" }}>
-            <Image className="cat-img" src={img} alt={label} fill sizes="(max-width: 767px) 50vw, 20vw" style={{ objectFit: "cover", transition: "transform 0.55s ease" }} />
-            <div className="cat-overlay" style={{ position: "absolute", inset: 0, background: "rgba(29,54,56,0.28)", opacity: 0, transition: "opacity 0.35s" }} />
-            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px 18px" }}>
-              <div style={{ background: T.white, display: "inline-block", padding: "7px 14px", borderLeft: `2px solid ${T.forest}` }}>
-                <div style={{ fontSize: "0.82rem", fontWeight: 800, color: T.forest }}>{label}</div>
-                <div style={{ fontSize: "0.58rem", color: T.muted, marginTop: 1, fontWeight: 600 }}>{count} styles →</div>
-              </div>
-            </div>
+      <div className="sois-cat2-grid">
+        {CATEGORIES.map(({ label, href, img, meta }, i) => (
+          <Link key={label} href={href} className="sois-cat2-card" aria-label={label}>
+            <Image
+              className="sois-cat2-img"
+              src={img}
+              alt={label}
+              fill
+              sizes="(max-width: 600px) 50vw, (max-width: 1024px) 25vw, 22vw"
+              style={{ objectFit: "cover" }}
+              priority={i < 4}
+            />
+            <span className="sois-cat2-veil" aria-hidden="true" />
+            <span className="sois-cat2-frame" aria-hidden="true" />
+            <span className="sois-cat2-body">
+              <span className="sois-cat2-label">{label}</span>
+              <span className="sois-cat2-cta">
+                {meta} <ArrowRight size={12} strokeWidth={2.4} />
+              </span>
+            </span>
           </Link>
         ))}
       </div>
-
-      <Link href="/category/gifts" className="cat-tile sois-cat-gift" style={{ marginTop: 4, position: "relative", overflow: "hidden", cursor: "pointer", height: 140, background: T.surface, display: "flex", alignItems: "center", textDecoration: "none" }}>
-        <Image className="cat-img" src={I.heartPend} alt="Gift Sets" fill sizes="100vw" style={{ objectFit: "cover", objectPosition: "center 40%", transition: "transform 0.55s ease" }} />
-        <div className="cat-overlay" style={{ position: "absolute", inset: 0, background: "rgba(29,54,56,0.5)", opacity: 0.35, transition: "opacity 0.35s" }} />
-        <div className="sois-cat-gift-inner" style={{ position: "relative", padding: "0 40px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-          <div>
-            <div style={{ fontSize: "1.2rem", fontWeight: 800, color: T.white, letterSpacing: "-0.01em" }}>Gift Sets</div>
-            <div style={{ fontSize: "0.68rem", color: T.sage, marginTop: 3, fontWeight: 500 }}>8 curated sets · Perfect for every occasion</div>
-          </div>
-          <div style={{ background: T.sage, color: T.forest, padding: "12px 28px", fontSize: "0.72rem", letterSpacing: "0.12em", fontWeight: 800, transition: "background 0.2s", flexShrink: 0 }}>
-            SHOP GIFTS →
-          </div>
-        </div>
-      </Link>
     </section>
   );
 }

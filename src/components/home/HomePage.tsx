@@ -5,7 +5,6 @@ import { Nav } from "@/components/home/Nav";
 import { TrustTicker } from "@/components/home/TrustTicker";
 import { Hero } from "@/components/home/Hero";
 import { CategoryGrid } from "@/components/home/CategoryGrid";
-import { EditorialBreak } from "@/components/home/EditorialBreak";
 import { Products } from "@/components/home/Products";
 import { StyledForEveryOccasion } from "@/components/home/StyledForEveryOccasion";
 import { CraftsmanshipFocus } from "@/components/home/CraftsmanshipFocus";
@@ -70,7 +69,6 @@ export function HomePage() {
           <TrustTicker />
           <Hero />
           <CategoryGrid />
-          <EditorialBreak />
           <Products />
           <StyledForEveryOccasion />
           <CraftsmanshipFocus />
