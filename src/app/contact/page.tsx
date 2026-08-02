@@ -9,6 +9,7 @@ import {
   Check,
 } from "lucide-react";
 import { PolicyShell } from "@/components/legal/PolicyShell";
+import { business, addressOneLine } from "@/lib/business";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -58,28 +59,28 @@ export default function ContactPage() {
             <Mail size={18} />
             <div>
               <span className="sois-contact-label">Email</span>
-              <a href="mailto:support@soisstore.com">support@soisstore.com</a>
+              <a href={`mailto:${business.email}`}>{business.email}</a>
             </div>
           </div>
           <div className="sois-contact-item">
             <Phone size={18} />
             <div>
               <span className="sois-contact-label">Phone</span>
-              <a href="tel:+919876543210">+91 98765 43210</a>
+              <a href={`tel:${business.phoneHref}`}>{business.phone}</a>
             </div>
           </div>
           <div className="sois-contact-item">
             <Clock size={18} />
             <div>
               <span className="sois-contact-label">Support Hours</span>
-              <span>Mon–Sat, 10:00 AM – 7:00 PM IST</span>
+              <span>{business.supportHours}</span>
             </div>
           </div>
           <div className="sois-contact-item">
             <MapPin size={18} />
             <div>
-              <span className="sois-contact-label">Studio</span>
-              <span>Chennai, Tamil Nadu, India</span>
+              <span className="sois-contact-label">Shop Address</span>
+              <span>{addressOneLine}</span>
             </div>
           </div>
         </div>

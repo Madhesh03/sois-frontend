@@ -29,13 +29,14 @@ export const business = {
   phoneHref: "+919876543210",
   supportHours: "Monday – Saturday, 10:00 AM – 7:00 PM IST",
 
-  /** TODO: full operating address, matching the Razorpay dashboard. */
+  /** Registered shop address — must match the Razorpay dashboard. */
   address: {
-    line1: "No. 12, Anna Salai",
-    line2: "Nungambakkam",
-    city: "Chennai",
+    line1: "No. 16/123A, Melarajaveethi",
+    line2: "Swamimalai",
+    city: "Kumbakonam",
+    district: "Thanjavur",
     state: "Tamil Nadu",
-    postalCode: "600034",
+    postalCode: "612302",
     country: "India",
   },
 
@@ -65,6 +66,7 @@ export const addressOneLine = [
   business.address.line1,
   business.address.line2,
   `${business.address.city} ${business.address.postalCode}`,
+  `${business.address.district} District`,
   business.address.state,
   business.address.country,
 ]
