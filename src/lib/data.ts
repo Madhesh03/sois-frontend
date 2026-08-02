@@ -37,6 +37,9 @@ export const I = {
     "https://images.unsplash.com/photo-1624588057318-5f1b2eb81012?w=700&h=460&fit=crop&auto=format&q=85",
   signatureModel:
     "https://images.unsplash.com/photo-1631965004544-1762fc696476?w=1400&h=1000&fit=crop&auto=format&q=85",
+  /** Coming-soon campaign panel — clasped hands, ring and bangle. */
+  comingSoonHands:
+    "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1000&h=1300&fit=crop&auto=format&q=85",
 } as const;
 
 export const products = [

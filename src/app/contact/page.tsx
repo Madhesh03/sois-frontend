@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
-  ChevronRight,
   Mail,
   Phone,
   MapPin,
   Clock,
   Check,
 } from "lucide-react";
-import { StoreShell } from "@/components/store/StoreShell";
+import { PolicyShell } from "@/components/legal/PolicyShell";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -43,13 +41,8 @@ export default function ContactPage() {
   };
 
   return (
-    <StoreShell>
+    <PolicyShell>
       <section className="sois-page-hero">
-        <nav className="sois-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/">Home</Link>
-          <ChevronRight size={13} />
-          <span aria-current="page">Contact</span>
-        </nav>
         <div className="sois-page-hero-eyebrow">GET IN TOUCH</div>
         <h1 className="sois-page-hero-title">Contact Us</h1>
         <p className="sois-page-hero-sub">
@@ -88,11 +81,6 @@ export default function ContactPage() {
               <span className="sois-contact-label">Studio</span>
               <span>Chennai, Tamil Nadu, India</span>
             </div>
-          </div>
-
-          <div className="sois-contact-faqlink">
-            Looking for quick answers? Visit our{" "}
-            <Link href="/faq">FAQs</Link>.
           </div>
         </div>
 
@@ -168,6 +156,6 @@ export default function ContactPage() {
           )}
         </div>
       </section>
-    </StoreShell>
+    </PolicyShell>
   );
 }

@@ -1,21 +1,21 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/data";
-import { getAllProducts, getCategories } from "@/lib/catalog";
 
+/**
+ * Pre-launch sitemap: the coming-soon landing page plus the policy and contact
+ * pages that payment gateways and crawlers verify. Catalogue routes (shop,
+ * categories, products) are re-added at launch — see the block kept in
+ * git history / the launch checklist in LAUNCH_CHECKLIST.md.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url.replace(/\/$/, "");
   const now = new Date();
 
-  const staticRoutes: MetadataRoute.Sitemap = [
+  return [
     { url: base, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    {
-      url: `${base}/shop`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
     ...[
       "/contact",
+      "/about",
       "/faq",
       "/shipping-policy",
       "/return-policy",
@@ -26,23 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${base}${path}`,
       lastModified: now,
       changeFrequency: "monthly" as const,
-      priority: 0.4,
+      priority: 0.5,
     })),
   ];
-
-  const categoryRoutes: MetadataRoute.Sitemap = getCategories().map((c) => ({
-    url: `${base}/category/${c.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
-
-  const productRoutes: MetadataRoute.Sitemap = getAllProducts().map((p) => ({
-    url: `${base}/product/${p.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
-
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
 }
