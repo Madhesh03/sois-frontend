@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useCart, ShippingInfo } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useOrders } from "@/context/OrdersContext";
-import { getAllProducts } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import {
   X,
@@ -23,13 +22,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-// Resolve a product's detail-page path from its name (falls back to a slugified
-// name if the item isn't in the catalogue, keeping the link valid).
+// Resolve a product's detail-page path from its name (slugified — the product
+// page resolves the live product by slug).
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 function productHref(name: string): string {
-  const match = getAllProducts().find((p) => p.name === name);
-  return `/product/${match ? match.slug : slugify(name)}`;
+  return `/product/${slugify(name)}`;
 }
 
 function ShippingForm() {

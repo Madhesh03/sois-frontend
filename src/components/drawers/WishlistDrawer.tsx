@@ -4,17 +4,15 @@ import React from "react";
 import Link from "next/link";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
-import { getAllProducts } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { X, Heart, ShoppingBag } from "lucide-react";
 
-// Resolve a product's detail-page path from its name. Falls back to a slugified
-// name if the item isn't found in the catalogue (keeps the link valid).
+// Resolve a product's detail-page path from its name (slugified — the product
+// page resolves the live product by slug).
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 function productHref(name: string): string {
-  const match = getAllProducts().find((p) => p.name === name);
-  return `/product/${match ? match.slug : slugify(name)}`;
+  return `/product/${slugify(name)}`;
 }
 
 export function WishlistDrawer() {

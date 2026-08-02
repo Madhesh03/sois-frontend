@@ -535,49 +535,99 @@ const seeds: Seed[] = [
   },
 ];
 
-const PRODUCTS: Product[] = build(seeds);
+/**
+ * Offline fallback catalogue. The `get*`/`search*` helpers below fetch from the
+ * live backend (`src/lib/api`); when the API is unreachable (e.g. local dev
+ * without the backend running, or during static builds) they fall back to this
+ * seeded data so the storefront still renders.
+ */
+const MOCK_PRODUCTS: Product[] = build(seeds);
 
-// ── Data-access helpers (swap the bodies for real API calls later) ──
+// ── Data-access helpers (API-backed, with an offline fallback) ──
+//
+// These are async because they call the backend consumer API. UI components
+// that consume them must `await` (server components) or fetch in an effect
+// (client components).
 
-export function getAllProducts(): Product[] {
-  return PRODUCTS;
+/** Fetch the full catalogue (mapped to the UI shape), falling back to mock data. */
+export async function getAllProducts(): Promise<Product[]> {
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const { items } = await catalogApi.listProducts({ page_size: 200 });
+    return items.map(mapListItem);
+  } catch {
+    return MOCK_PRODUCTS;
+  }
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return PRODUCTS.find((p) => p.slug === slug);
+export async function getProductBySlug(
+  slug: string
+): Promise<Product | undefined> {
+  try {
+    const { catalogApi, mapDetail } = await import("@/lib/api");
+    return mapDetail(await catalogApi.getProduct(slug));
+  } catch {
+    return MOCK_PRODUCTS.find((p) => p.slug === slug);
+  }
 }
 
-export function getCategories(): Category[] {
-  return categories;
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const { catalogApi, mapCategory } = await import("@/lib/api");
+    const cats = await catalogApi.listCategories();
+    const mapped = cats.map(mapCategory);
+    // Keep the storefront nav complete even if the backend omits some.
+    return mapped.length ? mapped : categories;
+  } catch {
+    return categories;
+  }
 }
 
-export function getCategoryBySlug(slug: string): Category | undefined {
-  return categories.find((c) => c.slug === slug);
+export async function getCategoryBySlug(
+  slug: string
+): Promise<Category | undefined> {
+  const all = await getCategories();
+  return all.find((c) => c.slug === slug);
 }
 
-export function getCategoryCount(slug: CategorySlug): number {
-  return PRODUCTS.filter((p) => p.category === slug).length;
+export async function getCategoryCount(slug: CategorySlug): Promise<number> {
+  const all = await getAllProducts();
+  return all.filter((p) => p.category === slug).length;
 }
 
-export function getProductsByCategory(slug: CategorySlug): Product[] {
-  return PRODUCTS.filter((p) => p.category === slug);
+export async function getProductsByCategory(
+  slug: CategorySlug
+): Promise<Product[]> {
+  const all = await getAllProducts();
+  return all.filter((p) => p.category === slug);
 }
 
-export function getRelatedProducts(product: Product, limit = 4): Product[] {
-  return PRODUCTS.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  ).slice(0, limit);
+export async function getRelatedProducts(
+  product: Product,
+  limit = 4
+): Promise<Product[]> {
+  const all = await getAllProducts();
+  return all
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, limit);
 }
 
-export function searchProducts(query: string): Product[] {
-  const q = query.trim().toLowerCase();
+export async function searchProducts(query: string): Promise<Product[]> {
+  const q = query.trim();
   if (!q) return [];
-  return PRODUCTS.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
-  );
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const { items } = await catalogApi.listProducts({ q, page_size: 50 });
+    return items.map(mapListItem);
+  } catch {
+    const needle = q.toLowerCase();
+    return MOCK_PRODUCTS.filter(
+      (p) =>
+        p.name.toLowerCase().includes(needle) ||
+        p.category.toLowerCase().includes(needle) ||
+        p.description.toLowerCase().includes(needle)
+    );
+  }
 }
 
 // ── Pure filter/sort helpers used by the listing UI ──

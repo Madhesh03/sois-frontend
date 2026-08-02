@@ -1,8 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { cartApi, mediaUrl } from "@/lib/api";
+import type { Cart as ApiCart } from "@/lib/api";
+import { useAuth } from "./AuthContext";
 
 export interface CartItem {
+  /** Product id (UUID) — how the storefront identifies a line for add/update. */
   id: string;
   name: string;
   price: number;
@@ -53,6 +63,14 @@ export interface CartContextType {
 }
 
 const SAVED_ADDRESSES_KEY = "sois_saved_addresses";
+// Server cart items carry no image/display metadata, so we cache the bits the
+// UI needs (name/price/image) keyed by product id as items are added.
+const CART_META_KEY = "sois_cart_meta";
+
+type CartMeta = Record<
+  string,
+  { name: string; price: number; image: string; size?: string }
+>;
 
 function loadSavedAddresses(): ShippingInfo[] {
   if (typeof window === "undefined") return [];
@@ -73,9 +91,29 @@ function persistSavedAddresses(addresses: ShippingInfo[]) {
   }
 }
 
+function loadCartMeta(): CartMeta {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(CART_META_KEY);
+    return raw ? (JSON.parse(raw) as CartMeta) : {};
+  } catch {
+    return {};
+  }
+}
+
+function persistCartMeta(meta: CartMeta) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(CART_META_KEY, JSON.stringify(meta));
+  } catch {
+    /* ignore */
+  }
+}
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -85,25 +123,97 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     loadSavedAddresses
   );
 
+  // product_id → server cart-item id, needed for update/remove API calls.
+  const itemIdByProduct = useRef<Record<string, string>>({});
+  const meta = useRef<CartMeta>({});
+
+  useEffect(() => {
+    meta.current = loadCartMeta();
+  }, []);
+
+  /** Reconcile local state from an authoritative server cart response. */
+  const applyCart = (cart: ApiCart) => {
+    const map: Record<string, string> = {};
+    const next: CartItem[] = cart.items.map((ci) => {
+      map[ci.product_id] = ci.id;
+      const cached = meta.current[ci.product_id];
+      return {
+        id: ci.product_id,
+        name: cached?.name ?? ci.product_name,
+        price: cached?.price ?? Number(ci.unit_price_at_add),
+        image: cached?.image ?? mediaUrl(undefined),
+        quantity: ci.quantity,
+        size: ci.selected_size || cached?.size || undefined,
+      };
+    });
+    itemIdByProduct.current = map;
+    setItems(next);
+  };
+
+  const syncCart = async () => {
+    try {
+      applyCart(await cartApi.getCart());
+    } catch {
+      /* offline / backend down — keep optimistic local state */
+    }
+  };
+
+  // Load the server cart on mount and whenever auth flips (the guest cart is
+  // merged into the customer cart on login by AuthContext).
+  useEffect(() => {
+    syncCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  const rememberMeta = (item: Omit<CartItem, "quantity">) => {
+    meta.current[item.id] = {
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      size: item.size,
+    };
+    persistCartMeta(meta.current);
+  };
+
   const addToCart = (item: Omit<CartItem, "quantity">) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
-      if (existingItem) {
-        return prevItems.map((i) =>
+    rememberMeta(item);
+
+    // Optimistic local update for instant feedback.
+    setItems((prev) => {
+      const existing = prev.find((i) => i.id === item.id);
+      if (existing) {
+        return prev.map((i) =>
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      return [...prevItems, { ...item, quantity: 1 }];
+      return [...prev, { ...item, quantity: 1 }];
     });
-    // Always surface the cart list (with quantity controls) when an item is
-    // added — otherwise a stale checkout step (review/payment/confirmation)
-    // from an earlier session would hide the quantity controls.
+    // Always surface the cart list when an item is added.
     setCheckoutStep("cart");
     setCartOpen(true);
+
+    cartApi
+      .addItem({
+        product_id: item.id,
+        quantity: 1,
+        selected_size: item.size,
+      })
+      .then(applyCart)
+      .catch(() => {
+        /* keep optimistic state if the API is unreachable */
+      });
   };
 
   const removeFromCart = (id: string) => {
-    setItems((prevItems) => prevItems.filter((i) => i.id !== id));
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    const cartItemId = itemIdByProduct.current[id];
+    if (!cartItemId) return;
+    cartApi
+      .removeItem(cartItemId)
+      .then(syncCart)
+      .catch(() => {
+        /* ignore */
+      });
   };
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -111,15 +221,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeFromCart(id);
       return;
     }
-    setItems((prevItems) =>
-      prevItems.map((i) => (i.id === id ? { ...i, quantity } : i))
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
     );
+    const cartItemId = itemIdByProduct.current[id];
+    if (!cartItemId) {
+      syncCart();
+      return;
+    }
+    cartApi
+      .updateItem(cartItemId, quantity)
+      .then((res) => {
+        if (res && typeof res === "object" && "items" in res) {
+          applyCart(res as ApiCart);
+        } else {
+          syncCart();
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      });
   };
 
   const clearCart = () => {
     setItems([]);
     setShippingInfo(null);
     setCheckoutStep("cart");
+    cartApi.clearCart().catch(() => {
+      /* ignore */
+    });
   };
 
   const openCart = () => {

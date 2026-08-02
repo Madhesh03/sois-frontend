@@ -17,7 +17,7 @@ import {
   RefreshCw,
   Rotate3d,
 } from "lucide-react";
-import { Product, formatPrice, getCategoryBySlug } from "@/lib/catalog";
+import { Product, formatPrice, categories } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -54,7 +54,7 @@ export function ProductDetail({
   const [shareMsg, setShareMsg] = useState("");
 
   const wished = isInWishlist(product.id);
-  const category = getCategoryBySlug(product.category);
+  const category = categories.find((c) => c.slug === product.category);
   const discount = product.originalPrice
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100

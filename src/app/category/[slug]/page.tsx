@@ -22,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) return { title: "Category" };
   return {
     title: `${category.name} — 925 Sterling Silver`,
@@ -38,12 +38,12 @@ export default async function CategoryPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q : undefined;
-  const products = getProductsByCategory(slug as CategorySlug);
+  const products = await getProductsByCategory(slug as CategorySlug);
 
   return (
     <StoreShell>

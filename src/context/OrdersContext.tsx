@@ -2,7 +2,9 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ShippingInfo } from "./CartContext";
-import { getAllProducts } from "@/lib/catalog";
+import { useAuth } from "./AuthContext";
+import { ordersApi, mediaUrl } from "@/lib/api";
+import type { Order as ApiOrder, ApiOrderStatus } from "@/lib/api";
 
 export type OrderStatus =
   | "placed"
@@ -56,13 +58,15 @@ export interface CreateOrderInput {
 interface OrdersContextType {
   orders: Order[];
   lastOrder: Order | null;
+  /** Loading flag while fetching orders from the API. */
+  loading: boolean;
   createOrder: (input: CreateOrderInput) => Order;
   getOrder: (id: string) => Order | undefined;
+  /** Reload orders from the backend (authenticated customers only). */
+  refresh: () => Promise<void>;
 }
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
-
-const ORDERS_KEY = "sois_orders";
 
 const STATUS_FLOW: { status: OrderStatus; label: string }[] = [
   { status: "placed", label: "Order Placed" },
@@ -75,6 +79,28 @@ const STATUS_FLOW: { status: OrderStatus; label: string }[] = [
 export function statusLabel(status: OrderStatus): string {
   if (status === "cancelled") return "Cancelled";
   return STATUS_FLOW.find((s) => s.status === status)?.label ?? status;
+}
+
+/** Map a backend order status onto the storefront's timeline status. */
+function mapStatus(status: ApiOrderStatus): OrderStatus {
+  switch (status) {
+    case "pending":
+      return "placed";
+    case "paid":
+      return "confirmed";
+    case "processing":
+      return "processing";
+    case "shipped":
+      return "shipped";
+    case "delivered":
+      return "delivered";
+    case "cancelled":
+    case "returned":
+    case "refunded":
+      return "cancelled";
+    default:
+      return "placed";
+  }
 }
 
 function addDays(base: Date, days: number): string {
@@ -111,109 +137,93 @@ function genOrderId(): string {
   return `SOIS-${rand}`;
 }
 
-function loadOrders(): Order[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(ORDERS_KEY);
-    return raw ? (JSON.parse(raw) as Order[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function persistOrders(orders: Order[]) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-  } catch {
-    /* ignore */
-  }
-}
-
-const DEMO_SHIPPING: ShippingInfo = {
-  fullName: "Aarav Sharma",
-  email: "aarav@example.com",
-  phone: "98765 43210",
-  address: "12 Radhakrishnan Salai, Mylapore",
-  city: "Chennai",
-  state: "Tamil Nadu",
-  pincode: "600004",
-};
-
-/** Seed a couple of illustrative past orders so history/tracking is populated. */
-function seedOrders(): Order[] {
-  const all = getAllProducts();
-  const pick = (slug: string) => all.find((p) => p.slug === slug) ?? all[0];
-  const now = new Date();
-
-  const toItem = (slug: string, quantity: number): OrderItem => {
-    const p = pick(slug);
-    return {
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      image: p.images[0],
-      quantity,
-    };
+/** Map a backend order to the storefront's UI order shape. */
+function mapApiOrder(o: ApiOrder): Order {
+  const status = mapStatus(o.status);
+  const addr = o.shipping_address;
+  const shipping: ShippingInfo = {
+    fullName: addr?.full_name ?? "",
+    email: o.customer_email ?? "",
+    phone: addr?.phone ?? "",
+    address: [addr?.line1, addr?.line2].filter(Boolean).join(", "),
+    city: addr?.city ?? "",
+    state: addr?.state ?? "",
+    pincode: addr?.pincode ?? "",
   };
-
-  const order1Date = addDays(now, -22);
-  const o1Items = [toItem("crescent-moon-pendant", 1), toItem("petite-orbit-studs", 1)];
-  const o1Subtotal = o1Items.reduce((s, i) => s + i.price * i.quantity, 0);
-
-  const order2Date = addDays(now, -3);
-  const o2Items = [toItem("eterna-cuff-bracelet", 1)];
-  const o2Subtotal = o2Items.reduce((s, i) => s + i.price * i.quantity, 0);
-
-  return [
-    {
-      id: "SOIS-7QX4KD",
-      date: order2Date,
-      items: o2Items,
-      shipping: DEMO_SHIPPING,
-      paymentMethod: "UPI",
-      subtotal: o2Subtotal,
-      shippingFee: 0,
-      total: o2Subtotal,
-      status: "shipped",
-      timeline: buildTimeline("shipped", order2Date),
-      trackingNumber: "SOISIN284519037",
-      courier: "BlueDart",
-      estimatedDelivery: addDays(new Date(order2Date), 5),
-    },
-    {
-      id: "SOIS-3MB9PL",
-      date: order1Date,
-      items: o1Items,
-      shipping: DEMO_SHIPPING,
-      paymentMethod: "Credit Card",
-      subtotal: o1Subtotal,
-      shippingFee: 0,
-      total: o1Subtotal,
-      status: "delivered",
-      timeline: buildTimeline("delivered", order1Date),
-      trackingNumber: "SOISIN193847265",
-      courier: "Delhivery",
-    },
-  ];
+  return {
+    id: o.id,
+    date: o.created_at,
+    items: o.items.map((it) => ({
+      id: it.product_id,
+      name: it.product_name,
+      price: Number(it.unit_price),
+      image: mediaUrl(it.thumbnail_key),
+      quantity: it.quantity,
+      size: it.selected_size || undefined,
+    })),
+    shipping,
+    paymentMethod:
+      o.payment_status === "captured" ? "Online (Razorpay)" : "Razorpay",
+    subtotal: Number(o.subtotal),
+    shippingFee: Number(o.shipping_charge),
+    total: Number(o.total_amount),
+    status,
+    timeline: buildTimeline(status, o.created_at),
+  };
 }
 
 export function OrdersProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Hydrate on mount; seed demo history the first time.
-  useEffect(() => {
-    const stored = loadOrders();
-    if (stored.length) {
-      setOrders(stored);
-    } else {
-      const seeded = seedOrders();
-      setOrders(seeded);
-      persistOrders(seeded);
+  const refresh = async () => {
+    if (!isAuthenticated) {
+      setOrders([]);
+      return;
     }
-  }, []);
+    setLoading(true);
+    try {
+      const apiOrders = await ordersApi.listOrders();
+      setOrders(apiOrders.map(mapApiOrder));
+    } catch {
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Load order history from the backend whenever auth state changes.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!isAuthenticated) {
+        if (active) setOrders([]);
+        return;
+      }
+      setLoading(true);
+      try {
+        const apiOrders = await ordersApi.listOrders();
+        if (active) setOrders(apiOrders.map(mapApiOrder));
+      } catch {
+        if (active) setOrders([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  /**
+   * Build the confirmation-screen order object right after checkout. The
+   * authoritative order lives on the backend (created via checkout/initiate +
+   * Razorpay); this local object drives the immediate confirmation UI and is
+   * reconciled with the server list on the next `refresh()`.
+   */
   const createOrder = (input: CreateOrderInput): Order => {
     const date = new Date().toISOString();
     const order: Order = {
@@ -228,11 +238,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
       status: "confirmed",
       timeline: buildTimeline("confirmed", date),
     };
-    setOrders((prev) => {
-      const next = [order, ...prev];
-      persistOrders(next);
-      return next;
-    });
+    setOrders((prev) => [order, ...prev]);
     setLastOrder(order);
     return order;
   };
@@ -241,7 +247,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <OrdersContext.Provider
-      value={{ orders, lastOrder, createOrder, getOrder }}
+      value={{ orders, lastOrder, loading, createOrder, getOrder, refresh }}
     >
       {children}
     </OrdersContext.Provider>

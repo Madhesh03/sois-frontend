@@ -69,14 +69,27 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
   const { openCart, getItemCount } = useCart();
   const { openWishlist, getWishlistCount } = useWishlist();
 
-  // Live results as the user types — scoped to the selected category, capped for the dropdown.
-  const results = useMemo<Product[]>(() => {
+  // Live results as the user types — scoped to the selected category, capped
+  // for the dropdown. Fetched from the catalogue API with a short debounce.
+  const [results, setResults] = useState<Product[]>([]);
+  useEffect(() => {
     const q = query.trim();
-    if (!q) return [];
-    let list = searchProducts(q);
-    const slug = categorySlugs[searchCat];
-    if (slug) list = list.filter((p) => p.category === slug);
-    return list.slice(0, MAX_RESULTS);
+    if (!q) {
+      setResults([]);
+      return;
+    }
+    let cancelled = false;
+    const handle = setTimeout(async () => {
+      const list = await searchProducts(q);
+      if (cancelled) return;
+      const slug = categorySlugs[searchCat];
+      const scoped = slug ? list.filter((p) => p.category === slug) : list;
+      setResults(scoped.slice(0, MAX_RESULTS));
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
   }, [query, searchCat]);
 
   // Reset the keyboard highlight whenever the result set changes.

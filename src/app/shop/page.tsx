@@ -20,7 +20,7 @@ export default async function ShopPage({
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q : undefined;
   const filter = typeof sp.filter === "string" ? sp.filter : undefined;
-  const products = getAllProducts();
+  const products = await getAllProducts();
 
   const FILTER_TITLES: Record<string, string> = {
     new: "New Arrivals",
