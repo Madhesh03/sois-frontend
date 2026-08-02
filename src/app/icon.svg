@@ -1,4 +1,14 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="7" fill="#115E59"/>
-  <text x="16" y="17" fill="#D1FAE5" font-family="Georgia, 'Times New Roman', serif" font-size="20" font-weight="700" text-anchor="middle" dominant-baseline="central" letter-spacing="-0.5">S</text>
+  <!-- Transparent sparkle. Browsers honour prefers-color-scheme in SVG
+       favicons, so the mark stays legible on light and dark tab strips. -->
+  <style>
+    .glyph { fill: #115E59; }
+    .glint { fill: #2F8F86; }
+    @media (prefers-color-scheme: dark) {
+      .glyph { fill: #D1FAE5; }
+      .glint { fill: #99F6E4; }
+    }
+  </style>
+  <path class="glyph" d="M14.7 4.4c0.2-0.8 1.3-0.8 1.5 0l1.7 5.9a4.6 4.6 0 0 0 3.2 3.2l5.9 1.7c0.8 0.2 0.8 1.3 0 1.5l-5.9 1.7a4.6 4.6 0 0 0-3.2 3.2l-1.7 5.9c-0.2 0.8-1.3 0.8-1.5 0l-1.7-5.9a4.6 4.6 0 0 0-3.2-3.2l-5.9-1.7c-0.8-0.2-0.8-1.3 0-1.5l5.9-1.7a4.6 4.6 0 0 0 3.2-3.2z"/>
+  <path class="glint" d="M26.2 2.6c0.1-0.4 0.7-0.4 0.8 0l0.6 2a1.9 1.9 0 0 0 1.3 1.3l2 0.6c0.4 0.1 0.4 0.7 0 0.8l-2 0.6a1.9 1.9 0 0 0-1.3 1.3l-0.6 2c-0.1 0.4-0.7 0.4-0.8 0l-0.6-2a1.9 1.9 0 0 0-1.3-1.3l-2-0.6c-0.4-0.1-0.4-0.7 0-0.8l2-0.6a1.9 1.9 0 0 0 1.3-1.3z"/>
 </svg>

@@ -5106,7 +5106,11 @@ video {
 
   position: relative;
   display: grid;
+  /* Mobile: photo band on top, panel below. Desktop: side by side. */
   grid-template-columns: 1fr;
+  /* Panel takes its natural height; the photo band absorbs whatever is
+     left, so it shrinks on short phones instead of pushing content out. */
+  grid-template-rows: minmax(90px, 1fr) auto;
   height: 100vh;
   height: 100svh;
   overflow: hidden;
@@ -5139,12 +5143,7 @@ video {
      scrolls, and at any normal height the content fits without this. */
   overflow-y: auto;
   scrollbar-width: none;
-  /* Mobile: the campaign image sits behind, so veil it for legibility. */
-  background: linear-gradient(
-    rgba(247, 245, 240, 0.9),
-    rgba(247, 245, 240, 0.97) 55%,
-    rgba(247, 245, 240, 0.99)
-  );
+  background: var(--cs-ivory);
 }
 .sois-cs-panel::-webkit-scrollbar {
   display: none;
@@ -5162,7 +5161,7 @@ video {
   align-items: center;
 }
 .sois-cs-logo {
-  height: clamp(22px, 3.6vh, 36px);
+  height: clamp(30px, 5.2vh, 52px);
   width: auto;
   display: block;
 }
@@ -5188,13 +5187,24 @@ video {
 .sois-cs-title {
   margin: clamp(14px, 3vh, 26px) 0 0;
   font-family: var(--font-logo), Georgia, serif;
-  font-size: clamp(1.9rem, 5.4vh, 3.1rem);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  line-height: 1.05;
+  font-size: clamp(1.35rem, 3.2vh, 1.9rem);
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  line-height: 1.15;
   text-transform: uppercase;
+  color: rgba(29, 54, 56, 0.72);
+}
+.sois-cs-statement {
+  margin: clamp(10px, 1.8vh, 20px) auto 0;
+  max-width: 38ch;
+  font-family: var(--font-logo), Georgia, serif;
+  font-size: clamp(0.92rem, 1.9vh, 1.1rem);
+  font-style: italic;
+  line-height: 1.5;
   color: var(--cs-forest);
 }
+
 .sois-cs-lede {
   margin: clamp(8px, 1.4vh, 14px) auto 0;
   max-width: 34ch;
@@ -5265,6 +5275,10 @@ video {
 .sois-cs-submit:hover {
   background: var(--cs-teal);
 }
+.sois-cs-submit:disabled {
+  opacity: 0.62;
+  cursor: progress;
+}
 
 .sois-cs-form-done {
   display: flex;
@@ -5297,13 +5311,17 @@ video {
   margin-top: clamp(12px, 2.6vh, 26px);
 }
 .sois-cs-social {
-  display: inline-grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px;
   border: 1px solid var(--cs-line);
-  border-radius: 50%;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   color: var(--cs-forest);
+  text-decoration: none;
   transition: background 0.25s ease, border-color 0.25s ease;
 }
 .sois-cs-social:hover {
@@ -5366,69 +5384,103 @@ video {
 
 /* ─── Campaign image: backdrop on mobile, right half on desktop ─── */
 .sois-cs-visual {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+  position: relative;
+  order: -1;
+  min-height: 0;
   background: #e7e2da;
   overflow: hidden;
+}
+/* Fade the band into the panel so the seam reads as one surface. */
+.sois-cs-visual::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 32%;
+  background: linear-gradient(to bottom, rgba(247, 245, 240, 0), var(--cs-ivory));
 }
 
 @media (min-width: 900px) {
   .sois-cs {
     grid-template-columns: 1fr 1fr;
-  }
-  .sois-cs-panel {
-    background: none;
+    grid-template-rows: 1fr;
   }
   .sois-cs-visual {
-    position: relative;
-    inset: auto;
+    order: 0;
     height: 100%;
+  }
+  .sois-cs-visual::after {
+    display: none;
   }
 }
 
 @media (min-width: 1280px) {
   .sois-cs-inner {
-    max-width: 430px;
+    max-width: 460px;
   }
 }
 
 /* Taller viewports have room to breathe — open the rhythm up in steps rather
    than scaling it continuously, so short screens are never squeezed. */
-@media (min-height: 760px) {
-  .sois-cs-panel { padding-block: 26px; }
-  .sois-cs-brand-sub { margin-top: 15px; }
-  .sois-cs-title { margin-top: 44px; }
-  .sois-cs-lede { margin-top: 18px; }
-  .sois-cs-form { margin-top: 36px; }
-  .sois-cs-field + .sois-cs-field { margin-top: 8px; }
+@media (min-width: 900px) and (min-height: 760px) {
+  .sois-cs-panel { padding-block: 24px; }
+  .sois-cs-brand-sub { margin-top: 13px; }
+  .sois-cs-title { margin-top: 30px; }
+  .sois-cs-statement { margin-top: 16px; }
+  .sois-cs-lede { margin-top: 12px; }
+  .sois-cs-form { margin-top: 26px; }
+  .sois-cs-field + .sois-cs-field { margin-top: 4px; }
+  .sois-cs-submit { margin-top: 24px; }
+  .sois-cs-form-done { margin-top: 26px; }
+  .sois-cs-meta { margin-top: 26px; }
+  .sois-cs-contact { margin-top: 16px; }
+  .sois-cs-policies { margin-top: 16px; padding-top: 16px; }
+  .sois-cs-legal { margin-top: 12px; }
+}
+
+@media (min-width: 900px) and (min-height: 900px) {
+  .sois-cs-panel { padding-block: 28px; }
+  .sois-cs-title { margin-top: 38px; }
+  .sois-cs-statement { margin-top: 20px; }
+  .sois-cs-lede { margin-top: 14px; }
+  .sois-cs-form { margin-top: 32px; }
+  .sois-cs-field + .sois-cs-field { margin-top: 7px; }
   .sois-cs-submit { margin-top: 30px; }
-  .sois-cs-form-done { margin-top: 36px; }
-  .sois-cs-meta { margin-top: 36px; }
+  .sois-cs-form-done { margin-top: 32px; }
+  .sois-cs-meta { margin-top: 32px; }
   .sois-cs-contact { margin-top: 20px; }
   .sois-cs-policies { margin-top: 20px; padding-top: 20px; }
   .sois-cs-legal { margin-top: 14px; }
 }
 
-@media (min-height: 900px) {
-  .sois-cs-panel { padding-block: 32px; }
-  .sois-cs-title { margin-top: 54px; }
-  .sois-cs-lede { margin-top: 22px; }
-  .sois-cs-form { margin-top: 46px; }
-  .sois-cs-field + .sois-cs-field { margin-top: 11px; }
+@media (min-width: 900px) and (min-height: 1000px) {
+  .sois-cs-title { margin-top: 52px; }
+  .sois-cs-form { margin-top: 44px; }
   .sois-cs-submit { margin-top: 38px; }
-  .sois-cs-form-done { margin-top: 46px; }
-  .sois-cs-meta { margin-top: 46px; }
-  .sois-cs-contact { margin-top: 26px; }
-  .sois-cs-policies { margin-top: 26px; padding-top: 26px; }
-  .sois-cs-legal { margin-top: 18px; }
+  .sois-cs-meta { margin-top: 44px; }
 }
 
-/* Landscape phones: drop the least essential lines rather than scroll. */
-@media (max-height: 520px) {
+/* Short screens: drop the least essential lines rather than scroll. */
+@media (max-height: 720px) {
+  .sois-cs-statement {
+    display: none;
+  }
+}
+
+/* Phones: the copyright line is the cheapest thing to trade for a photo band
+   with actual presence — the same detail is on every policy page. */
+@media (max-width: 899px) and (max-height: 900px) {
   .sois-cs-legal {
     display: none;
   }
+}
+@media (max-height: 660px) {
+  .sois-cs-legal {
+    display: none;
+  }
+}
+@media (max-height: 520px) {
   .sois-cs-brand-sub {
     display: none;
   }

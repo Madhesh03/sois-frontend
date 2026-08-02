@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Check } from "lucide-react";
-import { business, addressOneLine } from "@/lib/business";
+import { business } from "@/lib/business";
 import { I } from "@/lib/data";
 
 const policyLinks = [
@@ -16,26 +16,61 @@ const policyLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
-type FormState = "idle" | "error" | "done";
+/** Enquiries land in a SheetDB-backed Google Sheet until a CRM exists. */
+const ENQUIRY_ENDPOINT = "https://sheetdb.io/api/v1/thw3iuvc32ug7";
+
+type FormState = "idle" | "invalid" | "sending" | "failed" | "done";
 
 function ContactForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [state, setState] = useState<FormState>("idle");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Prototype: no messaging backend yet — validate and acknowledge locally.
+    if (state === "sending") return;
+
     const valid =
       name.trim().length > 1 &&
       /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()) &&
+      // 10-digit Indian mobile, optionally with a +91 / 0 prefix.
+      /^(\+?91[-\s]?|0)?[6-9]\d{9}$/.test(phone.replace(/[\s-]/g, "")) &&
       message.trim().length > 4;
-    setState(valid ? "done" : "error");
+
+    if (!valid) {
+      setState("invalid");
+      return;
+    }
+
+    setState("sending");
+    try {
+      const res = await fetch(ENQUIRY_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Keys must match the sheet's header row exactly — it is lower-case,
+        // and SheetDB rejects the whole request ("Bad data format") otherwise.
+        body: JSON.stringify({
+          data: [
+            {
+              name: name.trim(),
+              email: email.trim(),
+              phone: phone.trim(),
+              message: message.trim(),
+            },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(`Enquiry failed: ${res.status}`);
+      setState("done");
+    } catch {
+      setState("failed");
+    }
   };
 
   const touched = () => {
-    if (state === "error") setState("idle");
+    if (state === "invalid" || state === "failed") setState("idle");
   };
 
   if (state === "done") {
@@ -91,6 +126,25 @@ function ContactForm() {
       </div>
 
       <div className="sois-cs-field">
+        <label htmlFor="cs-phone" className="sois-cs-visually-hidden">
+          Mobile number
+        </label>
+        <input
+          id="cs-phone"
+          name="phone"
+          type="tel"
+          inputMode="numeric"
+          autoComplete="tel"
+          placeholder="Mobile Number"
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            touched();
+          }}
+        />
+      </div>
+
+      <div className="sois-cs-field">
         <label htmlFor="cs-message" className="sois-cs-visually-hidden">
           Your message
         </label>
@@ -107,25 +161,31 @@ function ContactForm() {
         />
       </div>
 
-      {state === "error" && (
+      {state === "invalid" && (
         <p className="sois-cs-form-error" role="alert">
-          Please enter your name, a valid email address and a short message.
+          Please enter your name, a valid email address, a 10-digit mobile
+          number and a short message.
+        </p>
+      )}
+      {state === "failed" && (
+        <p className="sois-cs-form-error" role="alert">
+          We couldn&rsquo;t send that just now. Please try again, or write to{" "}
+          {business.email}.
         </p>
       )}
 
-      <button type="submit" className="sois-cs-submit">
-        Contact Us
+      <button
+        type="submit"
+        className="sois-cs-submit"
+        disabled={state === "sending"}
+      >
+        {state === "sending" ? "Sending…" : "Contact Us"}
       </button>
     </form>
   );
 }
 
 export function ComingSoon() {
-  const { launchDate } = business;
-  const launchLabel = launchDate
-    ? launchDate.toLocaleDateString("en-IN", { month: "long", year: "numeric" })
-    : null;
-
   return (
     <div className="sois-cs">
       {/* ── Left panel: brand, form, contact & policies ───────────── */}
@@ -149,11 +209,13 @@ export function ComingSoon() {
 
           <h1 className="sois-cs-title">Coming Soon</h1>
 
+          <p className="sois-cs-statement">
+            SOIS is more than a jewellery brand. It&rsquo;s a celebration of
+            stories, emotions, and the people who wear them.
+          </p>
+
           <p className="sois-cs-lede">
-            {launchLabel
-              ? `We open in ${launchLabel}. Having any questions?`
-              : "We will launch soon. Having any questions?"}{" "}
-            Feel free to contact us.
+            We will launch soon. Having any questions? Feel free to contact us.
           </p>
 
           <ContactForm />
@@ -164,17 +226,15 @@ export function ComingSoon() {
               href={business.social.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`${business.brand} on Instagram`}
             >
-              <Instagram size={16} aria-hidden />
+              <Instagram size={15} aria-hidden />
+              <span>{business.social.instagramHandle}</span>
             </a>
 
             <address className="sois-cs-contact">
               <a href={`mailto:${business.email}`}>{business.email}</a>
               <span aria-hidden>•</span>
               <a href={`tel:${business.phoneHref}`}>{business.phone}</a>
-              <span aria-hidden>•</span>
-              <span>{addressOneLine}</span>
             </address>
 
             <nav className="sois-cs-policies" aria-label="Policies">

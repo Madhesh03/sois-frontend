@@ -1,4 +1,5 @@
 import { products, siteConfig } from "./data";
+import { business } from "./business";
 
 export function getOrganizationSchema() {
   return {
@@ -8,10 +9,7 @@ export function getOrganizationSchema() {
     url: siteConfig.url,
     logo: `${siteConfig.url}/logo.png`,
     description: siteConfig.description,
-    sameAs: [
-      "https://instagram.com/sois",
-      "https://pinterest.com/sois",
-    ],
+    sameAs: [business.social.instagram],
   };
 }
 

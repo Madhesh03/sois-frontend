@@ -23,10 +23,10 @@ export const business = {
 
   /** TODO: real, monitored inbox. Avoid free personal addresses if possible. */
   email: "support@soisstore.com",
-  /** TODO: real, reachable number — Razorpay's team calls this. */
-  phone: "+91 98765 43210",
+  /** Reachable support number — Razorpay's team calls this. */
+  phone: "+91 73052 72195",
   /** E.164 form used for tel: / wa.me links. */
-  phoneHref: "+919876543210",
+  phoneHref: "+917305272195",
   supportHours: "Monday – Saturday, 10:00 AM – 7:00 PM IST",
 
   /** Registered shop address — must match the Razorpay dashboard. */
@@ -58,7 +58,8 @@ export const business = {
   launchDate: new Date(2026, 9, 1, 10, 0, 0),
 
   social: {
-    instagram: "https://instagram.com/soisjewellery",
+    instagram: "https://www.instagram.com/soisstore.co",
+    instagramHandle: "@soisstore.co",
   },
 } as const;
 

@@ -54,10 +54,13 @@ merchants to what the site says.
 - The **contact form** at `/contact` has no backend — it acknowledges locally
   and discards the message. Wire it to an inbox, or the email/phone on the page
   are the only real support channels.
-- The **contact form** on the coming-soon page also has no backend
-  (`ContactForm` in [src/components/coming-soon/ComingSoon.tsx](src/components/coming-soon/ComingSoon.tsx)) —
-  it validates and acknowledges locally, then discards the message. Wire it to
-  an inbox or a form service before you drive traffic to it.
+- The **coming-soon enquiry form** posts to a SheetDB endpoint
+  (`ENQUIRY_ENDPOINT` in [src/components/coming-soon/ComingSoon.tsx](src/components/coming-soon/ComingSoon.tsx)),
+  which appends a row to a Google Sheet. Two caveats: the endpoint id sits in
+  client-side code so anyone can write rows to that sheet, and nobody is
+  notified — someone has to watch the sheet, or add a Sheets notification rule.
+  The column headers must stay lower-case (`name`, `email`, `phone`, `message`)
+  or SheetDB rejects every submission with "Bad data format".
 - The **storefront routes remain publicly reachable** (`/shop`, `/category/*`,
   `/product/*`) — they're just out of the sitemap. This is usually helpful for
   verification (reviewers like seeing products and prices), but if you want a

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Instagram, Heart, MessageCircle, ChevronDown } from "lucide-react";
 import { T } from "@/lib/tokens";
+import { business } from "@/lib/business";
 
 // Same deep forest as the Quality You Can Feel panel, with a much lighter glow
 // so the larger footer surface doesn't read as saturated.
@@ -123,9 +124,9 @@ export function Footer() {
       </div>
 
       <div className="sois-footer-contact">
-        <a href="mailto:support@soisstore.com" className="sois-footer-contact-item">support@soisstore.com</a>
+        <a href={`mailto:${business.email}`} className="sois-footer-contact-item">{business.email}</a>
         <span className="sois-footer-contact-sep">·</span>
-        <a href="tel:+919876543210" className="sois-footer-contact-item">+91 98765 43210</a>
+        <a href={`tel:${business.phoneHref}`} className="sois-footer-contact-item">{business.phone}</a>
       </div>
 
       <div className="sois-footer-bottom">
