@@ -85,8 +85,14 @@ export default function ContactPage() {
           <div className="sois-contact-item">
             <MapPin size={18} />
             <div>
-              <span className="sois-contact-label">Studio</span>
-              <span>Chennai, Tamil Nadu, India</span>
+              <span className="sois-contact-label">Store</span>
+              <span>
+                No. 16/123A, Melaraja Veethi, Swamimalai,
+                <br />
+                Kumbakonam, Thanjavur District,
+                <br />
+                Tamil Nadu – 612302, India
+              </span>
             </div>
           </div>
 
