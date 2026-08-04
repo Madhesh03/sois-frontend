@@ -44,24 +44,26 @@ export const I = {
   signatureModel:
     "https://images.unsplash.com/photo-1631965004544-1762fc696476?w=1400&h=1000&fit=crop&auto=format&q=85",
   /**
-   * The coming-soon campaign frame: the same photograph the home page opens
-   * on, so the pre-launch page and the storefront it becomes share one image.
-   * The jewellery leads — pendant, chain and stacked rings — and the face is
-   * cropped at the chin, so the frame reads as campaign rather than portrait.
-   *
-   * Served larger than `heroModel` because the coming-soon figure runs the
-   * full height of the band, and re-cropped taller than the source 10:13 so
-   * that track takes it near enough whole. Everything below the hands is
-   * white linen, which is what the mask needs to dissolve into the cream.
+   * The collarbone frame the home page opens on, re-cropped tall. Kept as the
+   * alternative for the coming-soon page: swap it into `ComingSoon.tsx` if the
+   * pre-launch page should share the storefront's opening image instead.
+   * A flat lay wants objectPosition "50% 48%" there; this one wants "50% 30%".
    */
   comingSoonCampaign: `${heroModelPhoto}?w=1400&h=2000&fit=crop&auto=format&q=88`,
-  // To use the brand's own campaign still life instead, save it to
-  // public/hero-campaign.jpg and swap the line above for:
-  //   comingSoonCampaign: "/hero-campaign.jpg",
-  // A flat lay wants objectPosition "50% 48%" in ComingSoon.tsx.
-  /** Clasped hands, ring and bangle — kept for other campaign placements. */
+  /**
+   * The coming-soon campaign frame in use: clasped hands, ring and bangle,
+   * shot into warm window light. The jewellery leads and the face is out of
+   * frame entirely, so it reads as campaign rather than portrait.
+   *
+   * Served tall and large because the photograph runs the full height of the
+   * band on desktop, and everything past the hands is soft blown-out light —
+   * which is what the mask needs to dissolve into the cream.
+   *
+   * To use the brand's own campaign still life instead, save it to
+   * public/hero-campaign.jpg and swap this for "/hero-campaign.jpg".
+   */
   comingSoonHands:
-    "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1000&h=1300&fit=crop&auto=format&q=85",
+    "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1200&h=1700&fit=crop&auto=format&q=88",
   /** Landscape crop of the same frame, kept for wide placements. */
   comingSoonBanner:
     "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1800&h=1000&fit=crop&auto=format&q=85",

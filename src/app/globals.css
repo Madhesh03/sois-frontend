@@ -5092,50 +5092,66 @@ video {
 /* ═══════════════════════════════════════════════════════════════
    COMING SOON  (pre-launch landing — payment-gateway verification)
 
-   Three columns on one compact band: an editorial photograph flush to
-   the left edge, the brand column centred beside it, and the enquiry
-   card on the right. The band is ~80vh so the whole page — hero,
-   contact details, form and footer — lands inside the first screen.
+   One centred measure — `.sois-cs-shell` — carries the wordmark, the
+   hero, both panels and the footer. Everything on the page therefore
+   starts and ends on the same two vertical lines, which is the single
+   correction the reference composition needed: there the logo, the
+   panels and the footer each sat on a different axis.
 
-   The photograph is a plain image: no card, border, radius, shadow or
-   opacity change. It is full bleed off the left edge and its trailing
-   edges are dissolved by gradient masks, so the only hard boundary it
-   has is the one the viewport already provides.
+   Behind it, the campaign photograph is flush to the top-left of the
+   viewport with its two inner edges dissolved into the cream. No card,
+   border, radius, shadow or background — the fade is the only treatment,
+   so the picture reads as the page's own paper.
 
-   Mobile-first — the base rules stack the same three parts.
+   Mobile-first: the photograph is a banner in normal flow, so nothing
+   overlaps and nothing depends on guessing a heading's height.
    ═══════════════════════════════════════════════════════════════ */
 
 .sois-cs {
   --cs-cream: #f8f5f0;
-  --cs-cream-lift: #fdfbf7;
   --cs-forest: #1d3638;
   --cs-forest-deep: #142629;
   --cs-gold: #c6a664;
   --cs-gold-soft: #dcc493;
   --cs-ink: #1d3638;
   --cs-muted: rgba(29, 54, 56, 0.72);
-  --cs-faint: rgba(29, 54, 56, 0.42);
-  --cs-line: rgba(29, 54, 56, 0.1);
+  --cs-faint: rgba(29, 54, 56, 0.45);
   --cs-gold-line: rgba(198, 166, 100, 0.45);
 
+  /* The page's one measure and one gutter. Every band uses both. */
+  --cs-shell: 1160px;
+  --cs-gutter: clamp(20px, 5vw, 60px);
+
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   overflow-x: clip;
-  /* Clean cream, lifted by two very quiet radials — nothing that reads
+  /* Clean cream, lifted by three very quiet washes — nothing that reads
      as a photograph or a section break. */
   background: radial-gradient(
-      70% 46% at 78% 6%,
-      rgba(255, 255, 255, 0.7) 0%,
+      70% 46% at 78% 4%,
+      rgba(255, 255, 255, 0.72) 0%,
       rgba(255, 255, 255, 0) 62%
     ),
     radial-gradient(
-      62% 44% at 96% 78%,
-      rgba(198, 166, 100, 0.08) 0%,
+      62% 40% at 96% 62%,
+      rgba(198, 166, 100, 0.09) 0%,
       rgba(198, 166, 100, 0) 66%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(198, 166, 100, 0) 62%,
+      rgba(198, 166, 100, 0.07) 100%
     ),
     var(--cs-cream);
   color: var(--cs-ink);
+}
+
+/* Header, hero and footer all sit inside this. */
+.sois-cs-shell {
+  width: min(var(--cs-shell), 100% - var(--cs-gutter) * 2);
+  margin-inline: auto;
 }
 
 .sois-cs-sr {
@@ -5155,14 +5171,11 @@ video {
   outline-offset: 3px;
   border-radius: 4px;
 }
-.sois-cs-footer *:focus-visible {
-  outline-color: var(--cs-gold-soft);
-}
 
 @keyframes sois-cs-rise {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -5170,123 +5183,211 @@ video {
   }
 }
 
+@keyframes sois-cs-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(198, 166, 100, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(198, 166, 100, 0);
+  }
+}
+
 .sois-cs-fleuron {
+  flex: 0 0 auto;
   color: var(--cs-gold);
 }
 
 /* ─────────────────────────────────────────────────────────────
-   The band: photograph · brand column · enquiry card
+   The campaign photograph
    ───────────────────────────────────────────────────────────── */
-.sois-cs-hero {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: center;
-  /* Grows to fill whatever the footer leaves, so band + footer come to
-     exactly one screen on a normal laptop. The floor keeps it usable
-     on short viewports. */
-  flex: 1 0 auto;
-  min-height: 560px;
-}
-
-/* A plain editorial image: flush to the edge, square corners, no card,
-   border, shadow, background or opacity change. The single treatment is
-   a gradient mask that dissolves its trailing edge into the cream, so
-   the photograph has no boundary to read as a section.
-
-   Stacked on phones, so it is the lower edge that dissolves. */
-.sois-cs-figure {
+/* Mobile: a banner in normal flow. It is the lower edge that dissolves,
+   and the type that follows never sits on top of the picture. */
+.sois-cs-photo {
   position: relative;
-  margin: 0;
-  height: clamp(280px, 42vh, 400px);
+  z-index: 0;
+  width: 100%;
+  height: clamp(280px, 42vh, 420px);
+  pointer-events: none;
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 58%,
-    rgba(0, 0, 0, 0.78) 72%,
-    rgba(0, 0, 0, 0.44) 83%,
-    rgba(0, 0, 0, 0.18) 91%,
+    #000 52%,
+    rgba(0, 0, 0, 0.78) 68%,
+    rgba(0, 0, 0, 0.44) 80%,
+    rgba(0, 0, 0, 0.18) 90%,
     rgba(0, 0, 0, 0.05) 96%,
     rgba(0, 0, 0, 0) 100%
   );
   mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 58%,
-    rgba(0, 0, 0, 0.78) 72%,
-    rgba(0, 0, 0, 0.44) 83%,
-    rgba(0, 0, 0, 0.18) 91%,
+    #000 52%,
+    rgba(0, 0, 0, 0.78) 68%,
+    rgba(0, 0, 0, 0.44) 80%,
+    rgba(0, 0, 0, 0.18) 90%,
     rgba(0, 0, 0, 0.05) 96%,
     rgba(0, 0, 0, 0) 100%
   );
 }
 /* Held just off full strength so the photograph sits under the type
-   rather than beside it. The cream it dissolves into is only a few steps
-   from the shirt and skin it is dissolving from, so 12% is enough to take
-   the picture's voice down without visibly greying it. */
-.sois-cs-figure img {
-  opacity: 0.88;
+   rather than beside it. */
+.sois-cs-photo img {
+  opacity: 0.9;
 }
-
 /* The photograph does not end — it runs out of cream to be visible
    against. This is the page's own #f8f5f0 painted back over the frame as
    a radial that is clear over the jewellery and solid by the edges, so
-   every boundary is a tone the background already has. Masks alone can't
-   do this: a mask ramps to whatever is behind, which reads as a fade,
-   while cream-over-cream reads as nothing at all.
-   The linear layer under it carries the same warmth along the trailing
-   edge, where the ramp is longest and greying would show first. */
-.sois-cs-figure::after {
+   every boundary is a tone the background already has. */
+.sois-cs-photo::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-      118% 78% at 48% 40%,
+      116% 76% at 46% 40%,
       rgba(248, 245, 240, 0) 0%,
-      rgba(248, 245, 240, 0) 34%,
-      rgba(248, 245, 240, 0.08) 52%,
+      rgba(248, 245, 240, 0) 32%,
+      rgba(248, 245, 240, 0.08) 50%,
       rgba(248, 245, 240, 0.22) 68%,
       rgba(248, 245, 240, 0.42) 84%,
-      rgba(248, 245, 240, 0.6) 100%
+      rgba(248, 245, 240, 0.58) 100%
     ),
     linear-gradient(
       to bottom,
-      rgba(248, 245, 240, 0) 46%,
+      rgba(248, 245, 240, 0) 44%,
       rgba(248, 245, 240, 0.18) 74%,
       rgba(248, 245, 240, 0.34) 100%
     );
 }
 
-/* ─── Brand column ─── */
-.sois-cs-lede {
+/* ─────────────────────────────────────────────────────────────
+   Header — the wordmark lockup
+
+   Centred at every width, on the same axis as the badge, the headline
+   and the statement below it, so the whole page reads down one line.
+   ───────────────────────────────────────────────────────────── */
+.sois-cs-head {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  padding: clamp(24px, 3.4vh, 38px) 0 0;
+  animation: sois-cs-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.sois-cs-brand {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  padding: 40px 24px 4px;
-  animation: sois-cs-rise 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  gap: clamp(10px, 1.4vh, 14px);
 }
+/* The wordmark leads the page, so it is set larger than the headline
+   under it — the glyphs run to roughly 0.86 of this height, against the
+   headline's cap height of roughly 0.70 of its font-size, and the two
+   clamps below are chosen to keep the wordmark ahead at every width. */
 .sois-cs-logo {
-  height: 40px;
+  display: block;
+  height: clamp(52px, min(7.4vw, 8vh), 78px);
   width: auto;
 }
 .sois-cs-tagline {
-  margin-top: 12px;
-  font-size: 0.6rem;
+  font-size: clamp(0.58rem, 0.5rem + 0.28vw, 0.72rem);
   font-weight: 600;
   letter-spacing: 0.3em;
   text-indent: 0.3em;
   color: var(--cs-muted);
 }
+.sois-cs-brand-rule {
+  width: clamp(38px, 4vw, 62px);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    rgba(198, 166, 100, 0),
+    var(--cs-gold),
+    rgba(198, 166, 100, 0)
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Hero — badge, headline, statement, then the two panels
+   ───────────────────────────────────────────────────────────── */
+.sois-cs-main {
+  position: relative;
+  z-index: 1;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(26px, 4.6vh, 52px) 0 clamp(30px, 5vh, 56px);
+}
+
+.sois-cs-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: sois-cs-rise 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) 0.06s both;
+}
+
+.sois-cs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px 9px 14px;
+  border: 1px solid rgba(198, 166, 100, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 26px -20px rgba(29, 54, 56, 0.55);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  text-transform: uppercase;
+  color: var(--cs-forest);
+}
+.sois-cs-badge-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cs-gold);
+  animation: sois-cs-pulse 2.4s ease-out infinite;
+}
+
+/* Set below the wordmark deliberately — the brand leads, the message
+   follows. Bounded by the viewport's *height* as well as its width, so a
+   short laptop screen shortens the headline instead of pushing the panels
+   below the fold. */
+.sois-cs-title {
+  margin: clamp(18px, 2.8vh, 28px) 0 0;
+  font-family: var(--font-logo), Georgia, serif;
+  font-size: clamp(2.15rem, min(6vw, 8.4vh), 4rem);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: 0.055em;
+  text-indent: 0.055em;
+  text-transform: uppercase;
+}
+.sois-cs-title span {
+  display: block;
+  color: var(--cs-forest);
+}
+.sois-cs-title em {
+  display: block;
+  font-style: normal;
+  color: var(--cs-gold);
+}
 
 .sois-cs-orn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
-  margin: 22px 0;
+  margin: clamp(18px, 2.6vh, 26px) 0;
 }
 .sois-cs-orn-line {
-  width: 62px;
+  width: clamp(52px, 8vw, 78px);
   height: 1px;
   background: linear-gradient(
     to right,
@@ -5302,53 +5403,106 @@ video {
   );
 }
 
-/* Set to sit with the wordmark rather than shout over it: a little over
-   twice the logo's cap height, where it was closer to three times. The
-   serif, the forest/gold split and the uppercase are unchanged — only the
-   scale, the leading and the tracking come in. */
-.sois-cs-title {
-  margin: 0;
-  font-family: var(--font-logo), Georgia, serif;
-  font-size: clamp(1.7rem, 7.15vw, 2.2rem);
-  font-weight: 500;
-  line-height: 1.06;
-  letter-spacing: 0.035em;
-  text-indent: 0.035em;
-  text-transform: uppercase;
-}
-.sois-cs-title span {
-  display: block;
-  color: var(--cs-forest);
-}
-.sois-cs-title em {
-  display: block;
-  font-style: normal;
-  color: var(--cs-gold);
-}
-
 .sois-cs-statement {
-  max-width: 32ch;
+  max-width: 46ch;
   margin: 0;
-  font-size: 0.98rem;
-  line-height: 1.8;
+  font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.06rem);
+  line-height: 1.85;
   color: var(--cs-muted);
 }
 
-/* ─── Contact details: icon · text · hairline. No card, no panel. ─── */
+/* ─────────────────────────────────────────────────────────────
+   The two panels — contact details · enquiry form
+   ───────────────────────────────────────────────────────────── */
+.sois-cs-panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 1.8vw, 24px);
+  margin-top: clamp(28px, 4.4vh, 52px);
+  animation: sois-cs-rise 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) 0.14s both;
+}
+
+/* Lighter on the page than a solid card: the border is barely a tint and
+   the drop is wide and shallow, so each panel reads as a slightly raised
+   plane rather than an object with weight. */
+.sois-cs-panel {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(22px, 3vh, 32px) clamp(20px, 2.2vw, 30px)
+    clamp(22px, 3vh, 30px);
+  border: 1px solid rgba(198, 166, 100, 0.16);
+  border-radius: 18px;
+  background: rgba(253, 252, 250, 0.88);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 26px 58px -40px rgba(29, 54, 56, 0.3),
+    0 1px 2px rgba(29, 54, 56, 0.03);
+  text-align: left;
+}
+
+/* The enquiry form is the page's one action, so it sits a step brighter
+   and a step further off the page than the panel beside it. Same shape,
+   same border — only the light on it differs. */
+.sois-cs-formcard {
+  background: rgba(255, 254, 252, 0.94);
+  box-shadow: 0 30px 66px -40px rgba(29, 54, 56, 0.36),
+    0 1px 2px rgba(29, 54, 56, 0.03);
+}
+.sois-cs-contact {
+  background: rgba(250, 248, 244, 0.8);
+}
+
+/* Label · hairline. Gives each panel a top anchor, which is what stops
+   the shorter of the two from trailing off into empty space. */
+.sois-cs-panel-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 clamp(14px, 2vh, 20px);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-transform: uppercase;
+  color: var(--cs-faint);
+  white-space: nowrap;
+}
+.sois-cs-panel-label::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    rgba(198, 166, 100, 0.4),
+    rgba(198, 166, 100, 0)
+  );
+}
+
+/* ─── Contact panel ─── */
 .sois-cs-channels {
-  width: 100%;
-  max-width: 330px;
-  margin: 30px 0 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
   padding: 0;
   list-style: none;
-  text-align: left;
+}
+/* The rows share out whatever height the form panel sets, so the three
+   of them fill the card evenly instead of clustering in the middle and
+   leaving a void above and below. Each row's rule then lands at the foot
+   of its own equal band, which is what makes the spread read as ruled
+   rather than merely stretched. */
+.sois-cs-channels li {
+  display: flex;
+  flex: 1 1 auto;
 }
 .sois-cs-channel {
   position: relative;
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
-  gap: 13px;
-  padding: 10px 0;
+  gap: 14px;
+  padding: clamp(11px, 1.5vh, 15px) 0;
   color: var(--cs-ink);
   text-decoration: none;
   transition: color 0.25s ease;
@@ -5356,24 +5510,22 @@ video {
 .sois-cs-channel:hover {
   color: var(--cs-gold);
 }
-/* The rule is indented past the icon, so it underlines the text only.
-   A hairline can't go under 1px, so the weight comes off in tone
-   instead — it now only just separates the rows. */
+/* Indented past the icon, so the rule underlines the text only. */
 .sois-cs-channels li:not(:last-child) .sois-cs-channel::after {
   content: "";
   position: absolute;
   right: 0;
   bottom: 0;
-  left: 45px;
+  left: 48px;
   border-bottom: 1px solid rgba(198, 166, 100, 0.2);
 }
 .sois-cs-channel-icon {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   background: var(--cs-forest);
   color: var(--cs-gold-soft);
   transition: background 0.25s ease;
@@ -5381,36 +5533,70 @@ video {
 .sois-cs-channel:hover .sois-cs-channel-icon {
   background: var(--cs-forest-deep);
 }
+.sois-cs-channel-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.sois-cs-channel-label {
+  font-size: 0.54rem;
+  font-weight: 600;
+  letter-spacing: 0.17em;
+  text-indent: 0.17em;
+  text-transform: uppercase;
+  color: var(--cs-faint);
+}
 .sois-cs-channel-value {
   overflow: hidden;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* ─── Enquiry card ─── */
-/* Lighter on the page than it was: the border is now barely a tint and
-   the drop is wide and shallow, so the card reads as a slightly raised
-   plane rather than an object with weight. The extra padding is what
-   keeps it feeling unhurried at the smaller shadow. */
-.sois-cs-formcard {
-  margin: 34px 20px 44px;
-  padding: 28px 24px 30px;
-  border: 1px solid rgba(198, 166, 100, 0.13);
-  border-radius: 16px;
-  background: #fdfcfa;
-  box-shadow: 0 22px 48px -34px rgba(29, 54, 56, 0.18),
-    0 1px 3px rgba(29, 54, 56, 0.02);
+.sois-cs-channel-arrow {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--cs-faint);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+.sois-cs-channel:hover .sois-cs-channel-arrow {
+  color: var(--cs-gold);
+  transform: translateX(3px);
+}
+.sois-cs-hours {
+  margin: clamp(14px, 2vh, 20px) 0 0;
+  padding-top: clamp(12px, 1.8vh, 17px);
+  border-top: 1px solid rgba(198, 166, 100, 0.2);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--cs-faint);
 }
 
-.sois-cs-field + .sois-cs-field {
-  margin-top: 14px;
+/* ─── Enquiry form ─── */
+.sois-cs-form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+.sois-cs-form > * + * {
+  margin-top: clamp(11px, 1.5vh, 14px);
+}
+.sois-cs-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(11px, 1.5vh, 14px);
+}
+.sois-cs-field-grow {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
 }
 .sois-cs-field input,
 .sois-cs-field textarea {
   display: block;
   width: 100%;
-  padding: 16px 18px;
-  border: 1px solid rgba(29, 54, 56, 0.13);
+  padding: 15px 17px;
+  border: 1px solid rgba(29, 54, 56, 0.12);
   border-radius: 10px;
   background: #fffefc;
   font-family: inherit;
@@ -5423,7 +5609,8 @@ video {
   -webkit-tap-highlight-color: transparent;
 }
 .sois-cs-field textarea {
-  min-height: 138px;
+  flex: 1 1 auto;
+  min-height: clamp(104px, 15vh, 148px);
   resize: vertical;
 }
 .sois-cs-field input::placeholder,
@@ -5438,7 +5625,7 @@ video {
 }
 
 .sois-cs-alert {
-  margin: 12px 0 0;
+  margin-top: 12px;
   font-size: 0.8rem;
   line-height: 1.6;
   color: #9f3a38;
@@ -5450,14 +5637,14 @@ video {
   justify-content: center;
   gap: 10px;
   width: 100%;
-  min-height: 56px;
-  margin-top: 18px;
-  padding: 18px 24px;
+  min-height: 54px;
+  margin-top: clamp(15px, 2.2vh, 20px);
+  padding: 17px 24px;
   border: 0;
   border-radius: 10px;
   background: var(--cs-forest);
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-indent: 0.18em;
@@ -5484,10 +5671,12 @@ video {
 
 .sois-cs-done {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 16px;
-  padding: 34px 6px 30px;
+  padding: clamp(24px, 4vh, 40px) 6px;
   text-align: center;
 }
 .sois-cs-done-icon {
@@ -5508,371 +5697,217 @@ video {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Footer — begins straight after the band and stays compact
+   Footer — rule, policies, rule, copyright. On the same measure as
+   everything above it, so its hairlines start where the panels do.
    ───────────────────────────────────────────────────────────── */
 .sois-cs-footer {
+  position: relative;
+  z-index: 1;
   flex: 0 0 auto;
-  padding: 30px 24px 24px;
-  background: var(--cs-forest);
-  color: #f2ece0;
+  padding: 0 0 clamp(24px, 3.6vh, 38px);
   text-align: center;
 }
-.sois-cs-footer-top {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-}
-.sois-cs-footer-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 9px;
-}
-.sois-cs-footer-logo {
-  height: 30px;
-  width: auto;
-  /* The wordmark ships dark; on the forest panel it reads as cream. */
-  filter: brightness(0) invert(1);
-  opacity: 0.94;
-}
-.sois-cs-footer-tagline {
-  font-size: 0.54rem;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-indent: 0.28em;
-  color: rgba(242, 236, 224, 0.66);
-}
-.sois-cs-footer-rule {
-  width: 46px;
-  height: 1px;
-  margin-top: 2px;
-  background: rgba(198, 166, 100, 0.7);
-}
-
-.sois-cs-footer-nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0 2px;
-}
-.sois-cs-footer-nav a {
-  position: relative;
-  padding: 8px 12px;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.13em;
-  text-indent: 0.13em;
-  text-transform: uppercase;
-  color: rgba(242, 236, 224, 0.88);
-  text-decoration: none;
-  transition: color 0.25s ease;
-}
-.sois-cs-footer-nav a:hover {
-  color: var(--cs-gold-soft);
-}
-
 .sois-cs-orn-wide {
   width: 100%;
-  max-width: none;
-  gap: 20px;
-  margin: clamp(9px, 1.6vh, 13px) 0 clamp(8px, 1.4vh, 11px);
+  gap: clamp(16px, 2.4vw, 28px);
+  margin: clamp(12px, 2vh, 20px) 0;
 }
 .sois-cs-orn-wide .sois-cs-orn-line {
   flex: 1 1 auto;
   width: auto;
   background: linear-gradient(
     to right,
-    rgba(198, 166, 100, 0.15),
-    rgba(198, 166, 100, 0.55)
+    rgba(198, 166, 100, 0),
+    rgba(198, 166, 100, 0.45)
   );
 }
 .sois-cs-orn-wide .sois-cs-orn-line:last-child {
   background: linear-gradient(
     to left,
-    rgba(198, 166, 100, 0.15),
-    rgba(198, 166, 100, 0.55)
+    rgba(198, 166, 100, 0),
+    rgba(198, 166, 100, 0.45)
   );
+}
+
+.sois-cs-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.sois-cs-footer-nav a {
+  position: relative;
+  padding: 7px clamp(11px, 1.5vw, 20px);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  text-transform: uppercase;
+  color: var(--cs-muted);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+.sois-cs-footer-nav a:hover {
+  color: var(--cs-gold);
+}
+.sois-cs-footer-nav a:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 1px;
+  height: 11px;
+  background: rgba(29, 54, 56, 0.16);
+  transform: translateY(-50%);
 }
 
 .sois-cs-copy {
   margin: 0;
-  font-size: 0.7rem;
-  line-height: 1.7;
-  color: rgba(242, 236, 224, 0.7);
+  font-size: 0.71rem;
+  line-height: 1.85;
+  color: var(--cs-faint);
+}
+.sois-cs-copy span {
+  display: block;
 }
 
 /* ─────────────────────────────────────────────────────────────
-   ≥768px — photograph to the left, brand column and card beside it
+   ≥620px — the two short fields pair up on one line
    ───────────────────────────────────────────────────────────── */
-@media (min-width: 768px) {
-  .sois-cs-hero {
-    grid-template-columns: 32% minmax(0, 1fr);
-    column-gap: clamp(28px, 4vw, 52px);
-    padding-right: clamp(28px, 4vw, 52px);
-    min-height: 80vh;
+@media (min-width: 620px) {
+  .sois-cs-row {
+    grid-template-columns: 1fr 1fr;
   }
-  /* Side by side from here up, so it is the right edge that dissolves —
-     and the photograph runs on past its track so the fade happens
-     underneath the copy rather than in a gutter beside it.
+}
 
-     Fully opaque to 66%, then an eased ramp that is spent by the time it
-     reaches the copy. Eleven stops rather than four: the ramp is long
-     enough here that a coarse one shows as banding across the flat shirt,
-     which is exactly the "an image was placed here" tell being removed.
-     Nothing is blurred and nothing is dimmed — the two thirds of the frame
-     carrying the jewellery stay at full strength. */
-  .sois-cs-figure {
-    height: auto;
-    align-self: stretch;
-    grid-row: 1 / span 2;
-    justify-self: start;
-    width: calc(100% + 14vw);
+/* ─────────────────────────────────────────────────────────────
+   ≥900px — the panels sit side by side and match heights
+   ───────────────────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  .sois-cs-panels {
+    /* The form needs the wider track; the contact panel is sized to its
+       longest line (the email address) and no wider. */
+    grid-template-columns: minmax(0, 0.84fr) minmax(0, 1.16fr);
+    align-items: stretch;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ≥1024px — the photograph moves behind the page, flush to the
+   top-left corner, and the wordmark takes the shell's left edge
+   ───────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  /* Wide enough to reach past the shell's left edge, so the fade happens
+     *under* the wordmark rather than in a gutter beside it.
+
+     Two elements, two axes: the wrapper feathers the right edge and the
+     <img> inside it feathers the bottom, which the compositor multiplies
+     without needing mask-composite. Eleven stops rather than four — the
+     ramp is long enough here that a coarse one bands across the flat
+     background, which is exactly the "an image was placed here" tell
+     being removed. */
+  .sois-cs-photo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: clamp(360px, 38vw, 680px);
+    height: min(92vh, 900px);
     -webkit-mask-image: linear-gradient(
       to right,
       #000 0%,
-      #000 66%,
-      rgba(0, 0, 0, 0.955) 71%,
-      rgba(0, 0, 0, 0.86) 76%,
-      rgba(0, 0, 0, 0.7) 80%,
-      rgba(0, 0, 0, 0.5) 84%,
-      rgba(0, 0, 0, 0.31) 88%,
-      rgba(0, 0, 0, 0.16) 91.5%,
-      rgba(0, 0, 0, 0.07) 94.5%,
-      rgba(0, 0, 0, 0.02) 97.5%,
+      #000 54%,
+      rgba(0, 0, 0, 0.95) 61%,
+      rgba(0, 0, 0, 0.85) 67%,
+      rgba(0, 0, 0, 0.68) 73%,
+      rgba(0, 0, 0, 0.48) 79%,
+      rgba(0, 0, 0, 0.3) 85%,
+      rgba(0, 0, 0, 0.15) 90%,
+      rgba(0, 0, 0, 0.06) 94.5%,
+      rgba(0, 0, 0, 0.015) 97.5%,
       rgba(0, 0, 0, 0) 100%
     );
     mask-image: linear-gradient(
       to right,
       #000 0%,
-      #000 66%,
-      rgba(0, 0, 0, 0.955) 71%,
-      rgba(0, 0, 0, 0.86) 76%,
-      rgba(0, 0, 0, 0.7) 80%,
-      rgba(0, 0, 0, 0.5) 84%,
-      rgba(0, 0, 0, 0.31) 88%,
-      rgba(0, 0, 0, 0.16) 91.5%,
-      rgba(0, 0, 0, 0.07) 94.5%,
-      rgba(0, 0, 0, 0.02) 97.5%,
+      #000 54%,
+      rgba(0, 0, 0, 0.95) 61%,
+      rgba(0, 0, 0, 0.85) 67%,
+      rgba(0, 0, 0, 0.68) 73%,
+      rgba(0, 0, 0, 0.48) 79%,
+      rgba(0, 0, 0, 0.3) 85%,
+      rgba(0, 0, 0, 0.15) 90%,
+      rgba(0, 0, 0, 0.06) 94.5%,
+      rgba(0, 0, 0, 0.015) 97.5%,
       rgba(0, 0, 0, 0) 100%
     );
   }
-  /* The right edge is only one of four. The figure's own mask runs
-     horizontally, so the horizon is taken off the top and bottom edges
-     here, on the <img> the figure wraps — two elements, two axes,
-     multiplied by the compositor without needing mask-composite. The top
-     feather is the shorter of the two because that edge meets the browser
-     chrome rather than the page: enough to stop it ruling a line across
-     the hair, not so much that the frame looks like it is floating.
-     Every edge is now either cream or the viewport's own. */
-  .sois-cs-figure img {
+  .sois-cs-photo img {
     -webkit-mask-image: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0.78) 3%,
-      rgba(0, 0, 0, 0.95) 6%,
-      #000 9%,
-      #000 82%,
-      rgba(0, 0, 0, 0.8) 88%,
-      rgba(0, 0, 0, 0.5) 93%,
-      rgba(0, 0, 0, 0.22) 97%,
+      #000 0%,
+      #000 56%,
+      rgba(0, 0, 0, 0.84) 68%,
+      rgba(0, 0, 0, 0.56) 78%,
+      rgba(0, 0, 0, 0.3) 86%,
+      rgba(0, 0, 0, 0.12) 93%,
       rgba(0, 0, 0, 0) 100%
     );
     mask-image: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0.78) 3%,
-      rgba(0, 0, 0, 0.95) 6%,
-      #000 9%,
-      #000 82%,
-      rgba(0, 0, 0, 0.8) 88%,
-      rgba(0, 0, 0, 0.5) 93%,
-      rgba(0, 0, 0, 0.22) 97%,
+      #000 0%,
+      #000 56%,
+      rgba(0, 0, 0, 0.84) 68%,
+      rgba(0, 0, 0, 0.56) 78%,
+      rgba(0, 0, 0, 0.3) 86%,
+      rgba(0, 0, 0, 0.12) 93%,
       rgba(0, 0, 0, 0) 100%
     );
   }
-  /* Re-aimed for the side-by-side crop: the clear centre sits over the
-     necklace, and the cream closes in hardest along the trailing edge,
-     where the mask's ramp is longest and a grey cast would show first. */
-  .sois-cs-figure::after {
+  /* Re-aimed for the vertical crop: the clear centre sits over the hand,
+     and the cream closes in hardest along the trailing edges, where the
+     ramp is longest and a grey cast would show first. */
+  .sois-cs-photo::after {
     background: radial-gradient(
-        96% 82% at 40% 44%,
+        92% 74% at 38% 34%,
         rgba(248, 245, 240, 0) 0%,
-        rgba(248, 245, 240, 0) 30%,
-        rgba(248, 245, 240, 0.09) 48%,
-        rgba(248, 245, 240, 0.24) 66%,
-        rgba(248, 245, 240, 0.44) 84%,
-        rgba(248, 245, 240, 0.6) 100%
+        rgba(248, 245, 240, 0) 28%,
+        rgba(248, 245, 240, 0.1) 46%,
+        rgba(248, 245, 240, 0.26) 64%,
+        rgba(248, 245, 240, 0.46) 84%,
+        rgba(248, 245, 240, 0.62) 100%
       ),
       linear-gradient(
         to right,
-        rgba(248, 245, 240, 0) 48%,
-        rgba(248, 245, 240, 0.18) 72%,
-        rgba(248, 245, 240, 0.32) 88%,
-        rgba(248, 245, 240, 0.4) 100%
+        rgba(248, 245, 240, 0) 44%,
+        rgba(248, 245, 240, 0.18) 70%,
+        rgba(248, 245, 240, 0.34) 88%,
+        rgba(248, 245, 240, 0.42) 100%
       );
   }
-  .sois-cs-lede,
-  .sois-cs-formcard {
-    position: relative;
-    z-index: 1;
-  }
-  .sois-cs-lede {
-    padding: 44px 0 0;
-  }
-  .sois-cs-formcard {
-    margin: 34px 0 44px;
-    padding: 30px 28px 32px;
-  }
 
-  .sois-cs-footer {
-    padding: 32px clamp(28px, 5vw, 64px) 26px;
+  .sois-cs-head {
+    padding-top: clamp(28px, 4vh, 44px);
   }
-  /* Centred against each other rather than stretched: the policy row now
-     sits on the wordmark's optical middle instead of floating in a taller
-     box beside it. */
-  .sois-cs-footer-top {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 32px;
-  }
-  .sois-cs-footer-brand {
-    align-items: flex-start;
-  }
-  .sois-cs-footer-nav {
-    justify-content: flex-end;
-    gap: 0 6px;
-  }
-  .sois-cs-footer-nav a:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: -4px;
-    width: 1px;
-    height: 11px;
-    background: rgba(242, 236, 224, 0.26);
-    transform: translateY(-50%);
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────
-   ≥1180px — the reference composition: three columns on one band,
-   vertically centred, the whole page inside the first screen
-   ───────────────────────────────────────────────────────────── */
-@media (min-width: 1180px) {
-  .sois-cs-hero {
-    /* photograph · brand column · enquiry card · right margin.
-       The fourth track is deliberately empty: holding the margin as a
-       track (rather than as padding) keeps the other three at exact
-       percentages of the viewport. */
-    grid-template-columns: 25% 29% 34.5% 11.5%;
-    column-gap: 0;
-  }
-  /* Explicitly placed, because the photograph is deliberately laid over
-     two tracks: it starts at the viewport edge and carries on behind the
-     brand column, where the mask hands it over to the cream. */
-  /* Sized so the mask's two landmarks fall where the layout needs them:
-     the opaque two thirds end within a few pixels of where the copy column
-     begins, and the ramp is spent by the middle of that column. The
-     photograph therefore never competes with a word — what sits behind the
-     type is the tail of the fade, not the picture. */
-  .sois-cs-figure {
-    grid-area: 1 / 1 / 2 / 3;
-    width: clamp(360px, 38vw, 820px);
-    z-index: 0;
-  }
-  .sois-cs-lede {
-    grid-area: 1 / 2 / 2 / 3;
-  }
-  .sois-cs-formcard {
-    grid-area: 1 / 3 / 2 / 4;
-  }
-
-  .sois-cs-lede {
-    justify-content: center;
-    /* Sized to its text and set against the photograph, so the column
-       reads as one measure rather than as a wide centred block. */
-    justify-self: start;
-    max-width: 312px;
-    /* Stepped right so the measure starts past the photograph's last
-       strong tone rather than on top of it — the copy sits beside the
-       image, in the part of the frame the cream has already taken. */
-    margin-left: clamp(28px, 3.2vw, 56px);
-    /* The band's vertical rhythm is measured in vh, so a short laptop
-       screen compresses the column instead of pushing the footer out
-       of the first viewport. */
-    padding: clamp(8px, 2vh, 16px) 0;
-  }
-  .sois-cs-logo {
-    height: clamp(42px, 6vh, 52px);
-  }
-  .sois-cs-tagline {
-    margin-top: clamp(12px, 2.2vh, 19px);
-    font-size: 0.66rem;
-  }
-  /* Opened back up now the heading is smaller. The air the type gave up
-     goes into the gaps, which is what makes the stack read as expensive
-     rather than merely small: wordmark, subtitle, rule, heading, rule and
-     description each get their own space instead of sharing one block. */
-  .sois-cs-orn {
-    margin: clamp(15px, 2.9vh, 26px) 0;
-  }
-  .sois-cs-orn-line {
-    width: 72px;
-  }
-  .sois-cs-title {
-    font-size: clamp(1.9rem, 2.45vw, 2.5rem);
-    line-height: 1.04;
+  .sois-cs-main {
+    padding: clamp(30px, 5.4vh, 62px) 0 clamp(32px, 5.2vh, 60px);
   }
   .sois-cs-statement {
-    max-width: 30ch;
-    font-size: 1.02rem;
-    line-height: 1.76;
+    max-width: 52ch;
   }
-  /* More air above the group, less inside it — the three lines close up
-     into one block, and that block stands clear of the description. */
-  .sois-cs-channels {
-    max-width: none;
-    margin-top: clamp(20px, 3.6vh, 32px);
-  }
-  .sois-cs-channel {
-    padding: clamp(7px, 1.15vh, 10px) 0;
-  }
-
-  .sois-cs-formcard {
-    margin: clamp(16px, 3vh, 24px) 0;
-    padding: clamp(28px, 4.3vh, 39px) 38px clamp(30px, 4.5vh, 41px);
-    border-radius: 18px;
-  }
-  .sois-cs-field + .sois-cs-field {
-    margin-top: clamp(12px, 2.1vh, 18px);
-  }
-  .sois-cs-field textarea {
-    min-height: clamp(118px, 19vh, 165px);
-  }
-
-  /* Shorter and wider: the band gives up a little height and takes the
-     margins out further, so the footer reads as the page's base rather
-     than as a third panel competing with the two above it. */
-  .sois-cs-footer {
-    padding: clamp(14px, 2.6vh, 23px) clamp(48px, 9.6vw, 180px)
-      clamp(12px, 2.2vh, 19px);
-  }
-  .sois-cs-footer-logo {
-    height: 34px;
-  }
-  .sois-cs-footer-nav a {
-    padding: 8px 14px;
-    font-size: 0.63rem;
+  .sois-cs-panel {
+    padding: clamp(26px, 3.4vh, 36px) clamp(24px, 2.2vw, 34px)
+      clamp(24px, 3.2vh, 34px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sois-cs-lede {
+  .sois-cs-head,
+  .sois-cs-intro,
+  .sois-cs-panels,
+  .sois-cs-badge-dot {
     animation: none;
   }
 }
+
 
 /* ═══════════════════════════════════════════════════════════════
    POLICY SHELL  (pre-launch legal / contact chrome — no store nav)

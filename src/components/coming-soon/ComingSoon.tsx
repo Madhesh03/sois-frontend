@@ -20,6 +20,7 @@ const channels = [
   {
     key: "instagram",
     Icon: Instagram,
+    label: "Instagram",
     value: business.social.instagramHandle,
     href: business.social.instagram,
     external: true,
@@ -27,6 +28,7 @@ const channels = [
   {
     key: "email",
     Icon: Mail,
+    label: "Email",
     value: business.email,
     href: `mailto:${business.email}`,
     external: false,
@@ -34,6 +36,7 @@ const channels = [
   {
     key: "phone",
     Icon: Phone,
+    label: "Phone",
     value: business.phone,
     href: `tel:${business.phoneHref}`,
     external: false,
@@ -74,7 +77,7 @@ function Ornament({ wide = false }: { wide?: boolean }) {
       aria-hidden
     >
       <span className="sois-cs-orn-line" />
-      <Fleuron size={wide ? 17 : 15} />
+      <Fleuron size={wide ? 16 : 14} />
       <span className="sois-cs-orn-line" />
     </span>
   );
@@ -148,40 +151,44 @@ function ContactForm() {
 
   return (
     <form className="sois-cs-form" onSubmit={submit} noValidate>
-      <div className="sois-cs-field">
-        <label htmlFor="cs-name" className="sois-cs-sr">
-          Full Name
-        </label>
-        <input
-          id="cs-name"
-          name="name"
-          type="text"
-          autoComplete="name"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            touched();
-          }}
-        />
-      </div>
+      {/* Name and email share a row: two short answers reading as one line
+          keeps the card from running taller than the panel beside it. */}
+      <div className="sois-cs-row">
+        <div className="sois-cs-field">
+          <label htmlFor="cs-name" className="sois-cs-sr">
+            Full Name
+          </label>
+          <input
+            id="cs-name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              touched();
+            }}
+          />
+        </div>
 
-      <div className="sois-cs-field">
-        <label htmlFor="cs-email" className="sois-cs-sr">
-          Email Address
-        </label>
-        <input
-          id="cs-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            touched();
-          }}
-        />
+        <div className="sois-cs-field">
+          <label htmlFor="cs-email" className="sois-cs-sr">
+            Email Address
+          </label>
+          <input
+            id="cs-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              touched();
+            }}
+          />
+        </div>
       </div>
 
       <div className="sois-cs-field">
@@ -203,14 +210,14 @@ function ContactForm() {
         />
       </div>
 
-      <div className="sois-cs-field">
+      <div className="sois-cs-field sois-cs-field-grow">
         <label htmlFor="cs-message" className="sois-cs-sr">
           Your Message
         </label>
         <textarea
           id="cs-message"
           name="message"
-          rows={5}
+          rows={4}
           placeholder="Your Message..."
           value={message}
           onChange={(e) => {
@@ -248,103 +255,115 @@ function ContactForm() {
 export function ComingSoon() {
   return (
     <div className="sois-cs">
-      {/* ── One band, three columns: photograph · brand · enquiry ─── */}
-      <main className="sois-cs-hero">
-        {/* Flush to the left edge of the viewport and carried on behind the
-            brand column, where a gradient mask dissolves its right side into
-            the cream. No card, container, radius, shadow, border or
-            background — the fade is the only treatment.
+      {/* The campaign frame, flush to the top-left of the viewport and
+          dissolved on its two inner edges. It sits behind everything and
+          under the wordmark, exactly as in the reference — no card, border,
+          radius or shadow, so it reads as the page's own paper rather than
+          as an image someone placed. */}
+      <div className="sois-cs-photo" aria-hidden>
+        <Image
+          src={I.comingSoonHands}
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1024px) 42vw, 100vw"
+          style={{ objectFit: "cover", objectPosition: "42% 38%" }}
+        />
+      </div>
 
-            The photograph carries its own subject left of centre — pendant,
-            then chain, then the ringed hand below it — so it is served
-            unflipped and pulled a little further left (objectPosition 60%)
-            to seat the necklace clear of the mask's 44% falloff. What ends up
-            in the dissolve is the blown-out window light and the shirt, which
-            is what should be melting into the cream. */}
-        <figure className="sois-cs-figure">
-          <Image
-            src={I.comingSoonCampaign}
-            alt=""
-            fill
-            priority
-            sizes="(min-width: 1180px) 35vw, (min-width: 768px) 39vw, 100vw"
-            style={{
-              objectFit: "cover",
-              objectPosition: "60% 42%",
-            }}
-          />
-        </figure>
-
-        <div className="sois-cs-lede">
-          <Image
-            className="sois-cs-logo"
-            src="/sois-logo.png"
-            alt={business.brand}
-            width={1106}
-            height={402}
-            priority
-          />
-          <span className="sois-cs-tagline">
-            {business.tagline.toUpperCase()}
-          </span>
-
-          <Ornament />
-
-          <h1 className="sois-cs-title">
-            <span>Coming</span>
-            <em>Soon</em>
-          </h1>
-
-          <Ornament />
-
-          <p className="sois-cs-statement">
-            SOIS is more than a jewellery brand. It&rsquo;s a celebration of
-            stories, emotions, and the people who wear them.
-          </p>
-
-          {/* Icon · text · hairline, directly under the description —
-              not a card and not a panel. */}
-          <ul className="sois-cs-channels">
-            {channels.map(({ key, Icon, value, href, external }) => (
-              <li key={key}>
-                <a
-                  className="sois-cs-channel"
-                  href={href}
-                  {...(external
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : {})}
-                >
-                  <span className="sois-cs-channel-icon" aria-hidden>
-                    <Icon size={15} />
-                  </span>
-                  <span className="sois-cs-channel-value">{value}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+      {/* Header, hero and footer all sit inside one centred measure, so the
+          wordmark's left edge, the panels' left edge and the footer's rules
+          land on the same vertical line. That single shared grid is what the
+          reference was missing. */}
+      <header className="sois-cs-head">
+        <div className="sois-cs-shell">
+          <div className="sois-cs-brand">
+            <Image
+              className="sois-cs-logo"
+              src="/sois-logo.png"
+              alt={business.brand}
+              width={1106}
+              height={402}
+              priority
+            />
+            <span className="sois-cs-tagline">
+              {business.tagline.toUpperCase()}
+            </span>
+            <span className="sois-cs-brand-rule" aria-hidden />
+          </div>
         </div>
+      </header>
 
-        <div className="sois-cs-formcard">
-          <ContactForm />
+      <main className="sois-cs-main">
+        <div className="sois-cs-shell">
+          <section className="sois-cs-intro">
+            <span className="sois-cs-badge">
+              <span className="sois-cs-badge-dot" aria-hidden />
+              Launching Soon
+            </span>
+
+            <h1 className="sois-cs-title">
+              <span>Coming</span>
+              <em>Soon</em>
+            </h1>
+
+            <Ornament />
+
+            <p className="sois-cs-statement">
+              SOIS is more than a jewellery brand. It&rsquo;s a celebration of
+              stories, emotions, and the people who wear them.
+            </p>
+          </section>
+
+          {/* Two panels of equal height. The contact panel is given a label
+              and a support-hours line so it fills its card instead of
+              trailing off into the empty lower half it had before. */}
+          <section className="sois-cs-panels">
+            <aside className="sois-cs-panel sois-cs-contact">
+              <p className="sois-cs-panel-label">Reach Us Directly</p>
+
+              <ul className="sois-cs-channels">
+                {channels.map(({ key, Icon, label, value, href, external }) => (
+                  <li key={key}>
+                    <a
+                      className="sois-cs-channel"
+                      href={href}
+                      {...(external
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                    >
+                      <span className="sois-cs-channel-icon" aria-hidden>
+                        <Icon size={16} />
+                      </span>
+                      <span className="sois-cs-channel-text">
+                        <span className="sois-cs-channel-label">{label}</span>
+                        <span className="sois-cs-channel-value">{value}</span>
+                      </span>
+                      <ArrowRight
+                        className="sois-cs-channel-arrow"
+                        size={14}
+                        aria-hidden
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="sois-cs-hours">{business.supportHours}</p>
+            </aside>
+
+            <div className="sois-cs-panel sois-cs-formcard">
+              <p className="sois-cs-panel-label">Send Us A Message</p>
+              <ContactForm />
+            </div>
+          </section>
         </div>
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────── */}
       <footer className="sois-cs-footer">
-        <div className="sois-cs-footer-top">
-          <div className="sois-cs-footer-brand">
-            <Image
-              className="sois-cs-footer-logo"
-              src="/sois-logo.png"
-              alt={business.brand}
-              width={1106}
-              height={402}
-            />
-            <span className="sois-cs-footer-tagline">
-              {business.tagline.toUpperCase()}
-            </span>
-            <span className="sois-cs-footer-rule" aria-hidden />
-          </div>
+        <div className="sois-cs-shell">
+          <Ornament wide />
 
           <nav className="sois-cs-footer-nav" aria-label="Policies">
             {policyLinks.map((l) => (
@@ -353,14 +372,15 @@ export function ComingSoon() {
               </Link>
             ))}
           </nav>
+
+          <Ornament wide />
+
+          <p className="sois-cs-copy">
+            © {new Date().getFullYear()} {business.legalName}. Hallmarked 925
+            Sterling Silver.
+            <span>All rights reserved.</span>
+          </p>
         </div>
-
-        <Ornament wide />
-
-        <p className="sois-cs-copy">
-          © {new Date().getFullYear()} {business.legalName}. Hallmarked 925
-          Sterling Silver. All rights reserved.
-        </p>
       </footer>
     </div>
   );
