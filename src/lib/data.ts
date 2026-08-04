@@ -1,6 +1,12 @@
+/**
+ * The home page hero frame — a silver pendant and chain at the collarbone,
+ * shot into window light on white linen. Held apart from `I` so the
+ * coming-soon page can serve the same photograph at its own size.
+ */
+const heroModelPhoto = "https://images.unsplash.com/photo-1611652022419-a9419f74343d";
+
 export const I = {
-  heroModel:
-    "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1000&h=1300&fit=crop&auto=format&q=85",
+  heroModel: `${heroModelPhoto}?w=1000&h=1300&fit=crop&auto=format&q=85`,
   heroSlide2:
     "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=1000&h=1300&fit=crop&auto=format&q=85",
   heroSlide3:
@@ -37,9 +43,28 @@ export const I = {
     "https://images.unsplash.com/photo-1624588057318-5f1b2eb81012?w=700&h=460&fit=crop&auto=format&q=85",
   signatureModel:
     "https://images.unsplash.com/photo-1631965004544-1762fc696476?w=1400&h=1000&fit=crop&auto=format&q=85",
-  /** Coming-soon campaign panel — clasped hands, ring and bangle. */
+  /**
+   * The coming-soon campaign frame: the same photograph the home page opens
+   * on, so the pre-launch page and the storefront it becomes share one image.
+   * The jewellery leads — pendant, chain and stacked rings — and the face is
+   * cropped at the chin, so the frame reads as campaign rather than portrait.
+   *
+   * Served larger than `heroModel` because the coming-soon figure runs the
+   * full height of the band, and re-cropped taller than the source 10:13 so
+   * that track takes it near enough whole. Everything below the hands is
+   * white linen, which is what the mask needs to dissolve into the cream.
+   */
+  comingSoonCampaign: `${heroModelPhoto}?w=1400&h=2000&fit=crop&auto=format&q=88`,
+  // To use the brand's own campaign still life instead, save it to
+  // public/hero-campaign.jpg and swap the line above for:
+  //   comingSoonCampaign: "/hero-campaign.jpg",
+  // A flat lay wants objectPosition "50% 48%" in ComingSoon.tsx.
+  /** Clasped hands, ring and bangle — kept for other campaign placements. */
   comingSoonHands:
     "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1000&h=1300&fit=crop&auto=format&q=85",
+  /** Landscape crop of the same frame, kept for wide placements. */
+  comingSoonBanner:
+    "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1800&h=1000&fit=crop&auto=format&q=85",
 } as const;
 
 export const products = [
