@@ -5245,7 +5245,7 @@ video {
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-      116% 76% at 46% 40%,
+      116% 76% at 50% 50%,
       rgba(248, 245, 240, 0) 0%,
       rgba(248, 245, 240, 0) 32%,
       rgba(248, 245, 240, 0.08) 50%,
@@ -5288,6 +5288,18 @@ video {
   display: block;
   height: clamp(52px, min(7.4vw, 8vh), 78px);
   width: auto;
+  aspect-ratio: 1106 / 402;
+  /* Tinted to the same forest green as the "Coming" headline via a mask,
+     rather than shipping a second, pre-coloured export of the wordmark. */
+  background-color: var(--cs-forest);
+  -webkit-mask-image: url("/sois-logo.png");
+  mask-image: url("/sois-logo.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 .sois-cs-tagline {
   font-size: clamp(0.58rem, 0.5rem + 0.28vw, 0.72rem);
@@ -5862,12 +5874,12 @@ video {
       rgba(0, 0, 0, 0) 100%
     );
   }
-  /* Re-aimed for the vertical crop: the clear centre sits over the hand,
-     and the cream closes in hardest along the trailing edges, where the
+  /* Re-aimed for the band's crop: the clear centre sits over the clasped
+     hands, and the cream closes in hardest along the trailing edges, where the
      ramp is longest and a grey cast would show first. */
   .sois-cs-photo::after {
     background: radial-gradient(
-        92% 74% at 38% 34%,
+        96% 78% at 46% 52%,
         rgba(248, 245, 240, 0) 0%,
         rgba(248, 245, 240, 0) 28%,
         rgba(248, 245, 240, 0.1) 46%,

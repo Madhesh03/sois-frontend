@@ -44,7 +44,7 @@ const channels = [
 ];
 
 /** Enquiries land in a SheetDB-backed Google Sheet until a CRM exists. */
-const ENQUIRY_ENDPOINT = "https://sheetdb.io/api/v1/thw3iuvc32ug7";
+const ENQUIRY_ENDPOINT = "https://sheetdb.io/api/v1/rpkool0c4qp2q";
 
 type FormState = "idle" | "invalid" | "sending" | "failed" | "done";
 
@@ -99,7 +99,7 @@ function ContactForm() {
       /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()) &&
       // 10-digit Indian mobile, optionally with a +91 / 0 prefix.
       /^(\+?91[-\s]?|0)?[6-9]\d{9}$/.test(phone.replace(/[\s-]/g, "")) &&
-      message.trim().length > 4;
+      message.trim().length > 2;
 
     if (!valid) {
       setState("invalid");
@@ -108,6 +108,7 @@ function ContactForm() {
 
     setState("sending");
     try {
+      const now = new Date();
       const res = await fetch(ENQUIRY_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,6 +121,17 @@ function ContactForm() {
               email: email.trim(),
               phone: phone.trim(),
               message: message.trim(),
+              date: now.toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }),
+              time: now.toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              }),
             },
           ],
         }),
@@ -257,17 +269,24 @@ export function ComingSoon() {
     <div className="sois-cs">
       {/* The campaign frame, flush to the top-left of the viewport and
           dissolved on its two inner edges. It sits behind everything and
-          under the wordmark, exactly as in the reference — no card, border,
-          radius or shadow, so it reads as the page's own paper rather than
-          as an image someone placed. */}
+          under the wordmark — no card, border, radius or shadow, so it reads
+          as the page's own paper rather than as an image someone placed.
+
+          Centred, because the frame is 3:4 and the desktop band is a tall
+          column of much the same proportion — cover keeps about 85% of the
+          width, so the photograph arrives near enough whole and the mask's
+          solid left half lands on the wrist, its bracelet and the join of the
+          hands without any panning. The phone band is wide and short, so the
+          same centring takes the middle slice: both bracelets, the infinity
+          ring and the clasped hands. */}
       <div className="sois-cs-photo" aria-hidden>
         <Image
           src={I.comingSoonHands}
           alt=""
           fill
           priority
-          sizes="(min-width: 1024px) 42vw, 100vw"
-          style={{ objectFit: "cover", objectPosition: "42% 38%" }}
+          sizes="(min-width: 1024px) 38vw, 100vw"
+          style={{ objectFit: "cover", objectPosition: "50% 50%" }}
         />
       </div>
 
@@ -278,13 +297,13 @@ export function ComingSoon() {
       <header className="sois-cs-head">
         <div className="sois-cs-shell">
           <div className="sois-cs-brand">
-            <Image
+            {/* Masked rather than rendered as an <img> so the mark can be
+                tinted to match the headline's forest green exactly, instead
+                of approximating it with a CSS filter over the source PNG. */}
+            <span
               className="sois-cs-logo"
-              src="/sois-logo.png"
-              alt={business.brand}
-              width={1106}
-              height={402}
-              priority
+              role="img"
+              aria-label={business.brand}
             />
             <span className="sois-cs-tagline">
               {business.tagline.toUpperCase()}

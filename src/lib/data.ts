@@ -51,19 +51,27 @@ export const I = {
    */
   comingSoonCampaign: `${heroModelPhoto}?w=1400&h=2000&fit=crop&auto=format&q=88`,
   /**
-   * The coming-soon campaign frame in use: clasped hands, ring and bangle,
-   * shot into warm window light. The jewellery leads and the face is out of
-   * frame entirely, so it reads as campaign rather than portrait.
+   * The coming-soon campaign frame in use — the brand's own still, not stock:
+   * two clasped hands wearing the rose-gold charm bracelets and infinity ring,
+   * shot flat against sage with gypsophila at the corners. The jewellery leads
+   * and no face is in frame, so it reads as campaign rather than portrait.
    *
-   * Served tall and large because the photograph runs the full height of the
-   * band on desktop, and everything past the hands is soft blown-out light —
-   * which is what the mask needs to dissolve into the cream.
+   * Portrait, 1086×1448. The desktop band is a tall left column of much the
+   * same proportion, so cover takes the frame near enough whole; the phone
+   * band is wide and short, so it takes the middle slice. Native size covers
+   * 2x DPR for the band's 680×900 CSS px maximum without upscaling.
    *
-   * To use the brand's own campaign still life instead, save it to
-   * public/hero-campaign.jpg and swap this for "/hero-campaign.jpg".
+   * Do NOT cache-bust this with a query string (`?v=…`). next/image rejects a
+   * query on a local public/ path in a production build — the optimiser answers
+   * 400 with "The requested resource isn't a valid image … received null" and
+   * the hero renders as a broken image. `next dev` tolerates it, so the failure
+   * only shows up after `next build`. To force caches to drop an old frame,
+   * change the file name instead.
+   *
+   * Previous stock frame, kept in case it is ever wanted back:
+   *   "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1200&h=1700&fit=crop&auto=format&q=88"
    */
-  comingSoonHands:
-    "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1200&h=1700&fit=crop&auto=format&q=88",
+  comingSoonHands: "/hero-campaign.png",
   /** Landscape crop of the same frame, kept for wide placements. */
   comingSoonBanner:
     "https://images.unsplash.com/photo-1636928332631-36ec025f65d7?w=1800&h=1000&fit=crop&auto=format&q=85",
