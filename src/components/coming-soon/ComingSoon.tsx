@@ -272,13 +272,19 @@ export function ComingSoon() {
           under the wordmark — no card, border, radius or shadow, so it reads
           as the page's own paper rather than as an image someone placed.
 
-          Centred, because the frame is 3:4 and the desktop band is a tall
-          column of much the same proportion — cover keeps about 85% of the
-          width, so the photograph arrives near enough whole and the mask's
-          solid left half lands on the wrist, its bracelet and the join of the
-          hands without any panning. The phone band is wide and short, so the
-          same centring takes the middle slice: both bracelets, the infinity
-          ring and the clasped hands. */}
+          Horizontally centred: the frame is 3:4 and the desktop band is a tall
+          column of much the same proportion, so cover keeps about 85% of the
+          width and the mask's solid left half lands on the wrist, its bracelet
+          and the join of the hands without any panning.
+
+          Vertically pushed to 78%, which only affects phones. The desktop band
+          is always narrower than 3:4, so cover fills its height exactly and
+          the Y value is inert there. The phone band is wide and short and does
+          crop vertically, and at 50% the clasped hands sat in its lower half —
+          which is precisely where the dissolve is, so the subject of the
+          photograph was the part being faded away. 78% lifts the hands into
+          the solid upper half and leaves the empty ground below them for the
+          mask to eat instead. */}
       <div className="sois-cs-photo" aria-hidden>
         <Image
           src={I.comingSoonHands}
@@ -286,7 +292,7 @@ export function ComingSoon() {
           fill
           priority
           sizes="(min-width: 1024px) 38vw, 100vw"
-          style={{ objectFit: "cover", objectPosition: "50% 50%" }}
+          style={{ objectFit: "cover", objectPosition: "50% 78%" }}
         />
       </div>
 

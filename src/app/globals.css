@@ -5905,6 +5905,15 @@ video {
   .sois-cs-statement {
     max-width: 52ch;
   }
+  /* Dropped a little further than the phone's clamp(28px, 4.4vh, 52px). The
+     photograph runs down the left of this band, and at the tighter gap the
+     contact panel's top edge landed across the clasped hands — the panel is
+     translucent, so they showed through it as a ghost rather than reading as
+     the photograph. Desktop only: on a phone the panels sit well below the
+     banner already and this gap would just be dead space. */
+  .sois-cs-panels {
+    margin-top: clamp(56px, 9vh, 112px);
+  }
   .sois-cs-panel {
     padding: clamp(26px, 3.4vh, 36px) clamp(24px, 2.2vw, 34px)
       clamp(24px, 3.2vh, 34px);
