@@ -557,6 +557,19 @@ function ReviewOrder() {
               >
                 {item.name}
               </h4>
+              {item.size && (
+                <p
+                  style={{
+                    fontSize: "0.72rem",
+                    color: T.muted,
+                    margin: "0 0 2px 0",
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Size: {item.size}
+                </p>
+              )}
               <p
                 style={{
                   fontSize: "0.8rem",
@@ -1350,6 +1363,19 @@ export function CartDrawer() {
                             {item.name}
                           </h4>
                         </Link>
+                        {item.size && (
+                          <p
+                            style={{
+                              fontSize: "0.74rem",
+                              color: T.muted,
+                              margin: "0 0 4px 0",
+                              fontWeight: 600,
+                              letterSpacing: "0.02em",
+                            }}
+                          >
+                            Size: {item.size}
+                          </p>
+                        )}
                         <p
                           style={{
                             fontSize: "0.85rem",

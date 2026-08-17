@@ -3435,6 +3435,64 @@ video {
   height: 8px;
   border-radius: 50%;
 }
+
+/* ── Size selector (sized products: rings, bangles) ── */
+.sois-pdp-sizes {
+  margin-bottom: 20px;
+}
+.sois-pdp-sizes-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sois-pdp-sizes-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #0a0a0a;
+}
+.sois-pdp-sizes-left {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #b3261e;
+}
+.sois-pdp-size-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sois-pdp-size {
+  min-width: 48px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0a0a0a;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.sois-pdp-size:hover:not(:disabled) {
+  border-color: #115e59;
+}
+.sois-pdp-size.active {
+  border-color: #115e59;
+  background: #115e59;
+  color: #ffffff;
+}
+.sois-pdp-size.oos {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  background: #f5f5f5;
+}
+.sois-pdp-size-error {
+  margin: 10px 0 0;
+  color: #b3261e;
+  font-size: 0.82rem;
+}
 .sois-pdp-actions {
   display: flex;
   gap: 12px;

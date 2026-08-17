@@ -12,13 +12,34 @@ import type { Cart as ApiCart } from "@/lib/api";
 import { useAuth } from "./AuthContext";
 
 export interface CartItem {
-  /** Product id (UUID) — how the storefront identifies a line for add/update. */
+  /**
+   * Cart-line identity. For sized products a product can appear as multiple
+   * lines (one per size), so this is a composite `${productId}::${size}` key;
+   * for unsized products it's just the product id. Use this for update/remove.
+   */
   id: string;
+  /** The underlying product id (UUID) — for product links / add calls. */
+  productId: string;
   name: string;
   price: number;
   image: string;
   quantity: number;
   size?: string;
+}
+
+/** Shape passed to `addToCart` — `id` is the product id. */
+export interface AddToCartInput {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  size?: string;
+}
+
+/** Composite cart-line key: product id, plus size for sized products. */
+function lineKeyFor(productId: string, size?: string): string {
+  const s = (size || "").trim();
+  return s ? `${productId}::${s}` : productId;
 }
 
 export interface ShippingInfo {
@@ -45,7 +66,7 @@ export interface CartContextType {
   checkoutStep: CheckoutStep;
   shippingInfo: ShippingInfo | null;
   savedAddresses: ShippingInfo[];
-  addToCart: (item: Omit<CartItem, "quantity">) => void;
+  addToCart: (item: AddToCartInput) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -67,9 +88,11 @@ const SAVED_ADDRESSES_KEY = "sois_saved_addresses";
 // UI needs (name/price/image) keyed by product id as items are added.
 const CART_META_KEY = "sois_cart_meta";
 
+// Keyed by composite line key (see lineKeyFor). Caches the display fields the
+// server cart doesn't carry so lines render richly after a refetch.
 type CartMeta = Record<
   string,
-  { name: string; price: number; image: string; size?: string }
+  { productId: string; name: string; price: number; image: string; size?: string }
 >;
 
 function loadSavedAddresses(): ShippingInfo[] {
@@ -123,8 +146,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     loadSavedAddresses
   );
 
-  // product_id → server cart-item id, needed for update/remove API calls.
-  const itemIdByProduct = useRef<Record<string, string>>({});
+  // composite line key → server cart-item id, for update/remove API calls.
+  const itemIdByLine = useRef<Record<string, string>>({});
   const meta = useRef<CartMeta>({});
 
   useEffect(() => {
@@ -135,18 +158,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const applyCart = (cart: ApiCart) => {
     const map: Record<string, string> = {};
     const next: CartItem[] = cart.items.map((ci) => {
-      map[ci.product_id] = ci.id;
-      const cached = meta.current[ci.product_id];
+      const size = ci.selected_size || undefined;
+      const key = lineKeyFor(ci.product_id, size);
+      map[key] = ci.id;
+      const cached = meta.current[key];
       return {
-        id: ci.product_id,
+        id: key,
+        productId: ci.product_id,
         name: cached?.name ?? ci.product_name,
         price: cached?.price ?? Number(ci.unit_price_at_add),
         image: cached?.image ?? mediaUrl(undefined),
         quantity: ci.quantity,
-        size: ci.selected_size || cached?.size || undefined,
+        size: size || cached?.size || undefined,
       };
     });
-    itemIdByProduct.current = map;
+    itemIdByLine.current = map;
     setItems(next);
   };
 
@@ -165,8 +191,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  const rememberMeta = (item: Omit<CartItem, "quantity">) => {
-    meta.current[item.id] = {
+  const rememberMeta = (key: string, item: AddToCartInput) => {
+    meta.current[key] = {
+      productId: item.id,
       name: item.name,
       price: item.price,
       image: item.image,
@@ -175,18 +202,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     persistCartMeta(meta.current);
   };
 
-  const addToCart = (item: Omit<CartItem, "quantity">) => {
-    rememberMeta(item);
+  const addToCart = (item: AddToCartInput) => {
+    const size = item.size?.trim() || undefined;
+    const key = lineKeyFor(item.id, size);
+    rememberMeta(key, { ...item, size });
 
     // Optimistic local update for instant feedback.
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+      const existing = prev.find((i) => i.id === key);
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === key ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [
+        ...prev,
+        {
+          id: key,
+          productId: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          quantity: 1,
+          size,
+        },
+      ];
     });
     // Always surface the cart list when an item is added.
     setCheckoutStep("cart");
@@ -196,7 +236,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       .addItem({
         product_id: item.id,
         quantity: 1,
-        selected_size: item.size,
+        selected_size: size,
       })
       .then(applyCart)
       .catch(() => {
@@ -206,7 +246,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = (id: string) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
-    const cartItemId = itemIdByProduct.current[id];
+    const cartItemId = itemIdByLine.current[id];
     if (!cartItemId) return;
     cartApi
       .removeItem(cartItemId)
@@ -224,7 +264,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) =>
       prev.map((i) => (i.id === id ? { ...i, quantity } : i))
     );
-    const cartItemId = itemIdByProduct.current[id];
+    const cartItemId = itemIdByLine.current[id];
     if (!cartItemId) {
       syncCart();
       return;

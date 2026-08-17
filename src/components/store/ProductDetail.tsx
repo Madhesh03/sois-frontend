@@ -55,6 +55,9 @@ export function ProductDetail({
 
   const wished = isInWishlist(product.id);
   const category = categories.find((c) => c.slug === product.category);
+
+  const canPurchase = product.inStock;
+  const maxQty = Infinity;
   const discount = product.originalPrice
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100
@@ -77,15 +80,19 @@ export function ProductDetail({
     image: product.images[0],
   };
 
-  const addChosenQuantity = () => {
-    const existing = items.find((i) => i.id === product.id)?.quantity ?? 0;
+  const lineKey = product.id;
+
+  const addChosenQuantity = (): boolean => {
+    const existing = items.find((i) => i.id === lineKey)?.quantity ?? 0;
     addToCart(payload);
-    updateQuantity(product.id, existing + quantity);
+    updateQuantity(lineKey, existing + quantity);
+    return true;
   };
 
   const handleBuyNow = () => {
-    addChosenQuantity();
-    setCheckoutStep("shipping");
+    if (addChosenQuantity()) {
+      setCheckoutStep("shipping");
+    }
   };
 
   const handleShare = async () => {
@@ -296,13 +303,13 @@ export function ProductDetail({
 
           <div
             className="sois-pdp-stock"
-            style={{ color: product.inStock ? T.forest : "#d4183d" }}
+            style={{ color: canPurchase ? T.forest : "#d4183d" }}
           >
             <span
               className="sois-pdp-stock-dot"
-              style={{ background: product.inStock ? T.forest : "#d4183d" }}
+              style={{ background: canPurchase ? T.forest : "#d4183d" }}
             />
-            {product.inStock ? "In stock — ships within 24h" : "Out of stock"}
+            {canPurchase ? "In stock — ships within 24h" : "Out of stock"}
           </div>
 
           {/* Quantity + actions */}
@@ -319,7 +326,8 @@ export function ProductDetail({
               <button
                 type="button"
                 aria-label="Increase quantity"
-                onClick={() => setQuantity((q) => q + 1)}
+                disabled={quantity >= maxQty}
+                onClick={() => setQuantity((q) => Math.min(q + 1, maxQty))}
               >
                 <Plus size={16} />
               </button>
@@ -328,8 +336,8 @@ export function ProductDetail({
             <button
               type="button"
               className="sois-pdp-add"
-              disabled={!product.inStock}
-              onClick={addChosenQuantity}
+              disabled={!canPurchase}
+              onClick={() => addChosenQuantity()}
             >
               <ShoppingBag size={16} /> Add to Bag
             </button>
@@ -338,7 +346,7 @@ export function ProductDetail({
           <button
             type="button"
             className="sois-pdp-buy"
-            disabled={!product.inStock}
+            disabled={!canPurchase}
             onClick={handleBuyNow}
           >
             Buy Now

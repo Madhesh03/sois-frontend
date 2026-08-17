@@ -87,15 +87,31 @@ export function ProductCard({ product }: { product: Product }) {
           )}
           {product.originalPrice && <span className="sois-pcard-save">SALE</span>}
         </div>
-        <button
-          type="button"
-          className="sois-pcard-add sois-touch-target"
-          disabled={!product.inStock}
-          style={!product.inStock ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
-          onClick={() => product.inStock && addToCart(cartPayload)}
-        >
-          <ShoppingBag size={14} /> {product.inStock ? "ADD TO BAG" : "SOLD OUT"}
-        </button>
+        {product.hasSizes ? (
+          // Sized products (e.g. rings) need a size chosen before adding, so
+          // the card links through to the detail page's size selector.
+          <Link
+            href={`/product/${product.slug}`}
+            className="sois-pcard-add sois-touch-target"
+            style={
+              !product.inStock
+                ? { opacity: 0.5, pointerEvents: "none" }
+                : undefined
+            }
+          >
+            <ShoppingBag size={14} /> {product.inStock ? "SELECT SIZE" : "SOLD OUT"}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="sois-pcard-add sois-touch-target"
+            disabled={!product.inStock}
+            style={!product.inStock ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+            onClick={() => product.inStock && addToCart(cartPayload)}
+          >
+            <ShoppingBag size={14} /> {product.inStock ? "ADD TO BAG" : "SOLD OUT"}
+          </button>
+        )}
       </div>
     </article>
   );

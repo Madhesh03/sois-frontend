@@ -152,11 +152,20 @@ export interface ProductListItem {
   stock_type: StockType;
   qty: number;
   is_in_stock: boolean;
+  available_sizes: string;
+  has_sizes: boolean;
   status: ProductStatus;
   is_featured: boolean;
   thumbnail_key: string;
   primary_image: { s3_key: string; alt_text: string } | null;
   created_at: string;
+}
+
+/** Per-size availability row (sized products only). */
+export interface SizeStock {
+  size: string;
+  qty: number;
+  is_in_stock: boolean;
 }
 
 export interface StoneDetail {
@@ -189,6 +198,8 @@ export interface ProductDetail {
   certificate_details: Record<string, unknown>;
   available_sizes: string;
   size_unit: string;
+  has_sizes: boolean;
+  size_stock: SizeStock[];
   care_instruction: string;
   is_featured: boolean;
   tags: string[];

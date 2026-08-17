@@ -104,6 +104,9 @@ export function mapListItem(p: ProductListItem): UIProduct {
       onSale,
       createdAt: p.created_at,
     }),
+    // The list API only tells us *whether* a product is sized, not per-size
+    // stock — that arrives on the detail response (see mapDetail).
+    hasSizes: p.has_sizes,
   };
 }
 
@@ -181,6 +184,15 @@ export function mapDetail(p: ProductDetail): UIProduct {
       onSale,
       createdAt: p.created_at,
     }),
+    hasSizes: p.has_sizes,
+    sizeUnit: p.size_unit || undefined,
+    sizes: p.has_sizes
+      ? (p.size_stock ?? []).map((s) => ({
+          size: s.size,
+          qty: s.qty,
+          inStock: s.is_in_stock,
+        }))
+      : undefined,
   };
 }
 

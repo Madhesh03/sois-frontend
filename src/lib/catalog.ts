@@ -54,6 +54,21 @@ export interface Product {
   reviewCount: number;
   /** Marketing badge shown on the card — derived, never hand-set. */
   badge: "New" | "Best Seller" | "Sale" | null;
+  /** True when the product is offered in discrete sizes (rings, bangles). */
+  hasSizes?: boolean;
+  /** Size unit label, e.g. "US". */
+  sizeUnit?: string;
+  /**
+   * Per-size availability. Only populated on product detail (the list API
+   * doesn't carry per-size counts); on cards only `hasSizes` is known.
+   */
+  sizes?: ProductSize[];
+}
+
+export interface ProductSize {
+  size: string;
+  qty: number;
+  inStock: boolean;
 }
 
 export const categories: Category[] = [
@@ -135,6 +150,15 @@ function slugify(name: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+// Offline demo sizing for rings — one size intentionally out of stock so the
+// size selector's disabled/out-of-stock state is visible without the backend.
+const MOCK_RING_SIZES: ProductSize[] = [
+  { size: "6", qty: 4, inStock: true },
+  { size: "7", qty: 6, inStock: true },
+  { size: "8", qty: 0, inStock: false },
+  { size: "9", qty: 3, inStock: true },
+];
+
 function build(seeds: Seed[]): Product[] {
   return seeds.map((s, i) => {
     const onSale = s.originalPrice != null && s.originalPrice > s.price;
@@ -146,6 +170,9 @@ function build(seeds: Seed[]): Product[] {
           ? "Sale"
           : null;
     const catCode = s.category.slice(0, 3).toUpperCase();
+    // Rings are offered in sizes in the mock catalogue (mirrors the backend's
+    // per-size stock for sized products).
+    const sized = s.category === "rings";
     return {
       id: `sois-${slugify(s.name)}`,
       slug: slugify(s.name),
@@ -172,6 +199,9 @@ function build(seeds: Seed[]): Product[] {
       rating: s.rating,
       reviewCount: s.reviewCount,
       badge,
+      hasSizes: sized,
+      sizeUnit: sized ? "US" : undefined,
+      sizes: sized ? MOCK_RING_SIZES : undefined,
     };
   });
 }
