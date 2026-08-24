@@ -1,66 +1,93 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, Heart, ShoppingBag } from "lucide-react";
 import { Eyebrow } from "@/components/shared/Eyebrow";
-import { products } from "@/lib/data";
+import {
+  Product,
+  formatPrice,
+  getTopProducts,
+  getAllProducts,
+} from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 
-// "₹1,299" -> 1299
-const parsePrice = (price: string) =>
-  parseInt(price.replace(/[^0-9]/g, ""), 10) || 0;
+const FILTERS = ["All", "New Arrivals", "Best Sellers", "On Sale"] as const;
+type Filter = (typeof FILTERS)[number];
 
-// Homepage product names map 1:1 to catalogue slugs (see src/lib/catalog.ts)
-const toSlug = (name: string) =>
-  name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const MAX_CARDS = 8;
 
 export function Products() {
-  const [heartAnim, setHeartAnim] = useState<number | null>(null);
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [heartAnim, setHeartAnim] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<Filter>("All");
   const [switching, setSwitching] = useState(false);
+  const [top, setTop] = useState<Product[]>([]);
+  const [all, setAll] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const filtersRef = useRef<HTMLDivElement>(null);
-  const filters = ["All", "New Arrivals", "Best Sellers", "On Sale"];
 
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
 
-  const productId = (i: number) => `sois-prod-${i}`;
+  // Live data: server-ranked bestsellers for the default view, plus the full
+  // catalogue so the New/Best/Sale tabs filter against real products.
+  useEffect(() => {
+    let active = true;
+    Promise.all([getTopProducts(MAX_CARDS), getAllProducts()])
+      .then(([topItems, allItems]) => {
+        if (!active) return;
+        setTop(topItems);
+        setAll(allItems);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  const handleAddToCart = (e: React.MouseEvent, p: (typeof products)[number], i: number) => {
+  const payload = (p: Product) => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.images[0],
+  });
+
+  const handleAddToCart = (e: React.MouseEvent, p: Product) => {
     e.stopPropagation();
-    addToCart({
-      id: productId(i),
-      name: p.name,
-      price: parsePrice(p.price),
-      image: p.img,
-    });
+    if (p.inStock) addToCart(payload(p));
   };
 
-  const toggleWishlist = (e: React.MouseEvent, p: (typeof products)[number], i: number) => {
+  const toggleWishlist = (e: React.MouseEvent, p: Product) => {
     e.stopPropagation();
-    addToWishlist({
-      id: productId(i),
-      name: p.name,
-      price: parsePrice(p.price),
-      image: p.img,
-    });
-    setHeartAnim(i);
+    addToWishlist(payload(p));
+    setHeartAnim(p.id);
     setTimeout(() => setHeartAnim(null), 420);
   };
-
-  const filteredProducts = products
-    .map((p, i) => ({ ...p, i }))
-    .filter((p) => p.categories.includes(activeFilter as any));
 
   const scrollFilters = (dir: number) => {
     const el = filtersRef.current;
     if (!el) return;
     el.scrollBy({ left: dir * 140, behavior: "smooth" });
   };
+
+  const visible = useMemo(() => {
+    switch (activeFilter) {
+      case "New Arrivals":
+        return all.filter((p) => p.isNew).slice(0, MAX_CARDS);
+      case "Best Sellers":
+        return all.filter((p) => p.isBestSeller).slice(0, MAX_CARDS);
+      case "On Sale":
+        return all.filter((p) => p.originalPrice != null).slice(0, MAX_CARDS);
+      case "All":
+      default:
+        return (top.length ? top : all).slice(0, MAX_CARDS);
+    }
+  }, [activeFilter, top, all]);
 
   // Replay a brief staggered fade-in on the cards each time the filter changes.
   useEffect(() => {
@@ -84,7 +111,7 @@ export function Products() {
             <ChevronLeft size={18} />
           </button>
           <div className="sois-product-filters" ref={filtersRef}>
-            {filters.map((f) => (
+            {FILTERS.map((f) => (
               <button
                 key={f}
                 type="button"
@@ -102,61 +129,98 @@ export function Products() {
         </div>
       </div>
 
-      <div className={`sois-products-grid${switching ? " sois-switch" : ""}`}>
-        {filteredProducts.map((p) => (
-          <article key={p.i} className="sois-pcard">
-            <div className="sois-pcard-img">
-              <Image
-                className="pc-img"
-                src={p.img}
-                alt={p.name}
-                fill
-                sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 24vw"
-                style={{ objectFit: "cover" }}
-              />
-              <Link
-                href={`/product/${toSlug(p.name)}`}
-                aria-label={p.name}
-                style={{ position: "absolute", inset: 0, zIndex: 1 }}
-              />
-              <span
-                className="sois-pcard-tag"
-                style={{ background: p.isNew ? T.forest : "rgba(255,255,255,0.94)", color: p.isNew ? T.sage : T.forest, zIndex: 2 }}
-              >
-                {p.tag.toUpperCase()}
-              </span>
-              <button
-                type="button"
-                aria-label="Add to wishlist"
-                onClick={(e) => toggleWishlist(e, p, p.i)}
-                className="sois-touch-target sois-pcard-heart"
-                style={{ background: isInWishlist(productId(p.i)) ? T.sage : "rgba(255,255,255,0.94)", zIndex: 2 }}
-              >
-                <Heart size={15} className={heartAnim === p.i ? "heart-pop" : ""} fill={isInWishlist(productId(p.i)) ? T.forest : "none"} color={T.forest} />
-              </button>
-            </div>
-
-            <div className="sois-pcard-body">
-              <div className="sois-pcard-sub">{p.subtitle}</div>
-              <Link href={`/product/${toSlug(p.name)}`} className="sois-pcard-name" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
-                {p.name}
-              </Link>
-              <div className="sois-pcard-price-row">
-                <span className="sois-pcard-price">{p.price}</span>
-                {p.original && <span className="sois-pcard-orig">{p.original}</span>}
-                {p.original && <span className="sois-pcard-save">SALE</span>}
+      {loading ? (
+        <div className="sois-products-grid" aria-hidden="true">
+          {Array.from({ length: MAX_CARDS }).map((_, i) => (
+            <article key={i} className="sois-pcard">
+              <div className="sois-pcard-img" style={{ aspectRatio: "1 / 1", background: T.surface }} />
+              <div className="sois-pcard-body">
+                <div style={{ height: 12, width: "60%", marginBottom: 8, background: T.surface, borderRadius: 4 }} />
+                <div style={{ height: 16, width: "85%", background: T.surface, borderRadius: 4 }} />
               </div>
-              <button
-                type="button"
-                className="sois-pcard-add sois-touch-target"
-                onClick={(e) => handleAddToCart(e, p, p.i)}
-              >
-                <ShoppingBag size={14} /> ADD TO BAG
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
+            </article>
+          ))}
+        </div>
+      ) : visible.length === 0 ? (
+        <p className="sois-products-empty" style={{ padding: "2rem 0", color: T.muted }}>
+          No products to show here yet.
+        </p>
+      ) : (
+        <div className={`sois-products-grid${switching ? " sois-switch" : ""}`}>
+          {visible.map((p) => {
+            const wished = isInWishlist(p.id);
+            return (
+              <article key={p.id} className="sois-pcard">
+                <div className="sois-pcard-img">
+                  <Image
+                    className="pc-img"
+                    src={p.images[0]}
+                    alt={p.name}
+                    fill
+                    sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 24vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                  <Link
+                    href={`/product/${p.slug}`}
+                    aria-label={p.name}
+                    style={{ position: "absolute", inset: 0, zIndex: 1 }}
+                  />
+                  {p.badge && (
+                    <span
+                      className="sois-pcard-tag"
+                      style={{ background: p.isNew ? T.forest : "rgba(255,255,255,0.94)", color: p.isNew ? T.sage : T.forest, zIndex: 2 }}
+                    >
+                      {p.badge.toUpperCase()}
+                    </span>
+                  )}
+                  {!p.inStock && <span className="sois-scard-oos" style={{ zIndex: 2 }}>SOLD OUT</span>}
+                  <button
+                    type="button"
+                    aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+                    onClick={(e) => toggleWishlist(e, p)}
+                    className="sois-touch-target sois-pcard-heart"
+                    style={{ background: wished ? T.sage : "rgba(255,255,255,0.94)", zIndex: 2 }}
+                  >
+                    <Heart size={15} className={heartAnim === p.id ? "heart-pop" : ""} fill={wished ? T.forest : "none"} color={T.forest} />
+                  </button>
+                </div>
+
+                <div className="sois-pcard-body">
+                  <div className="sois-pcard-sub">{p.subtitle}</div>
+                  <Link href={`/product/${p.slug}`} className="sois-pcard-name" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                    {p.name}
+                  </Link>
+                  <div className="sois-pcard-price-row">
+                    <span className="sois-pcard-price">{formatPrice(p.price)}</span>
+                    {p.originalPrice && <span className="sois-pcard-orig">{formatPrice(p.originalPrice)}</span>}
+                    {p.originalPrice && <span className="sois-pcard-save">SALE</span>}
+                  </div>
+                  {p.hasSizes ? (
+                    // Sized products need a size chosen first — link to the PDP.
+                    <Link
+                      href={`/product/${p.slug}`}
+                      className="sois-pcard-add sois-touch-target"
+                      style={!p.inStock ? { opacity: 0.5, pointerEvents: "none" } : undefined}
+                    >
+                      <ShoppingBag size={14} /> {p.inStock ? "SELECT SIZE" : "SOLD OUT"}
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      className="sois-pcard-add sois-touch-target"
+                      disabled={!p.inStock}
+                      style={!p.inStock ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+                      onClick={(e) => handleAddToCart(e, p)}
+                    >
+                      <ShoppingBag size={14} /> {p.inStock ? "ADD TO BAG" : "SOLD OUT"}
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
       <div className="sois-social-proof">
         <div className="sois-social-proof-copy">

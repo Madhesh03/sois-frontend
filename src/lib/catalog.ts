@@ -632,14 +632,56 @@ export async function getProductsByCategory(
   return all.filter((p) => p.category === slug);
 }
 
+/** Top-selling products for the homepage "Top Products" section. */
+export async function getTopProducts(limit = 8): Promise<Product[]> {
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const items = await catalogApi.listTopProducts(limit);
+    if (items.length) return items.map(mapListItem);
+  } catch {
+    // fall through to the offline fallback
+  }
+  // Offline fallback: best sellers first, then featured, capped at `limit`.
+  return sortProducts(MOCK_PRODUCTS, "featured").slice(0, limit);
+}
+
 export async function getRelatedProducts(
   product: Product,
   limit = 4
 ): Promise<Product[]> {
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const items = await catalogApi.listRelatedProducts(product.slug, limit);
+    if (items.length) return items.map(mapListItem);
+  } catch {
+    // fall through to the offline fallback
+  }
   const all = await getAllProducts();
   return all
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, limit);
+}
+
+/**
+ * Hydrate recently-viewed product IDs (stored client-side) into full cards,
+ * preserving the given order and excluding `excludeId` (usually the product
+ * currently being viewed). See `src/lib/recentlyViewed.ts`.
+ */
+export async function getProductsByIds(
+  ids: string[],
+  excludeId?: string
+): Promise<Product[]> {
+  const wanted = ids.filter((id) => id && id !== excludeId);
+  if (!wanted.length) return [];
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const items = await catalogApi.listProductsByIds(wanted);
+    return items.map(mapListItem);
+  } catch {
+    return MOCK_PRODUCTS.filter(
+      (p) => wanted.includes(p.id) && p.id !== excludeId
+    );
+  }
 }
 
 export async function searchProducts(query: string): Promise<Product[]> {

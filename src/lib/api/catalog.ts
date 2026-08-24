@@ -58,6 +58,50 @@ export function getProduct(
   );
 }
 
+/**
+ * Best-selling products for the storefront's "Top Products" section. Ranked
+ * server-side by units sold, topped up with featured/new items.
+ */
+export function listTopProducts(
+  limit = 8,
+  signal?: AbortSignal
+): Promise<ProductListItem[]> {
+  return apiGet<ProductListItem[]>("/catalog/products/top/", {
+    auth: false,
+    signal,
+    params: { limit },
+  });
+}
+
+/** "You may also like" recommendations for a product. */
+export function listRelatedProducts(
+  slug: string,
+  limit = 4,
+  signal?: AbortSignal
+): Promise<ProductListItem[]> {
+  return apiGet<ProductListItem[]>(
+    `/catalog/products/${encodeURIComponent(slug)}/related/`,
+    { auth: false, signal, params: { limit } }
+  );
+}
+
+/**
+ * Hydrate a list of product IDs (order preserved, unknown/inactive dropped).
+ * Powers the client-stored "recently viewed" strip. Returns `[]` for no ids.
+ */
+export function listProductsByIds(
+  ids: string[],
+  signal?: AbortSignal
+): Promise<ProductListItem[]> {
+  const cleaned = ids.filter(Boolean);
+  if (!cleaned.length) return Promise.resolve([]);
+  return apiGet<ProductListItem[]>("/catalog/products/batch/", {
+    auth: false,
+    signal,
+    params: { ids: cleaned.join(",") },
+  });
+}
+
 export function listCategories(signal?: AbortSignal): Promise<ApiCategory[]> {
   return apiGet<ApiCategory[]>("/catalog/categories/", { auth: false, signal });
 }

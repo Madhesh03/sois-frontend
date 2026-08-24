@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -22,6 +22,8 @@ import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/store/ProductCard";
+import { RecentlyViewed } from "@/components/store/RecentlyViewed";
+import { recordRecentlyViewed } from "@/lib/recentlyViewed";
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -52,6 +54,12 @@ export function ProductDetail({
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState<string | null>("details");
   const [shareMsg, setShareMsg] = useState("");
+
+  // Log this product to the client-side recently-viewed history (used by the
+  // strip below and on other product pages). Re-runs when the product changes.
+  useEffect(() => {
+    recordRecentlyViewed(product.id);
+  }, [product.id]);
 
   const wished = isInWishlist(product.id);
   const category = categories.find((c) => c.slug === product.category);
@@ -420,6 +428,9 @@ export function ProductDetail({
           </div>
         </section>
       )}
+
+      {/* Recently viewed — hydrated client-side from localStorage history */}
+      <RecentlyViewed excludeId={product.id} />
     </div>
   );
 }
