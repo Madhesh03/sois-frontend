@@ -135,8 +135,8 @@ export default function AddressesPage() {
         </div>
       ) : (
         <div className="sois-address-grid">
-          {savedAddresses.map((a, i) => (
-            <div key={i} className="sois-address-card">
+          {savedAddresses.map((a) => (
+            <div key={a.id} className="sois-address-card">
               <MapPin size={18} className="sois-address-card-pin" />
               <div className="sois-address-card-body">
                 <strong>{a.fullName}</strong>

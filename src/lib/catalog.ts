@@ -58,6 +58,8 @@ export interface Product {
   hasSizes?: boolean;
   /** Size unit label, e.g. "US". */
   sizeUnit?: string;
+  /** What the variant axis is called, e.g. "Size" or "Length". */
+  variantLabel?: string;
   /**
    * Per-size availability. Only populated on product detail (the list API
    * doesn't carry per-size counts); on cards only `hasSizes` is known.
@@ -776,4 +778,24 @@ export function sortProducts(products: Product[], sort: SortKey): Product[] {
 
 export function formatPrice(value: number): string {
   return `₹${value.toLocaleString("en-IN")}`;
+}
+
+/**
+ * Card badge colours, keyed by the badge text itself (not just "is it new")
+ * so New / Best Seller / Sale read as visually distinct tags rather than the
+ * same pill with different words in it.
+ */
+export function badgeColors(
+  badge: Product["badge"]
+): { background: string; color: string } {
+  switch (badge) {
+    case "New":
+      return { background: "#115E59", color: "#D1FAE5" };
+    case "Best Seller":
+      return { background: "#B7791F", color: "#FFFFFF" };
+    case "Sale":
+      return { background: "#D4183D", color: "#FFFFFF" };
+    default:
+      return { background: "rgba(255,255,255,0.94)", color: "#115E59" };
+  }
 }

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Heart } from "lucide-react";
-import { Product, formatPrice } from "@/lib/catalog";
+import { Product, formatPrice, badgeColors } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -41,12 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
         {product.badge && (
           <span
             className="sois-pcard-tag"
-            style={{
-              background: product.isNew
-                ? T.forest
-                : "rgba(255,255,255,0.94)",
-              color: product.isNew ? T.sage : T.forest,
-            }}
+            style={badgeColors(product.badge)}
           >
             {product.badge.toUpperCase()}
           </span>
@@ -88,8 +83,8 @@ export function ProductCard({ product }: { product: Product }) {
           {product.originalPrice && <span className="sois-pcard-save">SALE</span>}
         </div>
         {product.hasSizes ? (
-          // Sized products (e.g. rings) need a size chosen before adding, so
-          // the card links through to the detail page's size selector.
+          // Sized products (e.g. rings) need a size chosen before adding, so this
+          // reads as Add to Bag but links through to the detail page's size selector.
           <Link
             href={`/product/${product.slug}`}
             className="sois-pcard-add sois-touch-target"
@@ -99,7 +94,7 @@ export function ProductCard({ product }: { product: Product }) {
                 : undefined
             }
           >
-            <ShoppingBag size={14} /> {product.inStock ? "SELECT SIZE" : "SOLD OUT"}
+            <ShoppingBag size={14} /> {product.inStock ? "ADD TO BAG" : "SOLD OUT"}
           </Link>
         ) : (
           <button

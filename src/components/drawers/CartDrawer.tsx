@@ -6,6 +6,8 @@ import { useCart, ShippingInfo } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useOrders } from "@/context/OrdersContext";
 import { T } from "@/lib/tokens";
+import { checkoutApi, ApiError } from "@/lib/api";
+import { openRazorpayCheckout } from "@/lib/razorpay";
 import {
   X,
   Trash2,
@@ -38,27 +40,12 @@ function ShippingForm() {
     shippingInfo,
     savedAddresses,
   } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
 
-  // Signed-in customers get a sample address on file so the "choose a saved
-  // address" experience is available before their first stored order. Guests
-  // (or once real addresses exist) simply use the saved list.
-  const displayAddresses: ShippingInfo[] =
-    savedAddresses.length > 0
-      ? savedAddresses
-      : isAuthenticated
-        ? [
-            {
-              fullName: user?.name ?? "Home",
-              email: user?.email ?? "",
-              phone: "98765 43210",
-              address: "12 Radhakrishnan Salai, Mylapore",
-              city: "Chennai",
-              state: "Tamil Nadu",
-              pincode: "600004",
-            },
-          ]
-        : [];
+  // Only real, previously-saved addresses are offered here — no fabricated
+  // "sample" entry. A signed-in customer with none yet simply lands straight
+  // on the entry form.
+  const displayAddresses: ShippingInfo[] = savedAddresses;
 
   const [mode, setMode] = useState<"select" | "form">(
     displayAddresses.length > 0 ? "select" : "form"
@@ -66,8 +53,8 @@ function ShippingForm() {
   const [selectedIdx, setSelectedIdx] = useState(0);
 
   const [formData, setFormData] = useState({
-    fullName: shippingInfo?.fullName ?? "",
-    email: shippingInfo?.email ?? "",
+    fullName: shippingInfo?.fullName ?? user?.name ?? "",
+    email: shippingInfo?.email ?? user?.email ?? "",
     phone: shippingInfo?.phone ?? "",
     address: shippingInfo?.address ?? "",
     city: shippingInfo?.city ?? "",
@@ -129,7 +116,7 @@ function ShippingForm() {
           const selected = i === selectedIdx;
           return (
             <button
-              key={i}
+              key={addr.id ?? i}
               type="button"
               onClick={() => setSelectedIdx(i)}
               style={{
@@ -715,306 +702,129 @@ function ReviewOrder() {
   );
 }
 
-type PayMethod = "upi" | "card" | "netbanking" | "wallet";
-
-const PAY_METHODS: { key: PayMethod; label: string; icon: typeof CreditCard }[] =
-  [
-    { key: "upi", label: "UPI", icon: Smartphone },
-    { key: "card", label: "Card", icon: CreditCard },
-    { key: "netbanking", label: "Net Banking", icon: Building2 },
-    { key: "wallet", label: "Wallet", icon: Wallet },
-  ];
-
-const METHOD_LABEL: Record<PayMethod, string> = {
-  upi: "UPI",
-  card: "Card",
-  netbanking: "Net Banking",
-  wallet: "Wallet",
-};
-
-const BANKS = [
-  "HDFC Bank",
-  "ICICI Bank",
-  "State Bank of India",
-  "Axis Bank",
-  "Kotak Mahindra Bank",
-  "Punjab National Bank",
+// Purely informational — Razorpay's own widget presents the real method
+// picker and collects the payment instrument. We never see card/UPI/bank
+// details ourselves.
+const PAY_METHODS: { label: string; icon: typeof CreditCard }[] = [
+  { label: "UPI", icon: Smartphone },
+  { label: "Card", icon: CreditCard },
+  { label: "Net Banking", icon: Building2 },
+  { label: "Wallet", icon: Wallet },
 ];
 
-const WALLETS = ["Paytm", "PhonePe", "Amazon Pay", "Mobikwik", "Freecharge"];
-
 function PaymentForm() {
-  const { items, shippingInfo, setCheckoutStep, getTotal, clearCart } =
-    useCart();
-  const { createOrder } = useOrders();
+  const { shippingInfo, setCheckoutStep, getTotal, clearCart } = useCart();
+  const { isAuthenticated, openModal } = useAuth();
+  const { loadOrder } = useOrders();
 
-  const [method, setMethod] = useState<PayMethod>("upi");
-  const [card, setCard] = useState({
-    cardNumber: "",
-    cardName: "",
-    expiryDate: "",
-    cvv: "",
-  });
-  const [upiId, setUpiId] = useState("");
-  const [bank, setBank] = useState("");
-  const [wallet, setWallet] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const labelStyle: React.CSSProperties = {
-    display: "block",
-    fontSize: "0.8rem",
-    fontWeight: 500,
-    color: T.ink,
-    marginBottom: 6,
-  };
-  const inputStyle = (err?: boolean): React.CSSProperties => ({
-    width: "100%",
-    padding: "10px 12px",
-    fontSize: "0.9rem",
-    border: `1px solid ${err ? "#d4183d" : T.border}`,
-    borderRadius: "8px",
-    background: T.surface,
-    boxSizing: "border-box",
-  });
+  const handlePay = async () => {
+    setError(null);
 
-  const clearErr = (name: string) => {
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let v = value;
-    if (name === "cardNumber") {
-      v = value.replace(/\s/g, "").slice(0, 16).replace(/(\d{4})/g, "$1 ").trim();
-    } else if (name === "expiryDate") {
-      v = value.replace(/\D/g, "").slice(0, 4);
-      if (v.length >= 2) v = v.slice(0, 2) + "/" + v.slice(2);
-    } else if (name === "cvv") {
-      v = value.replace(/\D/g, "").slice(0, 3);
+    if (!shippingInfo) {
+      setCheckoutStep("shipping");
+      return;
     }
-    setCard((prev) => ({ ...prev, [name]: v }));
-    clearErr(name);
-  };
-
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (method === "upi") {
-      if (!/^[\w.-]{2,}@[a-zA-Z]{2,}$/.test(upiId))
-        e.upiId = "Enter a valid UPI ID (e.g. name@bank)";
-    } else if (method === "card") {
-      if (card.cardNumber.replace(/\s/g, "").length !== 16)
-        e.cardNumber = "Invalid card";
-      if (!card.cardName) e.cardName = "Required";
-      if (card.expiryDate.length !== 5) e.expiryDate = "Invalid";
-      if (card.cvv.length !== 3) e.cvv = "Invalid";
-    } else if (method === "netbanking") {
-      if (!bank) e.bank = "Select a bank";
-    } else if (method === "wallet") {
-      if (!wallet) e.wallet = "Select a wallet";
+    if (!isAuthenticated) {
+      setError("Sign in to complete your order — your cart is kept.");
+      openModal("login");
+      return;
     }
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
     setIsLoading(true);
-
-    // ────────────────────────────────────────────────────────────────
-    // RAZORPAY INTEGRATION POINT
-    // When the backend exposes the payment APIs, replace this simulated
-    // delay with the real Razorpay flow:
-    //   1. POST cart total to your backend → it creates a Razorpay Order
-    //      and returns { orderId, amount, currency, razorpayKey }.
-    //   2. Open Razorpay Checkout with that orderId and the selected
-    //      `method` (upi / card / netbanking / wallet).
-    //   3. On the handler success callback, verify the signature on your
-    //      backend, then continue below (createOrder + confirmation).
-    //      On failure/dismiss, setIsLoading(false) and show an error.
-    // The chosen method is already captured in `METHOD_LABEL[method]`.
-    // ────────────────────────────────────────────────────────────────
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const subtotal = getTotal();
-    createOrder({
-      items: items.map((i) => ({
-        id: i.id,
-        name: i.name,
-        price: i.price,
-        image: i.image,
-        quantity: i.quantity,
-        size: i.size,
-      })),
-      shipping:
-        shippingInfo ?? {
-          fullName: card.cardName,
-          email: "",
-          phone: "",
-          address: "",
-          city: "",
-          state: "",
-          pincode: "",
+    try {
+      // Creates the real order (deducts stock, clears the server cart) and a
+      // matching Razorpay order in one atomic call. If this throws, nothing
+      // was created.
+      const result = await checkoutApi.initiateCheckout({
+        shipping_address: {
+          full_name: shippingInfo.fullName,
+          phone: shippingInfo.phone,
+          line1: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.state,
+          pincode: shippingInfo.pincode,
         },
-      paymentMethod: METHOD_LABEL[method],
-      subtotal,
-      shippingFee: 0,
-      total: subtotal,
-    });
+      });
 
-    setIsLoading(false);
-    clearCart();
-    setCheckoutStep("confirmation");
+      await openRazorpayCheckout({
+        key: result.razorpay_key_id,
+        amount: result.amount_paise,
+        currency: result.currency,
+        order_id: result.razorpay_order_id,
+        name: result.branding?.company_name || "SOIS Store",
+        description: `Order ${result.order_number}`,
+        prefill: result.prefill,
+        theme: { color: result.branding?.primary_color || T.forest },
+        handler: () => {
+          // Razorpay confirmed the payment client-side; the order's true
+          // paid/captured status is set server-side once the webhook lands.
+          // Fetch the real order now so confirmation shows real data, and
+          // reconcile status on the next Orders page visit / refresh().
+          loadOrder(result.order_id).finally(() => {
+            clearCart();
+            setIsLoading(false);
+            setCheckoutStep("confirmation");
+          });
+        },
+        modal: {
+          ondismiss: () => {
+            setIsLoading(false);
+            setError(
+              "Payment wasn't completed. Your order is on hold for a few minutes — try again to finish paying."
+            );
+          },
+        },
+      });
+    } catch (err) {
+      setIsLoading(false);
+      setError(
+        err instanceof ApiError
+          ? err.firstMessage
+          : "We couldn't start checkout. Please try again."
+      );
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ padding: "20px 0" }}>
-      {/* Method selector */}
+    <div style={{ padding: "20px 0" }}>
+      {/* Method badges */}
       <div className="sois-pay-methods">
         {PAY_METHODS.map((m) => {
           const Icon = m.icon;
-          const active = method === m.key;
           return (
-            <button
-              key={m.key}
-              type="button"
-              aria-pressed={active}
-              className={`sois-pay-tile${active ? " active" : ""}`}
-              onClick={() => {
-                setMethod(m.key);
-                setErrors({});
-              }}
-            >
+            <div key={m.label} className="sois-pay-tile" aria-hidden="true">
               <Icon size={18} />
               {m.label}
-            </button>
+            </div>
           );
         })}
       </div>
 
-      {/* UPI */}
-      {method === "upi" && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>UPI ID</label>
-          <input
-            value={upiId}
-            onChange={(e) => {
-              setUpiId(e.target.value);
-              clearErr("upiId");
-            }}
-            placeholder="yourname@upi"
-            style={inputStyle(!!errors.upiId)}
-          />
-          {errors.upiId && (
-            <p className="sois-pay-err">{errors.upiId}</p>
-          )}
-        </div>
-      )}
+      <p
+        style={{
+          fontSize: "0.82rem",
+          color: T.muted,
+          lineHeight: 1.6,
+          margin: "14px 0 20px",
+        }}
+      >
+        You&apos;ll choose UPI, card, net banking or a wallet inside
+        Razorpay&apos;s secure checkout — we never see or store your payment
+        details.
+      </p>
 
-      {/* Card */}
-      {method === "card" && (
-        <>
-          <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Card Number</label>
-            <input
-              name="cardNumber"
-              value={card.cardNumber}
-              onChange={handleCardChange}
-              placeholder="1234 5678 9012 3456"
-              style={inputStyle(!!errors.cardNumber)}
-            />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Cardholder Name</label>
-            <input
-              name="cardName"
-              value={card.cardName}
-              onChange={handleCardChange}
-              placeholder="John Doe"
-              style={inputStyle(!!errors.cardName)}
-            />
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
-              marginBottom: 16,
-            }}
-          >
-            <div>
-              <label style={labelStyle}>Expiry</label>
-              <input
-                name="expiryDate"
-                value={card.expiryDate}
-                onChange={handleCardChange}
-                placeholder="MM/YY"
-                style={inputStyle(!!errors.expiryDate)}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>CVV</label>
-              <input
-                name="cvv"
-                value={card.cvv}
-                onChange={handleCardChange}
-                placeholder="123"
-                style={inputStyle(!!errors.cvv)}
-              />
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Net Banking */}
-      {method === "netbanking" && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Select Bank</label>
-          <select
-            value={bank}
-            onChange={(e) => {
-              setBank(e.target.value);
-              clearErr("bank");
-            }}
-            style={inputStyle(!!errors.bank)}
-          >
-            <option value="">Choose your bank</option>
-            {BANKS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-          {errors.bank && <p className="sois-pay-err">{errors.bank}</p>}
-        </div>
-      )}
-
-      {/* Wallet */}
-      {method === "wallet" && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Select Wallet</label>
-          <select
-            value={wallet}
-            onChange={(e) => {
-              setWallet(e.target.value);
-              clearErr("wallet");
-            }}
-            style={inputStyle(!!errors.wallet)}
-          >
-            <option value="">Choose your wallet</option>
-            {WALLETS.map((w) => (
-              <option key={w} value={w}>
-                {w}
-              </option>
-            ))}
-          </select>
-          {errors.wallet && <p className="sois-pay-err">{errors.wallet}</p>}
-        </div>
+      {error && (
+        <p className="sois-pay-err" role="alert" style={{ marginBottom: 14 }}>
+          {error}
+        </p>
       )}
 
       <button
-        type="submit"
+        type="button"
+        onClick={handlePay}
         disabled={isLoading}
         style={{
           width: "100%",
@@ -1049,7 +859,7 @@ function PaymentForm() {
       >
         <ShieldCheck size={13} /> Secured by Razorpay · Encrypted payment
       </p>
-    </form>
+    </div>
   );
 }
 
@@ -1109,7 +919,7 @@ function ConfirmationView() {
             margin: 0,
           }}
         >
-          {lastOrder ? lastOrder.id : "SOIS-XXXXXX"}
+          {lastOrder ? lastOrder.orderNumber ?? lastOrder.id : "—"}
         </p>
       </div>
 

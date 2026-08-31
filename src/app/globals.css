@@ -3493,6 +3493,69 @@ video {
   color: #b3261e;
   font-size: 0.82rem;
 }
+
+/* Size-chart trigger, sitting opposite the "Size (US)" label */
+.sois-pdp-sizechart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #115e59;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-underline-offset: 3px;
+}
+.sois-pdp-sizechart-link:hover {
+  text-decoration: underline;
+}
+
+/* Size chart (inside the shared Modal) */
+.sois-sizechart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.sois-sizechart-table th,
+.sois-sizechart-table td {
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 1px solid #ececec;
+}
+.sois-sizechart-table th {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b6b6b;
+}
+.sois-sizechart-table tr.offered td {
+  background: #f0f7f6;
+  font-weight: 600;
+  color: #115e59;
+}
+.sois-sizechart-note {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  color: #6b6b6b;
+}
+.sois-sizechart-subtitle {
+  margin: 22px 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+.sois-sizechart-tips {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 7px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #4a4a4a;
+}
 .sois-pdp-actions {
   display: flex;
   gap: 12px;
@@ -4071,6 +4134,44 @@ video {
   color: #075985;
   font-weight: 600;
 }
+.sois-order-tracking-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #115e59;
+  font-weight: 600;
+  text-decoration: none;
+}
+.sois-order-tracking-link:hover {
+  text-decoration: underline;
+}
+.sois-order-tracking-events {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+.sois-order-tracking-events li {
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e8e8e8;
+}
+.sois-order-tracking-event-status {
+  font-weight: 700;
+  color: #0a0a0a;
+  text-transform: capitalize;
+}
+.sois-order-tracking-event-loc {
+  color: #9ca3af;
+}
+.sois-order-tracking-event-time {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
 
 /* Timeline */
 .sois-timeline {
@@ -4604,8 +4705,6 @@ video {
   font-size: 0.82rem;
   font-weight: 600;
   color: #4b5563;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .sois-pay-tile svg {
   color: #9ca3af;

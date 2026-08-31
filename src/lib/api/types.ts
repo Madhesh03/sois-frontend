@@ -198,6 +198,7 @@ export interface ProductDetail {
   certificate_details: Record<string, unknown>;
   available_sizes: string;
   size_unit: string;
+  variant_label: string;
   has_sizes: boolean;
   size_stock: SizeStock[];
   care_instruction: string;

@@ -1,8 +1,14 @@
 import { HomePage } from "@/components/home/HomePage";
 import { getOrganizationSchema, getProductListSchema, getWebSiteSchema } from "@/lib/seo";
+import { getTopProducts } from "@/lib/catalog";
 
-export default function Page() {
-  const structuredData = [getOrganizationSchema(), getWebSiteSchema(), getProductListSchema()];
+export default async function Page() {
+  const topProducts = await getTopProducts(8);
+  const structuredData = [
+    getOrganizationSchema(),
+    getWebSiteSchema(),
+    getProductListSchema(topProducts),
+  ];
 
   return (
     <>

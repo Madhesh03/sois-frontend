@@ -7,8 +7,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { cartApi, mediaUrl } from "@/lib/api";
-import type { Cart as ApiCart } from "@/lib/api";
+import { cartApi, addressApi, mediaUrl } from "@/lib/api";
+import type { Cart as ApiCart, Address as ApiAddress } from "@/lib/api";
 import { useAuth } from "./AuthContext";
 
 export interface CartItem {
@@ -43,7 +43,12 @@ function lineKeyFor(productId: string, size?: string): string {
 }
 
 export interface ShippingInfo {
+  /** Backend Address id — present only for a saved address; absent for a
+   *  one-off address typed at checkout and never saved. */
+  id?: string;
   fullName: string;
+  /** Display-only. The backend address book has no email field — orders
+   *  carry the signed-in customer's account email instead. */
   email: string;
   phone: string;
   address: string;
@@ -76,6 +81,9 @@ export interface CartContextType {
   closeCheckout: () => void;
   setCheckoutStep: (step: CheckoutStep) => void;
   setShippingInfo: (info: ShippingInfo) => void;
+  /** No-op for guests — the address book is a signed-in customer feature
+   *  (the backend endpoint requires auth); the typed address still applies
+   *  to this checkout via `shippingInfo`, it just isn't persisted. */
   saveAddress: (info: ShippingInfo) => void;
   updateSavedAddress: (oldInfo: ShippingInfo, nextInfo: ShippingInfo) => void;
   removeSavedAddress: (info: ShippingInfo) => void;
@@ -83,7 +91,6 @@ export interface CartContextType {
   getItemCount: () => number;
 }
 
-const SAVED_ADDRESSES_KEY = "sois_saved_addresses";
 // Server cart items carry no image/display metadata, so we cache the bits the
 // UI needs (name/price/image) keyed by product id as items are added.
 const CART_META_KEY = "sois_cart_meta";
@@ -95,23 +102,29 @@ type CartMeta = Record<
   { productId: string; name: string; price: number; image: string; size?: string }
 >;
 
-function loadSavedAddresses(): ShippingInfo[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(SAVED_ADDRESSES_KEY);
-    return raw ? (JSON.parse(raw) as ShippingInfo[]) : [];
-  } catch {
-    return [];
-  }
+/** Backend Address -> UI ShippingInfo. `email` has no backend counterpart. */
+function mapAddress(a: ApiAddress): ShippingInfo {
+  return {
+    id: a.id,
+    fullName: a.full_name,
+    email: "",
+    phone: a.phone,
+    address: [a.line1, a.line2].filter(Boolean).join(", "),
+    city: a.city,
+    state: a.state,
+    pincode: a.pincode,
+  };
 }
 
-function persistSavedAddresses(addresses: ShippingInfo[]) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(SAVED_ADDRESSES_KEY, JSON.stringify(addresses));
-  } catch {
-    /* ignore quota / serialization errors */
-  }
+function toAddressInput(info: ShippingInfo) {
+  return {
+    full_name: info.fullName,
+    phone: info.phone,
+    line1: info.address,
+    city: info.city,
+    state: info.state,
+    pincode: info.pincode,
+  };
 }
 
 function loadCartMeta(): CartMeta {
@@ -142,9 +155,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("cart");
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo | null>(null);
-  const [savedAddresses, setSavedAddresses] = useState<ShippingInfo[]>(
-    loadSavedAddresses
-  );
+  const [savedAddresses, setSavedAddresses] = useState<ShippingInfo[]>([]);
 
   // composite line key → server cart-item id, for update/remove API calls.
   const itemIdByLine = useRef<Record<string, string>>({});
@@ -188,6 +199,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // merged into the customer cart on login by AuthContext).
   useEffect(() => {
     syncCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  /** Reload the address book from the backend. No-op (empty) for guests —
+   *  there is no local fallback; the endpoint requires a signed-in customer. */
+  const syncAddresses = async () => {
+    if (!isAuthenticated) {
+      setSavedAddresses([]);
+      return;
+    }
+    try {
+      setSavedAddresses((await addressApi.listAddresses()).map(mapAddress));
+    } catch {
+      /* offline / backend down — keep whatever's currently shown */
+    }
+  };
+
+  useEffect(() => {
+    syncAddresses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
@@ -298,34 +328,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
   const closeCart = () => setCartOpen(false);
 
+  /**
+   * Persist a newly-typed address to the real address book. Guests are
+   * silently skipped (no backend record to create) — the typed address still
+   * flows through `shippingInfo` for this checkout via `proceed()` in
+   * ShippingForm, it just isn't saved for next time.
+   */
   const saveAddress = (info: ShippingInfo) => {
-    setSavedAddresses((prev) => {
-      // Dedupe on the full address so re-using a saved address doesn't create
-      // duplicates; most-recently-used moves to the front.
-      const key = JSON.stringify(info);
-      const next = [info, ...prev.filter((a) => JSON.stringify(a) !== key)];
-      persistSavedAddresses(next);
-      return next;
-    });
+    if (!isAuthenticated) return;
+    // Optimistic placeholder so it appears instantly; replaced by the real
+    // record (with its backend id) once the create call resolves.
+    setSavedAddresses((prev) => [info, ...prev]);
+    addressApi
+      .createAddress(toAddressInput(info))
+      .then(syncAddresses)
+      .catch(syncAddresses);
   };
 
   const updateSavedAddress = (oldInfo: ShippingInfo, nextInfo: ShippingInfo) => {
-    setSavedAddresses((prev) => {
-      const key = JSON.stringify(oldInfo);
-      // Replace in place so the address keeps its position in the list.
-      const next = prev.map((a) => (JSON.stringify(a) === key ? nextInfo : a));
-      persistSavedAddresses(next);
-      return next;
-    });
+    if (!oldInfo.id) return;
+    setSavedAddresses((prev) =>
+      prev.map((a) => (a.id === oldInfo.id ? { ...nextInfo, id: oldInfo.id } : a))
+    );
+    addressApi
+      .updateAddress(oldInfo.id, toAddressInput(nextInfo))
+      .then(syncAddresses)
+      .catch(syncAddresses);
   };
 
   const removeSavedAddress = (info: ShippingInfo) => {
-    setSavedAddresses((prev) => {
-      const key = JSON.stringify(info);
-      const next = prev.filter((a) => JSON.stringify(a) !== key);
-      persistSavedAddresses(next);
-      return next;
-    });
+    if (!info.id) return;
+    setSavedAddresses((prev) => prev.filter((a) => a.id !== info.id));
+    addressApi.deleteAddress(info.id).catch(syncAddresses);
   };
   const openCheckout = () => {
     setCheckoutOpen(true);

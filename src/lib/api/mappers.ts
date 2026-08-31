@@ -33,11 +33,19 @@ export function toCategorySlug(
   slug: string | null | undefined,
   name?: string | null
 ): CategorySlug {
-  const candidate = (slug || name || "").toLowerCase();
-  const hit = KNOWN_SLUGS.find(
-    (s) => candidate === s || candidate.includes(s) || `${s}s` === candidate
+  const candidate = (slug || name || "").toLowerCase().trim();
+  if (!candidate) return "gifts";
+
+  // An exact (or simple singular/plural) match must be tried against EVERY
+  // known slug before any substring test: one slug contains another —
+  // "earrings" contains "rings" — so a substring pass ordered by KNOWN_SLUGS
+  // would file the backend's "Earrings" category under rings.
+  const exact = KNOWN_SLUGS.find(
+    (s) => candidate === s || `${s}s` === candidate || `${candidate}s` === s
   );
-  return hit ?? "gifts";
+  if (exact) return exact;
+
+  return KNOWN_SLUGS.find((s) => candidate.includes(s)) ?? "gifts";
 }
 
 const METAL_LABELS: Record<string, string> = {
@@ -59,14 +67,20 @@ function derivedBadge(opts: {
   onSale: boolean;
   createdAt: string;
 }): UIProduct["badge"] {
-  // "New" if created within the last 30 days.
+  // Deliberate merchandising signals (staff marked it a bestseller, it's
+  // discounted) take priority over the generic recency heuristic below —
+  // otherwise a freshly-seeded catalogue, where every product is "new" for
+  // its first 30 days, would show "New" on every card and "Best Seller" /
+  // "Sale" would never surface at all.
+  if (opts.isFeatured) return "Best Seller";
+  if (opts.onSale) return "Sale";
+
+  // "New" only as a fallback, for products with neither signal.
   const created = new Date(opts.createdAt).getTime();
   const isNew =
     Number.isFinite(created) &&
     Date.now() - created < 30 * 24 * 60 * 60 * 1000;
   if (isNew) return "New";
-  if (opts.isFeatured) return "Best Seller";
-  if (opts.onSale) return "Sale";
   return null;
 }
 
@@ -186,6 +200,7 @@ export function mapDetail(p: ProductDetail): UIProduct {
     }),
     hasSizes: p.has_sizes,
     sizeUnit: p.size_unit || undefined,
+    variantLabel: p.variant_label || undefined,
     sizes: p.has_sizes
       ? (p.size_stock ?? []).map((s) => ({
           size: s.size,

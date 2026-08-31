@@ -10,6 +10,7 @@ import {
   formatPrice,
   getTopProducts,
   getAllProducts,
+  badgeColors,
 } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
@@ -168,7 +169,7 @@ export function Products() {
                   {p.badge && (
                     <span
                       className="sois-pcard-tag"
-                      style={{ background: p.isNew ? T.forest : "rgba(255,255,255,0.94)", color: p.isNew ? T.sage : T.forest, zIndex: 2 }}
+                      style={{ ...badgeColors(p.badge), zIndex: 2 }}
                     >
                       {p.badge.toUpperCase()}
                     </span>
@@ -196,13 +197,14 @@ export function Products() {
                     {p.originalPrice && <span className="sois-pcard-save">SALE</span>}
                   </div>
                   {p.hasSizes ? (
-                    // Sized products need a size chosen first — link to the PDP.
+                    // Sized products need a size chosen first, so this links to the PDP's
+                    // size selector rather than adding straight to the bag.
                     <Link
                       href={`/product/${p.slug}`}
                       className="sois-pcard-add sois-touch-target"
                       style={!p.inStock ? { opacity: 0.5, pointerEvents: "none" } : undefined}
                     >
-                      <ShoppingBag size={14} /> {p.inStock ? "SELECT SIZE" : "SOLD OUT"}
+                      <ShoppingBag size={14} /> {p.inStock ? "ADD TO BAG" : "SOLD OUT"}
                     </Link>
                   ) : (
                     <button

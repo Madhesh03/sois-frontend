@@ -32,6 +32,9 @@ export interface OrderEvent {
 
 export interface Order {
   id: string;
+  /** Human-readable order code (e.g. "SOIS-2026-00042"). Only set for
+   *  backend-created orders — falls back to `id` for local/legacy records. */
+  orderNumber?: string;
   date: string;
   items: OrderItem[];
   shipping: ShippingInfo;
@@ -41,18 +44,6 @@ export interface Order {
   total: number;
   status: OrderStatus;
   timeline: OrderEvent[];
-  trackingNumber?: string;
-  courier?: string;
-  estimatedDelivery?: string;
-}
-
-export interface CreateOrderInput {
-  items: OrderItem[];
-  shipping: ShippingInfo;
-  paymentMethod: string;
-  subtotal: number;
-  shippingFee: number;
-  total: number;
 }
 
 interface OrdersContextType {
@@ -60,10 +51,16 @@ interface OrdersContextType {
   lastOrder: Order | null;
   /** Loading flag while fetching orders from the API. */
   loading: boolean;
-  createOrder: (input: CreateOrderInput) => Order;
   getOrder: (id: string) => Order | undefined;
   /** Reload orders from the backend (authenticated customers only). */
   refresh: () => Promise<void>;
+  /**
+   * Fetch the just-placed order by id (the real, backend-created order from
+   * checkout/initiate — not a client-fabricated record) and set it as
+   * `lastOrder` for the confirmation screen. Also folds it into `orders` so
+   * it's there immediately, without waiting for the next `refresh()`.
+   */
+  loadOrder: (orderId: string) => Promise<Order | null>;
 }
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
@@ -132,11 +129,6 @@ function buildTimeline(status: OrderStatus, orderDate: string): OrderEvent[] {
   }));
 }
 
-function genOrderId(): string {
-  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `SOIS-${rand}`;
-}
-
 /** Map a backend order to the storefront's UI order shape. */
 function mapApiOrder(o: ApiOrder): Order {
   const status = mapStatus(o.status);
@@ -152,6 +144,7 @@ function mapApiOrder(o: ApiOrder): Order {
   };
   return {
     id: o.id,
+    orderNumber: o.order_number,
     date: o.created_at,
     items: o.items.map((it) => ({
       id: it.product_id,
@@ -218,36 +211,29 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  /**
-   * Build the confirmation-screen order object right after checkout. The
-   * authoritative order lives on the backend (created via checkout/initiate +
-   * Razorpay); this local object drives the immediate confirmation UI and is
-   * reconciled with the server list on the next `refresh()`.
-   */
-  const createOrder = (input: CreateOrderInput): Order => {
-    const date = new Date().toISOString();
-    const order: Order = {
-      id: genOrderId(),
-      date,
-      items: input.items,
-      shipping: input.shipping,
-      paymentMethod: input.paymentMethod,
-      subtotal: input.subtotal,
-      shippingFee: input.shippingFee,
-      total: input.total,
-      status: "confirmed",
-      timeline: buildTimeline("confirmed", date),
-    };
-    setOrders((prev) => [order, ...prev]);
-    setLastOrder(order);
-    return order;
-  };
-
   const getOrder = (id: string) => orders.find((o) => o.id === id);
+
+  const loadOrder = async (orderId: string): Promise<Order | null> => {
+    try {
+      const order = mapApiOrder(await ordersApi.getOrder(orderId));
+      setLastOrder(order);
+      setOrders((prev) => [order, ...prev.filter((o) => o.id !== order.id)]);
+      return order;
+    } catch {
+      return null;
+    }
+  };
 
   return (
     <OrdersContext.Provider
-      value={{ orders, lastOrder, loading, createOrder, getOrder, refresh }}
+      value={{
+        orders,
+        lastOrder,
+        loading,
+        getOrder,
+        refresh,
+        loadOrder,
+      }}
     >
       {children}
     </OrdersContext.Provider>
