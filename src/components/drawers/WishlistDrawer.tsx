@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { T } from "@/lib/tokens";
+import { formatPrice } from "@/lib/catalog";
 import { X, Heart, ShoppingBag } from "lucide-react";
 
 // Resolve a product's detail-page path from its name (slugified — the product
@@ -198,7 +199,7 @@ export function WishlistDrawer() {
                         margin: "0 0 12px 0",
                       }}
                     >
-                      ₹{item.price.toLocaleString()}
+                      {formatPrice(item.price)}
                     </p>
 
                     <div

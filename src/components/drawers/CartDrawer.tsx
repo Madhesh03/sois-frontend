@@ -6,6 +6,7 @@ import { useCart, ShippingInfo } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useOrders } from "@/context/OrdersContext";
 import { T } from "@/lib/tokens";
+import { formatPrice } from "@/lib/catalog";
 import { checkoutApi, ApiError } from "@/lib/api";
 import { openRazorpayCheckout } from "@/lib/razorpay";
 import {
@@ -17,10 +18,6 @@ import {
   ChevronLeft,
   MapPin,
   Check,
-  CreditCard,
-  Smartphone,
-  Building2,
-  Wallet,
   ShieldCheck,
 } from "lucide-react";
 
@@ -487,8 +484,81 @@ function ShippingForm() {
 }
 
 function ReviewOrder() {
-  const { items, shippingInfo, setCheckoutStep, getTotal, getItemCount } =
+  const { items, shippingInfo, setCheckoutStep, getTotal, getItemCount, clearCart } =
     useCart();
+  const { isAuthenticated, openModal } = useAuth();
+  const { loadOrder } = useOrders();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePay = async () => {
+    setError(null);
+
+    if (!shippingInfo) {
+      setCheckoutStep("shipping");
+      return;
+    }
+    if (!isAuthenticated) {
+      setError("Sign in to complete your order — your cart is kept.");
+      openModal("login");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Creates the real order (deducts stock, clears the server cart) and a
+      // matching Razorpay order in one atomic call. If this throws, nothing
+      // was created.
+      const result = await checkoutApi.initiateCheckout({
+        shipping_address: {
+          full_name: shippingInfo.fullName,
+          phone: shippingInfo.phone,
+          line1: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.state,
+          pincode: shippingInfo.pincode,
+        },
+      });
+
+      await openRazorpayCheckout({
+        key: result.razorpay_key_id,
+        amount: result.amount_paise,
+        currency: result.currency,
+        order_id: result.razorpay_order_id,
+        name: result.branding?.company_name || "SOIS Store",
+        description: `Order ${result.order_number}`,
+        prefill: result.prefill,
+        theme: { color: result.branding?.primary_color || T.forest },
+        handler: () => {
+          // Razorpay confirmed the payment client-side; the order's true
+          // paid/captured status is set server-side once the webhook lands.
+          // Fetch the real order now so confirmation shows real data, and
+          // reconcile status on the next Orders page visit / refresh().
+          loadOrder(result.order_id).finally(() => {
+            clearCart();
+            setIsLoading(false);
+            setCheckoutStep("confirmation");
+          });
+        },
+        modal: {
+          ondismiss: () => {
+            setIsLoading(false);
+            setError(
+              "Payment wasn't completed. Your order is on hold for a few minutes — try again to finish paying."
+            );
+          },
+        },
+      });
+    } catch (err) {
+      setIsLoading(false);
+      setError(
+        err instanceof ApiError
+          ? err.firstMessage
+          : "We couldn't start checkout. Please try again."
+      );
+    }
+  };
 
   const labelStyle: React.CSSProperties = {
     fontSize: "0.7rem",
@@ -564,7 +634,7 @@ function ReviewOrder() {
                   margin: 0,
                 }}
               >
-                ₹{item.price.toLocaleString()} × {item.quantity}
+                {formatPrice(item.price)} × {item.quantity}
               </p>
             </div>
             <p
@@ -576,7 +646,7 @@ function ReviewOrder() {
                 whiteSpace: "nowrap",
               }}
             >
-              ₹{(item.price * item.quantity).toLocaleString()}
+              {formatPrice(item.price * item.quantity)}
             </p>
           </div>
         ))}
@@ -626,7 +696,7 @@ function ReviewOrder() {
         >
           <span style={{ fontSize: "0.85rem", color: T.muted }}>Subtotal</span>
           <span style={{ fontSize: "0.85rem", color: T.ink }}>
-            ₹{getTotal().toLocaleString()}
+            {formatPrice(getTotal())}
           </span>
         </div>
         <div
@@ -651,170 +721,10 @@ function ReviewOrder() {
             Total
           </span>
           <span style={{ fontSize: "0.95rem", fontWeight: 700, color: T.forest }}>
-            ₹{getTotal().toLocaleString()}
+            {formatPrice(getTotal())}
           </span>
         </div>
       </div>
-
-      <button
-        type="button"
-        onClick={() => setCheckoutStep("payment")}
-        style={{
-          width: "100%",
-          padding: "12px",
-          fontSize: "0.85rem",
-          fontWeight: 600,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          background: T.forest,
-          color: T.white,
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-        }}
-      >
-        Confirm &amp; Pay <ArrowRight size={16} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setCheckoutStep("shipping")}
-        style={{
-          width: "100%",
-          padding: "12px",
-          marginTop: 10,
-          fontSize: "0.8rem",
-          fontWeight: 500,
-          background: "none",
-          color: T.muted,
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-        }}
-      >
-        Edit Delivery Details
-      </button>
-    </div>
-  );
-}
-
-// Purely informational — Razorpay's own widget presents the real method
-// picker and collects the payment instrument. We never see card/UPI/bank
-// details ourselves.
-const PAY_METHODS: { label: string; icon: typeof CreditCard }[] = [
-  { label: "UPI", icon: Smartphone },
-  { label: "Card", icon: CreditCard },
-  { label: "Net Banking", icon: Building2 },
-  { label: "Wallet", icon: Wallet },
-];
-
-function PaymentForm() {
-  const { shippingInfo, setCheckoutStep, getTotal, clearCart } = useCart();
-  const { isAuthenticated, openModal } = useAuth();
-  const { loadOrder } = useOrders();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handlePay = async () => {
-    setError(null);
-
-    if (!shippingInfo) {
-      setCheckoutStep("shipping");
-      return;
-    }
-    if (!isAuthenticated) {
-      setError("Sign in to complete your order — your cart is kept.");
-      openModal("login");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Creates the real order (deducts stock, clears the server cart) and a
-      // matching Razorpay order in one atomic call. If this throws, nothing
-      // was created.
-      const result = await checkoutApi.initiateCheckout({
-        shipping_address: {
-          full_name: shippingInfo.fullName,
-          phone: shippingInfo.phone,
-          line1: shippingInfo.address,
-          city: shippingInfo.city,
-          state: shippingInfo.state,
-          pincode: shippingInfo.pincode,
-        },
-      });
-
-      await openRazorpayCheckout({
-        key: result.razorpay_key_id,
-        amount: result.amount_paise,
-        currency: result.currency,
-        order_id: result.razorpay_order_id,
-        name: result.branding?.company_name || "SOIS Store",
-        description: `Order ${result.order_number}`,
-        prefill: result.prefill,
-        theme: { color: result.branding?.primary_color || T.forest },
-        handler: () => {
-          // Razorpay confirmed the payment client-side; the order's true
-          // paid/captured status is set server-side once the webhook lands.
-          // Fetch the real order now so confirmation shows real data, and
-          // reconcile status on the next Orders page visit / refresh().
-          loadOrder(result.order_id).finally(() => {
-            clearCart();
-            setIsLoading(false);
-            setCheckoutStep("confirmation");
-          });
-        },
-        modal: {
-          ondismiss: () => {
-            setIsLoading(false);
-            setError(
-              "Payment wasn't completed. Your order is on hold for a few minutes — try again to finish paying."
-            );
-          },
-        },
-      });
-    } catch (err) {
-      setIsLoading(false);
-      setError(
-        err instanceof ApiError
-          ? err.firstMessage
-          : "We couldn't start checkout. Please try again."
-      );
-    }
-  };
-
-  return (
-    <div style={{ padding: "20px 0" }}>
-      {/* Method badges */}
-      <div className="sois-pay-methods">
-        {PAY_METHODS.map((m) => {
-          const Icon = m.icon;
-          return (
-            <div key={m.label} className="sois-pay-tile" aria-hidden="true">
-              <Icon size={18} />
-              {m.label}
-            </div>
-          );
-        })}
-      </div>
-
-      <p
-        style={{
-          fontSize: "0.82rem",
-          color: T.muted,
-          lineHeight: 1.6,
-          margin: "14px 0 20px",
-        }}
-      >
-        You&apos;ll choose UPI, card, net banking or a wallet inside
-        Razorpay&apos;s secure checkout — we never see or store your payment
-        details.
-      </p>
 
       {error && (
         <p className="sois-pay-err" role="alert" style={{ marginBottom: 14 }}>
@@ -839,9 +749,14 @@ function PaymentForm() {
           borderRadius: "8px",
           cursor: isLoading ? "not-allowed" : "pointer",
           opacity: isLoading ? 0.6 : 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
         }}
       >
-        {isLoading ? "Processing..." : `Pay ₹${getTotal().toLocaleString()}`}
+        {isLoading ? "Processing..." : "Confirm & Pay"}
+        {!isLoading && <ArrowRight size={16} />}
       </button>
 
       <p
@@ -859,6 +774,26 @@ function PaymentForm() {
       >
         <ShieldCheck size={13} /> Secured by Razorpay · Encrypted payment
       </p>
+
+      <button
+        type="button"
+        onClick={() => setCheckoutStep("shipping")}
+        disabled={isLoading}
+        style={{
+          width: "100%",
+          padding: "12px",
+          marginTop: 10,
+          fontSize: "0.8rem",
+          fontWeight: 500,
+          background: "none",
+          color: T.muted,
+          border: "none",
+          borderRadius: "8px",
+          cursor: isLoading ? "not-allowed" : "pointer",
+        }}
+      >
+        Edit Delivery Details
+      </button>
     </div>
   );
 }
@@ -994,9 +929,7 @@ export function CartDrawer() {
       ? ("cart" as const)
       : checkoutStep === "review"
         ? ("shipping" as const)
-        : checkoutStep === "payment"
-          ? ("review" as const)
-          : null;
+        : null;
 
   return (
     <>
@@ -1075,9 +1008,7 @@ export function CartDrawer() {
                   ? "Shipping Address"
                   : checkoutStep === "review"
                     ? "Review Order"
-                    : checkoutStep === "payment"
-                      ? "Payment Details"
-                      : "Order Confirmed"}
+                    : "Order Confirmed"}
             </h2>
           </div>
           <button
@@ -1193,7 +1124,7 @@ export function CartDrawer() {
                             margin: "0 0 8px 0",
                           }}
                         >
-                          ₹{item.price.toLocaleString()}
+                          {formatPrice(item.price)}
                         </p>
 
                         <div
@@ -1257,7 +1188,7 @@ export function CartDrawer() {
                             margin: "0 0 16px 0",
                           }}
                         >
-                          ₹{(item.price * item.quantity).toLocaleString()}
+                          {formatPrice(item.price * item.quantity)}
                         </p>
                         <button
                           onClick={() => removeFromCart(item.id)}
@@ -1281,7 +1212,6 @@ export function CartDrawer() {
 
           {checkoutStep === "shipping" && <ShippingForm />}
           {checkoutStep === "review" && <ReviewOrder />}
-          {checkoutStep === "payment" && <PaymentForm />}
           {checkoutStep === "confirmation" && <ConfirmationView />}
         </div>
 
@@ -1303,7 +1233,7 @@ export function CartDrawer() {
             >
               <span style={{ color: T.muted, fontSize: "0.9rem" }}>Total</span>
               <span style={{ fontWeight: 600, color: T.forest }}>
-                ₹{getTotal().toLocaleString()}
+                {formatPrice(getTotal())}
               </span>
             </div>
 

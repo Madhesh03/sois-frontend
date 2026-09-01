@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { T } from "@/lib/tokens";
 import { AuthLayout } from "./AuthLayout";
 import { FormInput } from "./FormInput";
 import { FormButton } from "./FormButton";
 
 export function LoginPage() {
+  const router = useRouter();
+  const { login, isAuthenticated, authError, clearAuthError } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -15,12 +19,17 @@ export function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (isAuthenticated) router.push("/account");
+  }, [isAuthenticated, router]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    if (authError) clearAuthError();
   };
 
   const validateForm = () => {
@@ -49,9 +58,7 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Login attempt:", formData);
+      await login(formData.email, formData.password);
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +70,22 @@ export function LoginPage() {
       description="Welcome back to your SOIS account"
     >
       <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+        {authError && (
+          <div
+            style={{
+              marginBottom: 20,
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(212,24,61,0.08)",
+              border: "1px solid rgba(212,24,61,0.25)",
+              color: "#d4183d",
+              fontSize: "0.85rem",
+            }}
+          >
+            {authError}
+          </div>
+        )}
+
         <FormInput
           label="Email"
           name="email"

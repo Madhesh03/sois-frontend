@@ -61,7 +61,6 @@ export type CheckoutStep =
   | "cart"
   | "shipping"
   | "review"
-  | "payment"
   | "confirmation";
 
 export interface CartContextType {

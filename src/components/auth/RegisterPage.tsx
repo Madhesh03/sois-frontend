@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { T } from "@/lib/tokens";
 import { AuthLayout } from "./AuthLayout";
 import { FormInput } from "./FormInput";
@@ -9,6 +11,8 @@ import { FormButton } from "./FormButton";
 import { Check } from "lucide-react";
 
 export function RegisterPage() {
+  const router = useRouter();
+  const { login: authenticate, isAuthenticated, authError, clearAuthError } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,12 +23,17 @@ export function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
+  useEffect(() => {
+    if (isAuthenticated) router.push("/account");
+  }, [isAuthenticated, router]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    if (authError) clearAuthError();
   };
 
   const validateForm = () => {
@@ -67,12 +76,7 @@ export function RegisterPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Register attempt:", {
-        name: formData.name,
-        email: formData.email,
-      });
+      await authenticate(formData.email, formData.password, formData.name);
     } finally {
       setIsLoading(false);
     }
@@ -84,6 +88,22 @@ export function RegisterPage() {
       description="Join SOIS and discover handcrafted sterling silver"
     >
       <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+        {authError && (
+          <div
+            style={{
+              marginBottom: 20,
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(212,24,61,0.08)",
+              border: "1px solid rgba(212,24,61,0.25)",
+              color: "#d4183d",
+              fontSize: "0.85rem",
+            }}
+          >
+            {authError}
+          </div>
+        )}
+
         <FormInput
           label="Full Name"
           name="name"
