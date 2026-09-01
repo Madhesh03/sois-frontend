@@ -133,7 +133,7 @@ function persistOrders(orders: Order[]) {
 const DEMO_SHIPPING: ShippingInfo = {
   fullName: "Aarav Sharma",
   email: "aarav@example.com",
-  phone: "98765 43210",
+  phone: "75400 08075",
   address: "12 Radhakrishnan Salai, Mylapore",
   city: "Chennai",
   state: "Tamil Nadu",

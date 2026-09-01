@@ -72,7 +72,7 @@ export default function ContactPage() {
             <Phone size={18} />
             <div>
               <span className="sois-contact-label">Phone</span>
-              <a href="tel:+919876543210">+91 98765 43210</a>
+              <a href="tel:+917540008075">+91 75400 08075</a>
             </div>
           </div>
           <div className="sois-contact-item">
