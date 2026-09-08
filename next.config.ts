@@ -35,6 +35,11 @@ const media = mediaPattern();
 
 const nextConfig: NextConfig = {
   images: {
+    // Product photos live at a unique, never-reused S3 key per upload, so a
+    // given optimized variant is immutable — safe to cache far past Next's
+    // 60s default, which otherwise forces a re-fetch/re-optimize almost every
+    // visit.
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: "https",
