@@ -1,0 +1,21 @@
+Section,Slide / Tile,Reference Image URL,Aspect Ratio,Deliver Size,Notes / Feel
+Hero,Slide 1 (Everyday),https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1000&h=1300&fit=crop&auto=format&q=85,3:4 portrait,2400 x 3200 px,"Anchored to top of frame, slow 8% zoom-in on load. Keep face/jewellery in upper 60%, headroom at top edge."
+Hero,Slide 2,https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=1000&h=1300&fit=crop&auto=format&q=85,3:4 portrait,2400 x 3200 px,Same crop rules as Slide 1. Rotates automatically every ~5.5s.
+Hero,Slide 3,https://images.unsplash.com/photo-1633934542430-0905ccb5f050?w=1000&h=1300&fit=crop&auto=format&q=85,3:4 portrait,2400 x 3200 px,Same crop rules as Slide 1.
+Category Tile,All Products,https://images.unsplash.com/photo-1616294208582-c2a6d73b467b?w=600&h=720&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,"Bottom 40% carries a dark gradient + white label text - keep that zone visually quiet/uncluttered."
+Category Tile,Rings,https://images.unsplash.com/photo-1590703160323-ac5d3fc14089?w=600&h=700&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,Same gradient/label rule as All Products tile.
+Category Tile,Earrings,https://images.unsplash.com/photo-1692521248622-98a1da77b673?w=600&h=700&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,Same gradient/label rule.
+Category Tile,Necklaces,https://images.unsplash.com/photo-1610661022658-5068c4d8f286?w=600&h=700&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,Same gradient/label rule.
+Category Tile,Pendant Chains,https://images.unsplash.com/photo-1588444968576-f8fe92ce56fd?w=600&h=700&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,Same gradient/label rule.
+Category Tile,Bracelets,https://images.unsplash.com/photo-1680775334280-adbda8e82fcd?w=600&h=700&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,Same gradient/label rule.
+Category Tile,Sets,https://images.unsplash.com/photo-1631965004544-1762fc696476?w=1400&h=1000&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,Same gradient/label rule.
+Category Tile,Surprise / Gift Box,https://images.unsplash.com/photo-1637325334678-de0b8af22304?w=1400&h=700&fit=crop&auto=format&q=85,5:4 landscape,2000 x 1600 px,Same gradient/label rule.
+Styled for Every Occasion,Everyday Shine,https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1000&h=1300&fit=crop&auto=format&q=85,4:5 portrait,1600 x 2000 px,"Coverflow carousel card. Crops to 3:4 on mobile (loses ~6% off each side) - keep subject away from side edges."
+Styled for Every Occasion,Festive Glam,https://images.unsplash.com/photo-1631965004544-1762fc696476?w=1400&h=1000&fit=crop&auto=format&q=85,4:5 portrait,1600 x 2000 px,Same coverflow crop rules.
+Styled for Every Occasion,Office Elegance,https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=1000&h=1300&fit=crop&auto=format&q=85,4:5 portrait,1600 x 2000 px,Same coverflow crop rules.
+Styled for Every Occasion,Date Night,https://images.unsplash.com/photo-1639660680788-bf160240864e?w=600&h=720&fit=crop&auto=format&q=85,4:5 portrait,1600 x 2000 px,Same coverflow crop rules.
+Styled for Every Occasion,Wedding Sparkle,https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&h=1000&fit=crop&auto=format&q=85,4:5 portrait,1600 x 2000 px,Same coverflow crop rules.
+Styled for Every Occasion,After Hours,https://images.unsplash.com/photo-1633934542430-0905ccb5f050?w=1000&h=1300&fit=crop&auto=format&q=85,4:5 portrait,1600 x 2000 px,Same coverflow crop rules.
+Styled for Every Occasion,Defined Impression,https://images.unsplash.com/photo-1616294208582-c2a6d73b467b?w=600&h=720&fit=crop&auto=format&q=85,4:5 portrait,1600 x 2000 px,Same coverflow crop rules.
+Every Detail Considered (Craftsmanship),Close-up detail shot,https://images.unsplash.com/photo-1620656798579-1984d9e87df7?w=1000&h=1200&fit=crop&auto=format&q=85,3:2 landscape,2400 x 1600 px,"Sits in a wide box (~830 x 560 px desktop, only 280 px tall on mobile) beside the ""Every Detail, Considered"" copy. Macro/texture feel - clasp, hallmark, stone setting."
+The SOIS Story,Story image,https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&h=1000&fit=crop&auto=format&q=85,3:2 landscape,2400 x 1600 px,"Same wide-box treatment as Craftsmanship image, paired with ""The SOIS Story"" copy about the founding sisters."

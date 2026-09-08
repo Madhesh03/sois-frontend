@@ -1,8 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { Truck, Package } from "lucide-react";
+import { Truck, Package, ExternalLink } from "lucide-react";
 import { AccountShell } from "@/components/account/AccountShell";
 import { useOrders } from "@/context/OrdersContext";
 import {
@@ -11,6 +11,8 @@ import {
   OrderTimeline,
 } from "@/components/account/orderView";
 import { formatPrice } from "@/lib/catalog";
+import { shippingApi } from "@/lib/api";
+import type { TrackingInfo } from "@/lib/api";
 
 export default function OrderDetailPage({
   params,
@@ -20,6 +22,29 @@ export default function OrderDetailPage({
   const { id } = use(params);
   const { getOrder } = useOrders();
   const order = getOrder(id);
+
+  // Real carrier tracking (courier, AWB, live events) — separate from
+  // `order.timeline`, which is a coarse status stepper derived from the
+  // order's own status. This is empty for most orders: a shipment only
+  // exists once staff books one in the Admin portal, so a 404 here is the
+  // normal, expected state for a freshly-placed order, not an error.
+  const [tracking, setTracking] = useState<TrackingInfo | null>(null);
+
+  useEffect(() => {
+    if (!order) return;
+    let active = true;
+    shippingApi
+      .trackOrder(order.id)
+      .then((t) => {
+        if (active) setTracking(t);
+      })
+      .catch(() => {
+        if (active) setTracking(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [order]);
 
   return (
     <AccountShell title="Order Details">
@@ -49,18 +74,51 @@ export default function OrderDetailPage({
           {/* Tracking */}
           <div className="sois-order-panel">
             <h3 className="sois-order-panel-title">Order Tracking</h3>
-            {order.trackingNumber && (
-              <div className="sois-order-tracking-meta">
-                <Truck size={16} />
-                <span>
-                  {order.courier} · <strong>{order.trackingNumber}</strong>
-                </span>
-                {order.estimatedDelivery && order.status !== "delivered" && (
-                  <span className="sois-order-eta">
-                    Est. delivery {formatOrderDate(order.estimatedDelivery)}
+            {tracking && (
+              <>
+                <div className="sois-order-tracking-meta">
+                  <Truck size={16} />
+                  <span>
+                    {tracking.courier} · <strong>{tracking.awb}</strong>
                   </span>
+                  {tracking.estimated_delivery && !tracking.delivered_at && (
+                    <span className="sois-order-eta">
+                      Est. delivery {formatOrderDate(tracking.estimated_delivery)}
+                    </span>
+                  )}
+                  {tracking.tracking_url && (
+                    <a
+                      href={tracking.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="sois-order-tracking-link"
+                    >
+                      Track with courier <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+                {tracking.events.length > 0 && (
+                  <ul className="sois-order-tracking-events">
+                    {tracking.events.map((ev, i) => (
+                      <li key={i}>
+                        <span className="sois-order-tracking-event-status">
+                          {ev.status}
+                        </span>
+                        {ev.description && <span> — {ev.description}</span>}
+                        {ev.location && (
+                          <span className="sois-order-tracking-event-loc">
+                            {" "}
+                            · {ev.location}
+                          </span>
+                        )}
+                        <span className="sois-order-tracking-event-time">
+                          {formatOrderDate(ev.timestamp)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </div>
+              </>
             )}
             <OrderTimeline order={order} />
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -16,12 +16,17 @@ import {
   ShieldCheck,
   RefreshCw,
   Rotate3d,
+  Ruler,
 } from "lucide-react";
-import { Product, formatPrice, getCategoryBySlug } from "@/lib/catalog";
+import { Product, formatPrice, categories, badgeColors } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/store/ProductCard";
+import { RecentlyViewed } from "@/components/store/RecentlyViewed";
+import { Modal } from "@/components/modals/Modal";
+import { RING_SIZE_CHART, RING_SIZE_TIPS } from "@/lib/sizeChart";
+import { recordRecentlyViewed } from "@/lib/recentlyViewed";
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -45,16 +50,37 @@ export function ProductDetail({
   product: Product;
   related: Product[];
 }) {
-  const { items, addToCart, updateQuantity, setCheckoutStep } = useCart();
+  const { items, addToCart, updateQuantity } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
 
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState<string | null>("details");
   const [shareMsg, setShareMsg] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
+  const [sizeError, setSizeError] = useState(false);
+  const [chartOpen, setChartOpen] = useState(false);
+
+  // Log this product to the client-side recently-viewed history (used by the
+  // strip below and on other product pages). Re-runs when the product changes.
+  useEffect(() => {
+    recordRecentlyViewed(product.id);
+  }, [product.id]);
 
   const wished = isInWishlist(product.id);
-  const category = getCategoryBySlug(product.category);
+  const category = categories.find((c) => c.slug === product.category);
+
+  // Sized products (rings, bangles) must have a size chosen before they can be
+  // added — each size is its own stocked variant.
+  const sizes = product.sizes ?? [];
+  const needsSize = Boolean(product.hasSizes) && sizes.length > 0;
+  const sizeUnit = product.sizeUnit ? ` (${product.sizeUnit})` : "";
+  const chosen = sizes.find((s) => s.size === selectedSize);
+
+  const canPurchase = needsSize
+    ? sizes.some((s) => s.inStock)
+    : product.inStock;
+  const maxQty = Infinity;
   const discount = product.originalPrice
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100
@@ -75,17 +101,22 @@ export function ProductDetail({
     name: product.name,
     price: product.price,
     image: product.images[0],
+    ...(needsSize && selectedSize ? { size: selectedSize } : {}),
   };
 
-  const addChosenQuantity = () => {
-    const existing = items.find((i) => i.id === product.id)?.quantity ?? 0;
+  // Mirrors CartContext's lineKeyFor: a sized product is one cart line per size.
+  const lineKey =
+    needsSize && selectedSize ? `${product.id}::${selectedSize}` : product.id;
+
+  const addChosenQuantity = (): boolean => {
+    if (needsSize && !selectedSize) {
+      setSizeError(true);
+      return false;
+    }
+    const existing = items.find((i) => i.id === lineKey)?.quantity ?? 0;
     addToCart(payload);
-    updateQuantity(product.id, existing + quantity);
-  };
-
-  const handleBuyNow = () => {
-    addChosenQuantity();
-    setCheckoutStep("shipping");
+    updateQuantity(lineKey, existing + quantity);
+    return true;
   };
 
   const handleShare = async () => {
@@ -114,16 +145,14 @@ export function ProductDetail({
       title: "Specifications",
       body: (
         <dl className="sois-spec-list">
-          {product.specifications.map((s) => (
-            <div key={s.label} className="sois-spec-row">
-              <dt>{s.label}</dt>
-              <dd>{s.value}</dd>
-            </div>
-          ))}
-          <div className="sois-spec-row">
-            <dt>SKU</dt>
-            <dd>{product.sku}</dd>
-          </div>
+          {product.specifications
+            .filter((s) => s.label.trim().toLowerCase() !== "sku")
+            .map((s) => (
+              <div key={s.label} className="sois-spec-row">
+                <dt>{s.label}</dt>
+                <dd>{s.value}</dd>
+              </div>
+            ))}
         </dl>
       ),
     },
@@ -204,13 +233,7 @@ export function ProductDetail({
             )}
 
             {product.badge && activeMedia.type === "image" && (
-              <span
-                className="sois-pcard-tag"
-                style={{
-                  background: product.isNew ? T.forest : "rgba(255,255,255,0.94)",
-                  color: product.isNew ? T.sage : T.forest,
-                }}
-              >
+              <span className="sois-pcard-tag" style={badgeColors(product.badge)}>
                 {product.badge.toUpperCase()}
               </span>
             )}
@@ -292,18 +315,70 @@ export function ProductDetail({
             )}
           </div>
 
-          <div className="sois-pdp-sku">SKU: {product.sku}</div>
-
           <div
             className="sois-pdp-stock"
-            style={{ color: product.inStock ? T.forest : "#d4183d" }}
+            style={{ color: canPurchase ? T.forest : "#d4183d" }}
           >
             <span
               className="sois-pdp-stock-dot"
-              style={{ background: product.inStock ? T.forest : "#d4183d" }}
+              style={{ background: canPurchase ? T.forest : "#d4183d" }}
             />
-            {product.inStock ? "In stock — ships within 24h" : "Out of stock"}
+            {canPurchase ? "In stock — ships within 24h" : "Out of stock"}
           </div>
+
+          {/* Size selector — only for sized products (rings, bangles) */}
+          {needsSize && (
+            <div className="sois-pdp-sizes">
+              <div className="sois-pdp-sizes-head">
+                <span className="sois-pdp-sizes-label">
+                  {product.variantLabel || "Size"}
+                  {sizeUnit}
+                </span>
+                <button
+                  type="button"
+                  className="sois-pdp-sizechart-link"
+                  onClick={() => setChartOpen(true)}
+                >
+                  <Ruler size={14} /> Size chart
+                </button>
+              </div>
+
+              <div className="sois-pdp-size-grid" role="group" aria-label="Choose a size">
+                {sizes.map((s) => {
+                  const active = s.size === selectedSize;
+                  return (
+                    <button
+                      key={s.size}
+                      type="button"
+                      className={`sois-pdp-size${active ? " active" : ""}${
+                        s.inStock ? "" : " oos"
+                      }`}
+                      disabled={!s.inStock}
+                      aria-pressed={active}
+                      title={s.inStock ? undefined : `Size ${s.size} is sold out`}
+                      onClick={() => {
+                        setSelectedSize(s.size);
+                        setSizeError(false);
+                      }}
+                    >
+                      {s.size}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {chosen && chosen.qty > 0 && chosen.qty <= 5 && (
+                <p className="sois-pdp-sizes-left">
+                  Only {chosen.qty} left in size {chosen.size}
+                </p>
+              )}
+              {sizeError && (
+                <p className="sois-pdp-size-error" role="alert">
+                  Please choose a size before adding to your bag.
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Quantity + actions */}
           <div className="sois-pdp-actions">
@@ -319,7 +394,8 @@ export function ProductDetail({
               <button
                 type="button"
                 aria-label="Increase quantity"
-                onClick={() => setQuantity((q) => q + 1)}
+                disabled={quantity >= maxQty}
+                onClick={() => setQuantity((q) => Math.min(q + 1, maxQty))}
               >
                 <Plus size={16} />
               </button>
@@ -328,21 +404,12 @@ export function ProductDetail({
             <button
               type="button"
               className="sois-pdp-add"
-              disabled={!product.inStock}
-              onClick={addChosenQuantity}
+              disabled={!canPurchase}
+              onClick={() => addChosenQuantity()}
             >
               <ShoppingBag size={16} /> Add to Bag
             </button>
           </div>
-
-          <button
-            type="button"
-            className="sois-pdp-buy"
-            disabled={!product.inStock}
-            onClick={handleBuyNow}
-          >
-            Buy Now
-          </button>
 
           <div className="sois-pdp-secondary">
             <button
@@ -411,6 +478,60 @@ export function ProductDetail({
             ))}
           </div>
         </section>
+      )}
+
+      {/* Recently viewed — hydrated client-side from localStorage history */}
+      <RecentlyViewed excludeId={product.id} />
+
+      {/* Size chart */}
+      {needsSize && (
+        <Modal
+          isOpen={chartOpen}
+          onClose={() => setChartOpen(false)}
+          title="Ring size guide"
+          size="md"
+        >
+          <div className="sois-sizechart">
+            <table className="sois-sizechart-table">
+              <thead>
+                <tr>
+                  <th scope="col">Size (US)</th>
+                  <th scope="col">Inside diameter</th>
+                  <th scope="col">Inside circumference</th>
+                </tr>
+              </thead>
+              <tbody>
+                {RING_SIZE_CHART.map((row) => {
+                  const offered = sizes.some((s) => s.size === row.us);
+                  return (
+                    <tr
+                      key={row.us}
+                      className={offered ? "offered" : undefined}
+                    >
+                      <td>
+                        {row.us}
+                        {offered ? " ·" : ""}
+                      </td>
+                      <td>{row.diameterMm.toFixed(1)} mm</td>
+                      <td>{row.circumferenceMm.toFixed(1)} mm</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            <p className="sois-sizechart-note">
+              Highlighted rows are the sizes this piece is made in.
+            </p>
+
+            <h3 className="sois-sizechart-subtitle">How to measure</h3>
+            <ul className="sois-sizechart-tips">
+              {RING_SIZE_TIPS.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+        </Modal>
       )}
     </div>
   );

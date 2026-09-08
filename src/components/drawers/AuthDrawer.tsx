@@ -5,6 +5,27 @@ import { useAuth } from "@/context/AuthContext";
 import { T } from "@/lib/tokens";
 import { X, Eye, EyeOff, Check, Mail, ArrowLeft } from "lucide-react";
 
+/** Inline banner for auth (login/register) API errors. */
+function AuthErrorBanner({ message }: { message: string }) {
+  return (
+    <div
+      role="alert"
+      style={{
+        background: "#fdecea",
+        color: "#b3261e",
+        border: "1px solid #f5c6c0",
+        borderRadius: 8,
+        padding: "10px 12px",
+        marginBottom: 16,
+        fontSize: "0.82rem",
+        lineHeight: 1.4,
+      }}
+    >
+      {message}
+    </div>
+  );
+}
+
 function FormInput({
   label,
   name,
@@ -114,7 +135,7 @@ function LoginForm({
   onSwitchToRegister: () => void;
   onForgot: () => void;
 }) {
-  const { login } = useAuth();
+  const { login, authError } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -146,6 +167,7 @@ function LoginForm({
 
   return (
     <form onSubmit={handleSubmit}>
+      {authError && <AuthErrorBanner message={authError} />}
       <FormInput
         label="Email"
         name="email"
@@ -232,7 +254,7 @@ function LoginForm({
 }
 
 function RegisterForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
-  const { login } = useAuth();
+  const { login, authError } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -273,6 +295,7 @@ function RegisterForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
 
   return (
     <form onSubmit={handleSubmit}>
+      {authError && <AuthErrorBanner message={authError} />}
       <FormInput
         label="Full Name"
         name="name"

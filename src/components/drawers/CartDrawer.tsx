@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useCart, ShippingInfo } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useOrders } from "@/context/OrdersContext";
-import { getAllProducts } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
+import { formatPrice } from "@/lib/catalog";
+import { checkoutApi, ApiError } from "@/lib/api";
+import { openRazorpayCheckout } from "@/lib/razorpay";
 import {
   X,
   Trash2,
@@ -16,20 +18,15 @@ import {
   ChevronLeft,
   MapPin,
   Check,
-  CreditCard,
-  Smartphone,
-  Building2,
-  Wallet,
   ShieldCheck,
 } from "lucide-react";
 
-// Resolve a product's detail-page path from its name (falls back to a slugified
-// name if the item isn't in the catalogue, keeping the link valid).
+// Resolve a product's detail-page path from its name (slugified — the product
+// page resolves the live product by slug).
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 function productHref(name: string): string {
-  const match = getAllProducts().find((p) => p.name === name);
-  return `/product/${match ? match.slug : slugify(name)}`;
+  return `/product/${slugify(name)}`;
 }
 
 function ShippingForm() {
@@ -40,27 +37,12 @@ function ShippingForm() {
     shippingInfo,
     savedAddresses,
   } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
 
-  // Signed-in customers get a sample address on file so the "choose a saved
-  // address" experience is available before their first stored order. Guests
-  // (or once real addresses exist) simply use the saved list.
-  const displayAddresses: ShippingInfo[] =
-    savedAddresses.length > 0
-      ? savedAddresses
-      : isAuthenticated
-        ? [
-            {
-              fullName: user?.name ?? "Home",
-              email: user?.email ?? "",
-              phone: "75400 08075",
-              address: "12 Radhakrishnan Salai, Mylapore",
-              city: "Chennai",
-              state: "Tamil Nadu",
-              pincode: "600004",
-            },
-          ]
-        : [];
+  // Only real, previously-saved addresses are offered here — no fabricated
+  // "sample" entry. A signed-in customer with none yet simply lands straight
+  // on the entry form.
+  const displayAddresses: ShippingInfo[] = savedAddresses;
 
   const [mode, setMode] = useState<"select" | "form">(
     displayAddresses.length > 0 ? "select" : "form"
@@ -68,8 +50,8 @@ function ShippingForm() {
   const [selectedIdx, setSelectedIdx] = useState(0);
 
   const [formData, setFormData] = useState({
-    fullName: shippingInfo?.fullName ?? "",
-    email: shippingInfo?.email ?? "",
+    fullName: shippingInfo?.fullName ?? user?.name ?? "",
+    email: shippingInfo?.email ?? user?.email ?? "",
     phone: shippingInfo?.phone ?? "",
     address: shippingInfo?.address ?? "",
     city: shippingInfo?.city ?? "",
@@ -131,7 +113,7 @@ function ShippingForm() {
           const selected = i === selectedIdx;
           return (
             <button
-              key={i}
+              key={addr.id ?? i}
               type="button"
               onClick={() => setSelectedIdx(i)}
               style={{
@@ -502,8 +484,81 @@ function ShippingForm() {
 }
 
 function ReviewOrder() {
-  const { items, shippingInfo, setCheckoutStep, getTotal, getItemCount } =
+  const { items, shippingInfo, setCheckoutStep, getTotal, getItemCount, clearCart } =
     useCart();
+  const { isAuthenticated, openModal } = useAuth();
+  const { loadOrder } = useOrders();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePay = async () => {
+    setError(null);
+
+    if (!shippingInfo) {
+      setCheckoutStep("shipping");
+      return;
+    }
+    if (!isAuthenticated) {
+      setError("Sign in to complete your order — your cart is kept.");
+      openModal("login");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Creates the real order (deducts stock, clears the server cart) and a
+      // matching Razorpay order in one atomic call. If this throws, nothing
+      // was created.
+      const result = await checkoutApi.initiateCheckout({
+        shipping_address: {
+          full_name: shippingInfo.fullName,
+          phone: shippingInfo.phone,
+          line1: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.state,
+          pincode: shippingInfo.pincode,
+        },
+      });
+
+      await openRazorpayCheckout({
+        key: result.razorpay_key_id,
+        amount: result.amount_paise,
+        currency: result.currency,
+        order_id: result.razorpay_order_id,
+        name: result.branding?.company_name || "SOIS Store",
+        description: `Order ${result.order_number}`,
+        prefill: result.prefill,
+        theme: { color: result.branding?.primary_color || T.forest },
+        handler: () => {
+          // Razorpay confirmed the payment client-side; the order's true
+          // paid/captured status is set server-side once the webhook lands.
+          // Fetch the real order now so confirmation shows real data, and
+          // reconcile status on the next Orders page visit / refresh().
+          loadOrder(result.order_id).finally(() => {
+            clearCart();
+            setIsLoading(false);
+            setCheckoutStep("confirmation");
+          });
+        },
+        modal: {
+          ondismiss: () => {
+            setIsLoading(false);
+            setError(
+              "Payment wasn't completed. Your order is on hold for a few minutes — try again to finish paying."
+            );
+          },
+        },
+      });
+    } catch (err) {
+      setIsLoading(false);
+      setError(
+        err instanceof ApiError
+          ? err.firstMessage
+          : "We couldn't start checkout. Please try again."
+      );
+    }
+  };
 
   const labelStyle: React.CSSProperties = {
     fontSize: "0.7rem",
@@ -559,6 +614,19 @@ function ReviewOrder() {
               >
                 {item.name}
               </h4>
+              {item.size && (
+                <p
+                  style={{
+                    fontSize: "0.72rem",
+                    color: T.muted,
+                    margin: "0 0 2px 0",
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Size: {item.size}
+                </p>
+              )}
               <p
                 style={{
                   fontSize: "0.8rem",
@@ -566,7 +634,7 @@ function ReviewOrder() {
                   margin: 0,
                 }}
               >
-                ₹{item.price.toLocaleString()} × {item.quantity}
+                {formatPrice(item.price)} × {item.quantity}
               </p>
             </div>
             <p
@@ -578,7 +646,7 @@ function ReviewOrder() {
                 whiteSpace: "nowrap",
               }}
             >
-              ₹{(item.price * item.quantity).toLocaleString()}
+              {formatPrice(item.price * item.quantity)}
             </p>
           </div>
         ))}
@@ -628,7 +696,7 @@ function ReviewOrder() {
         >
           <span style={{ fontSize: "0.85rem", color: T.muted }}>Subtotal</span>
           <span style={{ fontSize: "0.85rem", color: T.ink }}>
-            ₹{getTotal().toLocaleString()}
+            {formatPrice(getTotal())}
           </span>
         </div>
         <div
@@ -653,357 +721,20 @@ function ReviewOrder() {
             Total
           </span>
           <span style={{ fontSize: "0.95rem", fontWeight: 700, color: T.forest }}>
-            ₹{getTotal().toLocaleString()}
+            {formatPrice(getTotal())}
           </span>
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => setCheckoutStep("payment")}
-        style={{
-          width: "100%",
-          padding: "12px",
-          fontSize: "0.85rem",
-          fontWeight: 600,
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          background: T.forest,
-          color: T.white,
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-        }}
-      >
-        Confirm &amp; Pay <ArrowRight size={16} />
-      </button>
+      {error && (
+        <p className="sois-pay-err" role="alert" style={{ marginBottom: 14 }}>
+          {error}
+        </p>
+      )}
 
       <button
         type="button"
-        onClick={() => setCheckoutStep("shipping")}
-        style={{
-          width: "100%",
-          padding: "12px",
-          marginTop: 10,
-          fontSize: "0.8rem",
-          fontWeight: 500,
-          background: "none",
-          color: T.muted,
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-        }}
-      >
-        Edit Delivery Details
-      </button>
-    </div>
-  );
-}
-
-type PayMethod = "upi" | "card" | "netbanking" | "wallet";
-
-const PAY_METHODS: { key: PayMethod; label: string; icon: typeof CreditCard }[] =
-  [
-    { key: "upi", label: "UPI", icon: Smartphone },
-    { key: "card", label: "Card", icon: CreditCard },
-    { key: "netbanking", label: "Net Banking", icon: Building2 },
-    { key: "wallet", label: "Wallet", icon: Wallet },
-  ];
-
-const METHOD_LABEL: Record<PayMethod, string> = {
-  upi: "UPI",
-  card: "Card",
-  netbanking: "Net Banking",
-  wallet: "Wallet",
-};
-
-const BANKS = [
-  "HDFC Bank",
-  "ICICI Bank",
-  "State Bank of India",
-  "Axis Bank",
-  "Kotak Mahindra Bank",
-  "Punjab National Bank",
-];
-
-const WALLETS = ["Paytm", "PhonePe", "Amazon Pay", "Mobikwik", "Freecharge"];
-
-function PaymentForm() {
-  const { items, shippingInfo, setCheckoutStep, getTotal, clearCart } =
-    useCart();
-  const { createOrder } = useOrders();
-
-  const [method, setMethod] = useState<PayMethod>("upi");
-  const [card, setCard] = useState({
-    cardNumber: "",
-    cardName: "",
-    expiryDate: "",
-    cvv: "",
-  });
-  const [upiId, setUpiId] = useState("");
-  const [bank, setBank] = useState("");
-  const [wallet, setWallet] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const labelStyle: React.CSSProperties = {
-    display: "block",
-    fontSize: "0.8rem",
-    fontWeight: 500,
-    color: T.ink,
-    marginBottom: 6,
-  };
-  const inputStyle = (err?: boolean): React.CSSProperties => ({
-    width: "100%",
-    padding: "10px 12px",
-    fontSize: "0.9rem",
-    border: `1px solid ${err ? "#d4183d" : T.border}`,
-    borderRadius: "8px",
-    background: T.surface,
-    boxSizing: "border-box",
-  });
-
-  const clearErr = (name: string) => {
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let v = value;
-    if (name === "cardNumber") {
-      v = value.replace(/\s/g, "").slice(0, 16).replace(/(\d{4})/g, "$1 ").trim();
-    } else if (name === "expiryDate") {
-      v = value.replace(/\D/g, "").slice(0, 4);
-      if (v.length >= 2) v = v.slice(0, 2) + "/" + v.slice(2);
-    } else if (name === "cvv") {
-      v = value.replace(/\D/g, "").slice(0, 3);
-    }
-    setCard((prev) => ({ ...prev, [name]: v }));
-    clearErr(name);
-  };
-
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (method === "upi") {
-      if (!/^[\w.-]{2,}@[a-zA-Z]{2,}$/.test(upiId))
-        e.upiId = "Enter a valid UPI ID (e.g. name@bank)";
-    } else if (method === "card") {
-      if (card.cardNumber.replace(/\s/g, "").length !== 16)
-        e.cardNumber = "Invalid card";
-      if (!card.cardName) e.cardName = "Required";
-      if (card.expiryDate.length !== 5) e.expiryDate = "Invalid";
-      if (card.cvv.length !== 3) e.cvv = "Invalid";
-    } else if (method === "netbanking") {
-      if (!bank) e.bank = "Select a bank";
-    } else if (method === "wallet") {
-      if (!wallet) e.wallet = "Select a wallet";
-    }
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setIsLoading(true);
-
-    // ────────────────────────────────────────────────────────────────
-    // RAZORPAY INTEGRATION POINT
-    // When the backend exposes the payment APIs, replace this simulated
-    // delay with the real Razorpay flow:
-    //   1. POST cart total to your backend → it creates a Razorpay Order
-    //      and returns { orderId, amount, currency, razorpayKey }.
-    //   2. Open Razorpay Checkout with that orderId and the selected
-    //      `method` (upi / card / netbanking / wallet).
-    //   3. On the handler success callback, verify the signature on your
-    //      backend, then continue below (createOrder + confirmation).
-    //      On failure/dismiss, setIsLoading(false) and show an error.
-    // The chosen method is already captured in `METHOD_LABEL[method]`.
-    // ────────────────────────────────────────────────────────────────
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const subtotal = getTotal();
-    createOrder({
-      items: items.map((i) => ({
-        id: i.id,
-        name: i.name,
-        price: i.price,
-        image: i.image,
-        quantity: i.quantity,
-        size: i.size,
-      })),
-      shipping:
-        shippingInfo ?? {
-          fullName: card.cardName,
-          email: "",
-          phone: "",
-          address: "",
-          city: "",
-          state: "",
-          pincode: "",
-        },
-      paymentMethod: METHOD_LABEL[method],
-      subtotal,
-      shippingFee: 0,
-      total: subtotal,
-    });
-
-    setIsLoading(false);
-    clearCart();
-    setCheckoutStep("confirmation");
-  };
-
-  return (
-    <form onSubmit={handleSubmit} style={{ padding: "20px 0" }}>
-      {/* Method selector */}
-      <div className="sois-pay-methods">
-        {PAY_METHODS.map((m) => {
-          const Icon = m.icon;
-          const active = method === m.key;
-          return (
-            <button
-              key={m.key}
-              type="button"
-              aria-pressed={active}
-              className={`sois-pay-tile${active ? " active" : ""}`}
-              onClick={() => {
-                setMethod(m.key);
-                setErrors({});
-              }}
-            >
-              <Icon size={18} />
-              {m.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* UPI */}
-      {method === "upi" && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>UPI ID</label>
-          <input
-            value={upiId}
-            onChange={(e) => {
-              setUpiId(e.target.value);
-              clearErr("upiId");
-            }}
-            placeholder="yourname@upi"
-            style={inputStyle(!!errors.upiId)}
-          />
-          {errors.upiId && (
-            <p className="sois-pay-err">{errors.upiId}</p>
-          )}
-        </div>
-      )}
-
-      {/* Card */}
-      {method === "card" && (
-        <>
-          <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Card Number</label>
-            <input
-              name="cardNumber"
-              value={card.cardNumber}
-              onChange={handleCardChange}
-              placeholder="1234 5678 9012 3456"
-              style={inputStyle(!!errors.cardNumber)}
-            />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Cardholder Name</label>
-            <input
-              name="cardName"
-              value={card.cardName}
-              onChange={handleCardChange}
-              placeholder="John Doe"
-              style={inputStyle(!!errors.cardName)}
-            />
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 12,
-              marginBottom: 16,
-            }}
-          >
-            <div>
-              <label style={labelStyle}>Expiry</label>
-              <input
-                name="expiryDate"
-                value={card.expiryDate}
-                onChange={handleCardChange}
-                placeholder="MM/YY"
-                style={inputStyle(!!errors.expiryDate)}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>CVV</label>
-              <input
-                name="cvv"
-                value={card.cvv}
-                onChange={handleCardChange}
-                placeholder="123"
-                style={inputStyle(!!errors.cvv)}
-              />
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Net Banking */}
-      {method === "netbanking" && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Select Bank</label>
-          <select
-            value={bank}
-            onChange={(e) => {
-              setBank(e.target.value);
-              clearErr("bank");
-            }}
-            style={inputStyle(!!errors.bank)}
-          >
-            <option value="">Choose your bank</option>
-            {BANKS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-          {errors.bank && <p className="sois-pay-err">{errors.bank}</p>}
-        </div>
-      )}
-
-      {/* Wallet */}
-      {method === "wallet" && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Select Wallet</label>
-          <select
-            value={wallet}
-            onChange={(e) => {
-              setWallet(e.target.value);
-              clearErr("wallet");
-            }}
-            style={inputStyle(!!errors.wallet)}
-          >
-            <option value="">Choose your wallet</option>
-            {WALLETS.map((w) => (
-              <option key={w} value={w}>
-                {w}
-              </option>
-            ))}
-          </select>
-          {errors.wallet && <p className="sois-pay-err">{errors.wallet}</p>}
-        </div>
-      )}
-
-      <button
-        type="submit"
+        onClick={handlePay}
         disabled={isLoading}
         style={{
           width: "100%",
@@ -1018,9 +749,14 @@ function PaymentForm() {
           borderRadius: "8px",
           cursor: isLoading ? "not-allowed" : "pointer",
           opacity: isLoading ? 0.6 : 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
         }}
       >
-        {isLoading ? "Processing..." : `Pay ₹${getTotal().toLocaleString()}`}
+        {isLoading ? "Processing..." : "Confirm & Pay"}
+        {!isLoading && <ArrowRight size={16} />}
       </button>
 
       <p
@@ -1038,7 +774,27 @@ function PaymentForm() {
       >
         <ShieldCheck size={13} /> Secured by Razorpay · Encrypted payment
       </p>
-    </form>
+
+      <button
+        type="button"
+        onClick={() => setCheckoutStep("shipping")}
+        disabled={isLoading}
+        style={{
+          width: "100%",
+          padding: "12px",
+          marginTop: 10,
+          fontSize: "0.8rem",
+          fontWeight: 500,
+          background: "none",
+          color: T.muted,
+          border: "none",
+          borderRadius: "8px",
+          cursor: isLoading ? "not-allowed" : "pointer",
+        }}
+      >
+        Edit Delivery Details
+      </button>
+    </div>
   );
 }
 
@@ -1098,7 +854,7 @@ function ConfirmationView() {
             margin: 0,
           }}
         >
-          {lastOrder ? lastOrder.id : "SOIS-XXXXXX"}
+          {lastOrder ? lastOrder.orderNumber ?? lastOrder.id : "—"}
         </p>
       </div>
 
@@ -1173,9 +929,7 @@ export function CartDrawer() {
       ? ("cart" as const)
       : checkoutStep === "review"
         ? ("shipping" as const)
-        : checkoutStep === "payment"
-          ? ("review" as const)
-          : null;
+        : null;
 
   return (
     <>
@@ -1254,9 +1008,7 @@ export function CartDrawer() {
                   ? "Shipping Address"
                   : checkoutStep === "review"
                     ? "Review Order"
-                    : checkoutStep === "payment"
-                      ? "Payment Details"
-                      : "Order Confirmed"}
+                    : "Order Confirmed"}
             </h2>
           </div>
           <button
@@ -1352,6 +1104,19 @@ export function CartDrawer() {
                             {item.name}
                           </h4>
                         </Link>
+                        {item.size && (
+                          <p
+                            style={{
+                              fontSize: "0.74rem",
+                              color: T.muted,
+                              margin: "0 0 4px 0",
+                              fontWeight: 600,
+                              letterSpacing: "0.02em",
+                            }}
+                          >
+                            Size: {item.size}
+                          </p>
+                        )}
                         <p
                           style={{
                             fontSize: "0.85rem",
@@ -1359,7 +1124,7 @@ export function CartDrawer() {
                             margin: "0 0 8px 0",
                           }}
                         >
-                          ₹{item.price.toLocaleString()}
+                          {formatPrice(item.price)}
                         </p>
 
                         <div
@@ -1423,7 +1188,7 @@ export function CartDrawer() {
                             margin: "0 0 16px 0",
                           }}
                         >
-                          ₹{(item.price * item.quantity).toLocaleString()}
+                          {formatPrice(item.price * item.quantity)}
                         </p>
                         <button
                           onClick={() => removeFromCart(item.id)}
@@ -1447,7 +1212,6 @@ export function CartDrawer() {
 
           {checkoutStep === "shipping" && <ShippingForm />}
           {checkoutStep === "review" && <ReviewOrder />}
-          {checkoutStep === "payment" && <PaymentForm />}
           {checkoutStep === "confirmation" && <ConfirmationView />}
         </div>
 
@@ -1469,7 +1233,7 @@ export function CartDrawer() {
             >
               <span style={{ color: T.muted, fontSize: "0.9rem" }}>Total</span>
               <span style={{ fontWeight: 600, color: T.forest }}>
-                ₹{getTotal().toLocaleString()}
+                {formatPrice(getTotal())}
               </span>
             </div>
 

@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Heart } from "lucide-react";
-import { Product, formatPrice } from "@/lib/catalog";
+import { Product, formatPrice, badgeColors } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -12,6 +13,8 @@ export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
   const wished = isInWishlist(product.id);
+  const [hovered, setHovered] = useState(false);
+  const showHover = hovered && !!product.hoverImage;
 
   const cartPayload = {
     id: product.id,
@@ -22,7 +25,11 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="sois-scard">
-      <div className="sois-pcard-img">
+      <div
+        className="sois-pcard-img"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
         <Link
           href={`/product/${product.slug}`}
           aria-label={product.name}
@@ -34,19 +41,30 @@ export function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             sizes="(max-width: 767px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            style={{ objectFit: "cover" }}
+            style={{ objectFit: "cover", opacity: showHover ? 0 : 1, transition: "opacity 300ms ease" }}
           />
+          {product.hoverImage && (
+            <Image
+              className="pc-img"
+              src={product.hoverImage}
+              alt={product.name}
+              fill
+              sizes="(max-width: 767px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              style={{
+                position: "absolute",
+                inset: 0,
+                objectFit: "cover",
+                opacity: showHover ? 1 : 0,
+                transition: "opacity 300ms ease",
+              }}
+            />
+          )}
         </Link>
 
         {product.badge && (
           <span
             className="sois-pcard-tag"
-            style={{
-              background: product.isNew
-                ? T.forest
-                : "rgba(255,255,255,0.94)",
-              color: product.isNew ? T.sage : T.forest,
-            }}
+            style={badgeColors(product.badge)}
           >
             {product.badge.toUpperCase()}
           </span>
@@ -87,15 +105,31 @@ export function ProductCard({ product }: { product: Product }) {
           )}
           {product.originalPrice && <span className="sois-pcard-save">SALE</span>}
         </div>
-        <button
-          type="button"
-          className="sois-pcard-add sois-touch-target"
-          disabled={!product.inStock}
-          style={!product.inStock ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
-          onClick={() => product.inStock && addToCart(cartPayload)}
-        >
-          <ShoppingBag size={14} /> {product.inStock ? "ADD TO BAG" : "SOLD OUT"}
-        </button>
+        {product.hasSizes ? (
+          // Sized products (e.g. rings) need a size chosen before adding, so this
+          // reads as Add to Bag but links through to the detail page's size selector.
+          <Link
+            href={`/product/${product.slug}`}
+            className="sois-pcard-add sois-touch-target"
+            style={
+              !product.inStock
+                ? { opacity: 0.5, pointerEvents: "none" }
+                : undefined
+            }
+          >
+            <ShoppingBag size={14} /> {product.inStock ? "ADD TO BAG" : "SOLD OUT"}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="sois-pcard-add sois-touch-target"
+            disabled={!product.inStock}
+            style={!product.inStock ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+            onClick={() => product.inStock && addToCart(cartPayload)}
+          >
+            <ShoppingBag size={14} /> {product.inStock ? "ADD TO BAG" : "SOLD OUT"}
+          </button>
+        )}
       </div>
     </article>
   );

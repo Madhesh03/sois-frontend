@@ -78,13 +78,8 @@ video {
   gap: 24px;
 }
 
-/* ─── Hero (desktop) ─── */
+/* ─── Hero (desktop) — full-width banner carousel ─── */
 .sois-hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  /* Size to the content instead of forcing a full viewport, so the image
-     column no longer leaves empty space under the shorter text column. */
-  min-height: auto;
   /* White background so the top-padding reserved for the fixed nav blends into
      the white header instead of exposing a grey (#FAFAFA) band beneath it. */
   background: #fff;
@@ -92,9 +87,25 @@ video {
 }
 
 .sois-hero-image {
-  /* No fixed floor on desktop: the grid row is driven by the text column, so
-     the image matches the left-side content height exactly (no overhang). */
-  min-height: 0;
+  /* Fixed to the width alone (not viewport height) so the crop ratio never
+     drifts: object-fit: cover always trims the same ~11% off the top/bottom
+     of each banner (well inside both images' safe text margins), full-bleed,
+     no letterbox bars, at any window shape. No min-height floor — one was
+     tried and it silently overrode this on phone-width screens, pushing the
+     ratio the other way and cropping the sides instead. */
+  height: 46vw;
+}
+
+.sois-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ─── Category grid (desktop) ─── */
@@ -1488,31 +1499,8 @@ video {
   }
 
   .sois-hero {
-    grid-template-columns: 1fr;
     min-height: auto;
     padding-top: 96px;
-  }
-
-  .sois-hero-text {
-    padding: 48px 32px 40px !important;
-  }
-
-  .sois-hero-review {
-    position: relative !important;
-    bottom: auto !important;
-    right: auto !important;
-    margin-top: 32px;
-    align-self: flex-start;
-  }
-
-  .sois-hero-image {
-    min-height: 420px;
-    height: 50vh;
-  }
-
-  .sois-hero-featured {
-    top: 24px !important;
-    right: 24px !important;
   }
 
   .sois-cat-grid {
@@ -1940,85 +1928,10 @@ video {
     font-size: 0.58rem !important;
   }
 
-  /* ── Hero — image-first, cinematic mobile layout ── */
-  /* min-height is intentionally NOT 100vh here: the hero is sized to its
-     (trimmed) content so the top of the next section peeks into the
-     initial viewport, signalling there's more to scroll to. */
+  /* ── Hero — full-width banner carousel, mobile ── */
   .sois-hero {
-    display: flex;
-    flex-direction: column-reverse;
     min-height: auto;
     padding-top: 96px;
-  }
-
-  .sois-hero-image {
-    min-height: 190px;
-    height: 44vw;
-    max-height: 260px;
-  }
-
-  .sois-hero-text {
-    padding: 22px 20px 18px !important;
-    position: relative;
-  }
-
-  /* Accent bar above hero text block */
-  .sois-hero-text::before {
-    content: '';
-    display: block;
-    width: 44px;
-    height: 3px;
-    background: #1d3638;
-    margin-bottom: 14px;
-    border-radius: 2px;
-  }
-
-  #hero-heading {
-    font-size: 2.15rem !important;
-    line-height: 1.08 !important;
-  }
-
-  .sois-hero-desc {
-    margin-top: 10px !important;
-    margin-bottom: 16px !important;
-    max-width: 100% !important;
-    font-size: 0.88rem !important;
-    line-height: 1.65 !important;
-  }
-
-  .sois-hero-ctas {
-    margin-bottom: 16px !important;
-    flex-direction: column;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
-
-  .sois-hero-ctas a {
-    justify-content: center;
-    width: 100%;
-    padding: 14px 24px !important;
-    font-size: 0.76rem !important;
-    letter-spacing: 0.1em !important;
-  }
-
-  .sois-hero-featured {
-    top: 12px !important;
-    right: 12px !important;
-    left: auto !important;
-    max-width: 190px !important;
-    padding: 12px 14px !important;
-    border-radius: 6px;
-  }
-
-  .sois-hero-tag {
-    bottom: 16px !important;
-    font-size: 0.54rem !important;
-    padding: 9px 14px !important;
-    letter-spacing: 0.18em !important;
-  }
-
-  .sois-hero-review {
-    display: none !important;
   }
 
   /* ── Category grid ── */
@@ -2249,20 +2162,6 @@ video {
     color: #ffffff;
   }
 
-  .sois-hero-cta-primary:hover {
-    background: #0a0a0a;
-    transform: translateY(-2px);
-  }
-
-  .sois-hero-cta-secondary:hover {
-    background: rgba(17, 94, 89, 0.06);
-    border-color: #115e59;
-  }
-
-  .sois-hero-featured-add:hover {
-    background: #0a0a0a;
-  }
-
   .sois-footer-social-btn:hover {
     background: rgba(17, 94, 89, 0.35);
     border-color: rgba(209, 250, 229, 0.4);
@@ -2275,12 +2174,6 @@ video {
   .sois-footer-contact-item:hover {
     color: #d1fae5;
   }
-}
-
-.sois-hero-cta-primary,
-.sois-hero-cta-secondary,
-.sois-hero-featured-add {
-  transition: background 0.22s ease, border-color 0.22s ease, transform 0.18s ease;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -3435,6 +3328,127 @@ video {
   height: 8px;
   border-radius: 50%;
 }
+
+/* ── Size selector (sized products: rings, bangles) ── */
+.sois-pdp-sizes {
+  margin-bottom: 20px;
+}
+.sois-pdp-sizes-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sois-pdp-sizes-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #0a0a0a;
+}
+.sois-pdp-sizes-left {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #b3261e;
+}
+.sois-pdp-size-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sois-pdp-size {
+  min-width: 48px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0a0a0a;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.sois-pdp-size:hover:not(:disabled) {
+  border-color: #115e59;
+}
+.sois-pdp-size.active {
+  border-color: #115e59;
+  background: #115e59;
+  color: #ffffff;
+}
+.sois-pdp-size.oos {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  background: #f5f5f5;
+}
+.sois-pdp-size-error {
+  margin: 10px 0 0;
+  color: #b3261e;
+  font-size: 0.82rem;
+}
+
+/* Size-chart trigger, sitting opposite the "Size (US)" label */
+.sois-pdp-sizechart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #115e59;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-underline-offset: 3px;
+}
+.sois-pdp-sizechart-link:hover {
+  text-decoration: underline;
+}
+
+/* Size chart (inside the shared Modal) */
+.sois-sizechart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.sois-sizechart-table th,
+.sois-sizechart-table td {
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 1px solid #ececec;
+}
+.sois-sizechart-table th {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b6b6b;
+}
+.sois-sizechart-table tr.offered td {
+  background: #f0f7f6;
+  font-weight: 600;
+  color: #115e59;
+}
+.sois-sizechart-note {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  color: #6b6b6b;
+}
+.sois-sizechart-subtitle {
+  margin: 22px 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+.sois-sizechart-tips {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 7px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #4a4a4a;
+}
 .sois-pdp-actions {
   display: flex;
   gap: 12px;
@@ -4013,6 +4027,44 @@ video {
   color: #075985;
   font-weight: 600;
 }
+.sois-order-tracking-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #115e59;
+  font-weight: 600;
+  text-decoration: none;
+}
+.sois-order-tracking-link:hover {
+  text-decoration: underline;
+}
+.sois-order-tracking-events {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+.sois-order-tracking-events li {
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e8e8e8;
+}
+.sois-order-tracking-event-status {
+  font-weight: 700;
+  color: #0a0a0a;
+  text-transform: capitalize;
+}
+.sois-order-tracking-event-loc {
+  color: #9ca3af;
+}
+.sois-order-tracking-event-time {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
 
 /* Timeline */
 .sois-timeline {
@@ -4546,8 +4598,6 @@ video {
   font-size: 0.82rem;
   font-weight: 600;
   color: #4b5563;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .sois-pay-tile svg {
   color: #9ca3af;

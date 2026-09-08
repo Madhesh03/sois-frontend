@@ -41,6 +41,13 @@ export interface Product {
   originalPrice: number | null;
   sku: string;
   images: string[];
+  /**
+   * Shown in place of `images[0]` when a shopper hovers the product card — a
+   * second look (worn on-model, a different angle) that helps them decide
+   * without clicking through. Falls back to `images[1]` when not set
+   * explicitly, so a product with 2+ photos gets the effect for free.
+   */
+  hoverImage?: string;
   /** Optional 360° spin video shown as an extra media item in the gallery. */
   video360?: string;
   description: string;
@@ -54,6 +61,23 @@ export interface Product {
   reviewCount: number;
   /** Marketing badge shown on the card — derived, never hand-set. */
   badge: "New" | "Best Seller" | "Sale" | null;
+  /** True when the product is offered in discrete sizes (rings, bangles). */
+  hasSizes?: boolean;
+  /** Size unit label, e.g. "US". */
+  sizeUnit?: string;
+  /** What the variant axis is called, e.g. "Size" or "Length". */
+  variantLabel?: string;
+  /**
+   * Per-size availability. Only populated on product detail (the list API
+   * doesn't carry per-size counts); on cards only `hasSizes` is known.
+   */
+  sizes?: ProductSize[];
+}
+
+export interface ProductSize {
+  size: string;
+  qty: number;
+  inStock: boolean;
 }
 
 export const categories: Category[] = [
@@ -118,6 +142,8 @@ interface Seed {
   price: number;
   originalPrice?: number;
   images: string[];
+  /** Explicit hover-image override; defaults to images[1] in buildProducts(). */
+  hoverImage?: string;
   description: string;
   specs: ProductSpec[];
   video360?: string;
@@ -135,6 +161,15 @@ function slugify(name: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+// Offline demo sizing for rings — one size intentionally out of stock so the
+// size selector's disabled/out-of-stock state is visible without the backend.
+const MOCK_RING_SIZES: ProductSize[] = [
+  { size: "6", qty: 4, inStock: true },
+  { size: "7", qty: 6, inStock: true },
+  { size: "8", qty: 0, inStock: false },
+  { size: "9", qty: 3, inStock: true },
+];
+
 function build(seeds: Seed[]): Product[] {
   return seeds.map((s, i) => {
     const onSale = s.originalPrice != null && s.originalPrice > s.price;
@@ -146,6 +181,9 @@ function build(seeds: Seed[]): Product[] {
           ? "Sale"
           : null;
     const catCode = s.category.slice(0, 3).toUpperCase();
+    // Rings are offered in sizes in the mock catalogue (mirrors the backend's
+    // per-size stock for sized products).
+    const sized = s.category === "rings";
     return {
       id: `sois-${slugify(s.name)}`,
       slug: slugify(s.name),
@@ -156,6 +194,7 @@ function build(seeds: Seed[]): Product[] {
       originalPrice: onSale ? s.originalPrice! : null,
       sku: `SOIS-${catCode}-${String(i + 1).padStart(3, "0")}`,
       images: s.images,
+      hoverImage: s.hoverImage ?? s.images[1],
       video360: s.video360,
       description: s.description,
       specifications: [
@@ -172,6 +211,9 @@ function build(seeds: Seed[]): Product[] {
       rating: s.rating,
       reviewCount: s.reviewCount,
       badge,
+      hasSizes: sized,
+      sizeUnit: sized ? "US" : undefined,
+      sizes: sized ? MOCK_RING_SIZES : undefined,
     };
   });
 }
@@ -535,49 +577,141 @@ const seeds: Seed[] = [
   },
 ];
 
-const PRODUCTS: Product[] = build(seeds);
+/**
+ * Offline fallback catalogue. The `get*`/`search*` helpers below fetch from the
+ * live backend (`src/lib/api`); when the API is unreachable (e.g. local dev
+ * without the backend running, or during static builds) they fall back to this
+ * seeded data so the storefront still renders.
+ */
+const MOCK_PRODUCTS: Product[] = build(seeds);
 
-// ── Data-access helpers (swap the bodies for real API calls later) ──
+// ── Data-access helpers (API-backed, with an offline fallback) ──
+//
+// These are async because they call the backend consumer API. UI components
+// that consume them must `await` (server components) or fetch in an effect
+// (client components).
 
-export function getAllProducts(): Product[] {
-  return PRODUCTS;
+/** Fetch the full catalogue (mapped to the UI shape), falling back to mock data. */
+export async function getAllProducts(): Promise<Product[]> {
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const { items } = await catalogApi.listProducts({ page_size: 200 });
+    return items.map(mapListItem);
+  } catch {
+    return MOCK_PRODUCTS;
+  }
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return PRODUCTS.find((p) => p.slug === slug);
+export async function getProductBySlug(
+  slug: string
+): Promise<Product | undefined> {
+  try {
+    const { catalogApi, mapDetail } = await import("@/lib/api");
+    return mapDetail(await catalogApi.getProduct(slug));
+  } catch {
+    return MOCK_PRODUCTS.find((p) => p.slug === slug);
+  }
 }
 
-export function getCategories(): Category[] {
-  return categories;
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const { catalogApi, mapCategory } = await import("@/lib/api");
+    const cats = await catalogApi.listCategories();
+    const mapped = cats.map(mapCategory);
+    // Keep the storefront nav complete even if the backend omits some.
+    return mapped.length ? mapped : categories;
+  } catch {
+    return categories;
+  }
 }
 
-export function getCategoryBySlug(slug: string): Category | undefined {
-  return categories.find((c) => c.slug === slug);
+export async function getCategoryBySlug(
+  slug: string
+): Promise<Category | undefined> {
+  const all = await getCategories();
+  return all.find((c) => c.slug === slug);
 }
 
-export function getCategoryCount(slug: CategorySlug): number {
-  return PRODUCTS.filter((p) => p.category === slug).length;
+export async function getCategoryCount(slug: CategorySlug): Promise<number> {
+  const all = await getAllProducts();
+  return all.filter((p) => p.category === slug).length;
 }
 
-export function getProductsByCategory(slug: CategorySlug): Product[] {
-  return PRODUCTS.filter((p) => p.category === slug);
+export async function getProductsByCategory(
+  slug: CategorySlug
+): Promise<Product[]> {
+  const all = await getAllProducts();
+  return all.filter((p) => p.category === slug);
 }
 
-export function getRelatedProducts(product: Product, limit = 4): Product[] {
-  return PRODUCTS.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  ).slice(0, limit);
+/** Top-selling products for the homepage "Top Products" section. */
+export async function getTopProducts(limit = 8): Promise<Product[]> {
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const items = await catalogApi.listTopProducts(limit);
+    if (items.length) return items.map(mapListItem);
+  } catch {
+    // fall through to the offline fallback
+  }
+  // Offline fallback: best sellers first, then featured, capped at `limit`.
+  return sortProducts(MOCK_PRODUCTS, "featured").slice(0, limit);
 }
 
-export function searchProducts(query: string): Product[] {
-  const q = query.trim().toLowerCase();
+export async function getRelatedProducts(
+  product: Product,
+  limit = 4
+): Promise<Product[]> {
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const items = await catalogApi.listRelatedProducts(product.slug, limit);
+    if (items.length) return items.map(mapListItem);
+  } catch {
+    // fall through to the offline fallback
+  }
+  const all = await getAllProducts();
+  return all
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, limit);
+}
+
+/**
+ * Hydrate recently-viewed product IDs (stored client-side) into full cards,
+ * preserving the given order and excluding `excludeId` (usually the product
+ * currently being viewed). See `src/lib/recentlyViewed.ts`.
+ */
+export async function getProductsByIds(
+  ids: string[],
+  excludeId?: string
+): Promise<Product[]> {
+  const wanted = ids.filter((id) => id && id !== excludeId);
+  if (!wanted.length) return [];
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const items = await catalogApi.listProductsByIds(wanted);
+    return items.map(mapListItem);
+  } catch {
+    return MOCK_PRODUCTS.filter(
+      (p) => wanted.includes(p.id) && p.id !== excludeId
+    );
+  }
+}
+
+export async function searchProducts(query: string): Promise<Product[]> {
+  const q = query.trim();
   if (!q) return [];
-  return PRODUCTS.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
-  );
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const { items } = await catalogApi.listProducts({ q, page_size: 50 });
+    return items.map(mapListItem);
+  } catch {
+    const needle = q.toLowerCase();
+    return MOCK_PRODUCTS.filter(
+      (p) =>
+        p.name.toLowerCase().includes(needle) ||
+        p.category.toLowerCase().includes(needle) ||
+        p.description.toLowerCase().includes(needle)
+    );
+  }
 }
 
 // ── Pure filter/sort helpers used by the listing UI ──
@@ -653,5 +787,28 @@ export function sortProducts(products: Product[], sort: SortKey): Product[] {
 }
 
 export function formatPrice(value: number): string {
-  return `₹${value.toLocaleString("en-IN")}`;
+  return `₹${value.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+/**
+ * Card badge colours, keyed by the badge text itself (not just "is it new")
+ * so New / Best Seller / Sale read as visually distinct tags rather than the
+ * same pill with different words in it.
+ */
+export function badgeColors(
+  badge: Product["badge"]
+): { background: string; color: string } {
+  switch (badge) {
+    case "New":
+      return { background: "#115E59", color: "#D1FAE5" };
+    case "Best Seller":
+      return { background: "#B7791F", color: "#FFFFFF" };
+    case "Sale":
+      return { background: "#D4183D", color: "#FFFFFF" };
+    default:
+      return { background: "rgba(255,255,255,0.94)", color: "#115E59" };
+  }
 }

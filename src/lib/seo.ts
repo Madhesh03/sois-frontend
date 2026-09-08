@@ -1,4 +1,5 @@
-import { products, siteConfig } from "./data";
+import { siteConfig } from "./data";
+import type { Product } from "./catalog";
 
 export function getOrganizationSchema() {
   return {
@@ -30,7 +31,8 @@ export function getWebSiteSchema() {
   };
 }
 
-export function getProductListSchema() {
+/** Built from live catalogue products (see getTopProducts) — never static copy. */
+export function getProductListSchema(products: Product[]) {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -42,12 +44,14 @@ export function getProductListSchema() {
         "@type": "Product",
         name: product.name,
         description: product.subtitle,
-        image: product.img,
+        image: product.images[0],
         offers: {
           "@type": "Offer",
-          price: product.price.replace(/[^\d]/g, ""),
+          price: String(product.price),
           priceCurrency: "INR",
-          availability: "https://schema.org/InStock",
+          availability: product.inStock
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
         },
       },
     })),

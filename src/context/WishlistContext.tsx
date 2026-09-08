@@ -1,8 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { wishlistApi, mediaUrl } from "@/lib/api";
+import type { WishlistItem as ApiWishlistItem } from "@/lib/api";
+import { useAuth } from "./AuthContext";
 
 export interface WishlistItem {
+  /** Product id (UUID) — matches how ProductCard identifies products. */
   id: string;
   name: string;
   price: number;
@@ -25,55 +35,112 @@ const WishlistContext = createContext<WishlistContextType | undefined>(
   undefined
 );
 
-// Default static items so the wishlist is populated out of the box.
-const DEFAULT_WISHLIST: WishlistItem[] = [
-  {
-    id: "wish-crescent-moon",
-    name: "Crescent Moon Pendant",
-    price: 1299,
-    image:
-      "https://images.unsplash.com/photo-1616294208582-c2a6d73b467b?w=600&h=720&fit=crop&auto=format&q=85",
-    addedDate: new Date(),
-  },
-  {
-    id: "wish-celestial-ring",
-    name: "Celestial Stack Ring",
-    price: 899,
-    image:
-      "https://images.unsplash.com/photo-1639660680788-bf160240864e?w=600&h=720&fit=crop&auto=format&q=85",
-    addedDate: new Date(),
-  },
-  {
-    id: "wish-cascade-hoop",
-    name: "Cascade Hoop Earrings",
-    price: 749,
-    image:
-      "https://images.unsplash.com/photo-1764591576264-ad2e0e4e793c?w=600&h=720&fit=crop&auto=format&q=85",
-    addedDate: new Date(),
-  },
-];
+const GUEST_KEY = "sois_wishlist_guest";
+
+function mapApiItem(w: ApiWishlistItem): WishlistItem {
+  return {
+    id: w.product_id,
+    name: w.product_name,
+    price: Number(w.price_at_add),
+    image: mediaUrl(w.thumbnail_key),
+    addedDate: new Date(w.added_at),
+  };
+}
+
+function loadGuest(): WishlistItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(GUEST_KEY);
+    if (!raw) return [];
+    return (JSON.parse(raw) as WishlistItem[]).map((i) => ({
+      ...i,
+      addedDate: new Date(i.addedDate),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function persistGuest(items: WishlistItem[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(GUEST_KEY, JSON.stringify(items));
+  } catch {
+    /* ignore */
+  }
+}
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<WishlistItem[]>(DEFAULT_WISHLIST);
+  const { isAuthenticated } = useAuth();
+  const [items, setItems] = useState<WishlistItem[]>([]);
   const [wishlistOpen, setWishlistOpen] = useState(false);
 
-  const addToWishlist = (item: Omit<WishlistItem, "addedDate">) => {
-    setItems((prevItems) => {
-      const exists = prevItems.find((i) => i.id === item.id);
-      if (exists) {
-        return prevItems.filter((i) => i.id !== item.id);
+  // Load the wishlist from the API (authenticated) or localStorage (guest),
+  // and re-sync whenever auth state flips.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (isAuthenticated) {
+        try {
+          const apiItems = await wishlistApi.listWishlist();
+          if (active) setItems(apiItems.map(mapApiItem));
+        } catch {
+          if (active) setItems([]);
+        }
+      } else {
+        setItems(loadGuest());
       }
-      return [...prevItems, { ...item, addedDate: new Date() }];
+    })();
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
+
+  const inList = useCallback(
+    (id: string) => items.some((i) => i.id === id),
+    [items]
+  );
+
+  const addToWishlist = (item: Omit<WishlistItem, "addedDate">) => {
+    const exists = inList(item.id);
+
+    // Optimistic local update (toggle — matches prior behaviour).
+    setItems((prev) => {
+      const next = exists
+        ? prev.filter((i) => i.id !== item.id)
+        : [...prev, { ...item, addedDate: new Date() }];
+      if (!isAuthenticated) persistGuest(next);
+      return next;
+    });
+
+    if (!isAuthenticated) return;
+    // Persist to the backend; refresh on failure to stay consistent.
+    const call = exists
+      ? wishlistApi.removeFromWishlist(item.id)
+      : wishlistApi.addToWishlist(item.id);
+    call.catch(async () => {
+      try {
+        setItems((await wishlistApi.listWishlist()).map(mapApiItem));
+      } catch {
+        /* ignore */
+      }
     });
   };
 
   const removeFromWishlist = (id: string) => {
-    setItems((prevItems) => prevItems.filter((i) => i.id !== id));
+    setItems((prev) => {
+      const next = prev.filter((i) => i.id !== id);
+      if (!isAuthenticated) persistGuest(next);
+      return next;
+    });
+    if (isAuthenticated) {
+      wishlistApi.removeFromWishlist(id).catch(() => {
+        /* ignore */
+      });
+    }
   };
 
-  const isInWishlist = (id: string) => {
-    return items.some((i) => i.id === id);
-  };
+  const isInWishlist = (id: string) => inList(id);
 
   const openWishlist = () => setWishlistOpen(true);
   const closeWishlist = () => setWishlistOpen(false);
