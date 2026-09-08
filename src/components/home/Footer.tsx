@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Instagram, Heart, MessageCircle, ChevronDown } from "lucide-react";
 import { T } from "@/lib/tokens";

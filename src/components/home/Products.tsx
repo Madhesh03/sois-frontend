@@ -23,6 +23,7 @@ const MAX_CARDS = 8;
 
 export function Products() {
   const [heartAnim, setHeartAnim] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<Filter>("All");
   const [switching, setSwitching] = useState(false);
   const [top, setTop] = useState<Product[]>([]);
@@ -150,17 +151,38 @@ export function Products() {
         <div className={`sois-products-grid${switching ? " sois-switch" : ""}`}>
           {visible.map((p) => {
             const wished = isInWishlist(p.id);
+            const showHover = hoveredId === p.id && !!p.hoverImage;
             return (
               <article key={p.id} className="sois-pcard">
-                <div className="sois-pcard-img">
+                <div
+                  className="sois-pcard-img"
+                  onMouseEnter={() => setHoveredId(p.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
                   <Image
                     className="pc-img"
                     src={p.images[0]}
                     alt={p.name}
                     fill
                     sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 24vw"
-                    style={{ objectFit: "cover" }}
+                    style={{ objectFit: "cover", opacity: showHover ? 0 : 1, transition: "opacity 300ms ease" }}
                   />
+                  {p.hoverImage && (
+                    <Image
+                      className="pc-img"
+                      src={p.hoverImage}
+                      alt={p.name}
+                      fill
+                      sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 24vw"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        objectFit: "cover",
+                        opacity: showHover ? 1 : 0,
+                        transition: "opacity 300ms ease",
+                      }}
+                    />
+                  )}
                   <Link
                     href={`/product/${p.slug}`}
                     aria-label={p.name}

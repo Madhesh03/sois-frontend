@@ -41,6 +41,13 @@ export interface Product {
   originalPrice: number | null;
   sku: string;
   images: string[];
+  /**
+   * Shown in place of `images[0]` when a shopper hovers the product card — a
+   * second look (worn on-model, a different angle) that helps them decide
+   * without clicking through. Falls back to `images[1]` when not set
+   * explicitly, so a product with 2+ photos gets the effect for free.
+   */
+  hoverImage?: string;
   /** Optional 360° spin video shown as an extra media item in the gallery. */
   video360?: string;
   description: string;
@@ -135,6 +142,8 @@ interface Seed {
   price: number;
   originalPrice?: number;
   images: string[];
+  /** Explicit hover-image override; defaults to images[1] in buildProducts(). */
+  hoverImage?: string;
   description: string;
   specs: ProductSpec[];
   video360?: string;
@@ -185,6 +194,7 @@ function build(seeds: Seed[]): Product[] {
       originalPrice: onSale ? s.originalPrice! : null,
       sku: `SOIS-${catCode}-${String(i + 1).padStart(3, "0")}`,
       images: s.images,
+      hoverImage: s.hoverImage ?? s.images[1],
       video360: s.video360,
       description: s.description,
       specifications: [

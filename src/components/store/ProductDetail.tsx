@@ -145,20 +145,14 @@ export function ProductDetail({
       title: "Specifications",
       body: (
         <dl className="sois-spec-list">
-          {product.specifications.map((s) => (
-            <div key={s.label} className="sois-spec-row">
-              <dt>{s.label}</dt>
-              <dd>{s.value}</dd>
-            </div>
-          ))}
-          {!product.specifications.some(
-            (s) => s.label.trim().toLowerCase() === "sku"
-          ) && (
-            <div className="sois-spec-row">
-              <dt>SKU</dt>
-              <dd>{product.sku}</dd>
-            </div>
-          )}
+          {product.specifications
+            .filter((s) => s.label.trim().toLowerCase() !== "sku")
+            .map((s) => (
+              <div key={s.label} className="sois-spec-row">
+                <dt>{s.label}</dt>
+                <dd>{s.value}</dd>
+              </div>
+            ))}
         </dl>
       ),
     },
@@ -320,8 +314,6 @@ export function ProductDetail({
               <span className="sois-pdp-save">Save {discount}%</span>
             )}
           </div>
-
-          <div className="sois-pdp-sku">SKU: {product.sku}</div>
 
           <div
             className="sois-pdp-stock"

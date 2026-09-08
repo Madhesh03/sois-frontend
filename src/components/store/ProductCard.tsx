@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Heart } from "lucide-react";
@@ -12,6 +13,8 @@ export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
   const wished = isInWishlist(product.id);
+  const [hovered, setHovered] = useState(false);
+  const showHover = hovered && !!product.hoverImage;
 
   const cartPayload = {
     id: product.id,
@@ -22,7 +25,11 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="sois-scard">
-      <div className="sois-pcard-img">
+      <div
+        className="sois-pcard-img"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
         <Link
           href={`/product/${product.slug}`}
           aria-label={product.name}
@@ -34,8 +41,24 @@ export function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             sizes="(max-width: 767px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            style={{ objectFit: "cover" }}
+            style={{ objectFit: "cover", opacity: showHover ? 0 : 1, transition: "opacity 300ms ease" }}
           />
+          {product.hoverImage && (
+            <Image
+              className="pc-img"
+              src={product.hoverImage}
+              alt={product.name}
+              fill
+              sizes="(max-width: 767px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              style={{
+                position: "absolute",
+                inset: 0,
+                objectFit: "cover",
+                opacity: showHover ? 1 : 0,
+                transition: "opacity 300ms ease",
+              }}
+            />
+          )}
         </Link>
 
         {product.badge && (

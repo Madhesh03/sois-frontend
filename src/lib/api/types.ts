@@ -135,6 +135,8 @@ export interface ProductMedia {
   alt_text: string;
   sort_order: number;
   is_primary: boolean;
+  /** Shown in place of the primary image when a shopper hovers the product card. */
+  is_hover: boolean;
 }
 
 export interface ProductListItem {
@@ -158,6 +160,7 @@ export interface ProductListItem {
   is_featured: boolean;
   thumbnail_key: string;
   primary_image: { s3_key: string; alt_text: string } | null;
+  hover_image: { s3_key: string; alt_text: string } | null;
   created_at: string;
 }
 
@@ -173,6 +176,13 @@ export interface StoneDetail {
   weight: string;
   quality: string;
   count: number;
+}
+
+/** One labelled measurement, e.g. { label: "Chain length", value: "19", unit: "cm" }. */
+export interface ProductDimension {
+  label: string;
+  value: string;
+  unit: "mm" | "cm" | "in";
 }
 
 export interface ProductDetail {
@@ -194,6 +204,7 @@ export interface ProductDetail {
   purity: string;
   gross_weight: number | null;
   net_weight: number | null;
+  dimensions: ProductDimension[];
   stone_details: StoneDetail[];
   certificate_details: Record<string, unknown>;
   available_sizes: string;

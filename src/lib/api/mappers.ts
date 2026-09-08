@@ -13,6 +13,7 @@ import { mediaUrl, PLACEHOLDER_IMAGE } from "./media";
 import type {
   ApiCategory,
   ProductDetail,
+  ProductDimension,
   ProductListItem,
   StoneDetail,
 } from "./types";
@@ -91,6 +92,7 @@ export function mapListItem(p: ProductListItem): UIProduct {
     p.primary_image?.s3_key || p.thumbnail_key,
     PLACEHOLDER_IMAGE
   );
+  const hoverImage = p.hover_image?.s3_key ? mediaUrl(p.hover_image.s3_key) : undefined;
   const isNew =
     Date.now() - new Date(p.created_at).getTime() <
     30 * 24 * 60 * 60 * 1000;
@@ -104,6 +106,7 @@ export function mapListItem(p: ProductListItem): UIProduct {
     originalPrice: onSale ? Number(p.price) : null,
     sku: p.sku,
     images: [image],
+    hoverImage,
     description: "",
     specifications: [],
     silverDetails: "",
@@ -133,6 +136,9 @@ function specsFromDetail(p: ProductDetail): ProductSpec[] {
     specs.push({ label: "Gross Weight", value: `${p.gross_weight} g` });
   if (p.net_weight != null)
     specs.push({ label: "Net Weight", value: `${p.net_weight} g` });
+  (p.dimensions ?? []).forEach((d: ProductDimension) => {
+    if (d.label && d.value) specs.push({ label: d.label, value: `${d.value} ${d.unit}` });
+  });
   if (p.available_sizes)
     specs.push({
       label: "Sizes",
@@ -146,7 +152,6 @@ function specsFromDetail(p: ProductDetail): ProductSpec[] {
         .join(" · "),
     });
   });
-  if (p.sku) specs.push({ label: "SKU", value: p.sku });
   return specs;
 }
 
@@ -158,6 +163,7 @@ export function mapDetail(p: ProductDetail): UIProduct {
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((m) => mediaUrl(m.s3_key));
   const video = (p.media ?? []).find((m) => m.media_type === "video");
+  const hover = (p.media ?? []).find((m) => m.is_hover && m.media_type === "image");
   const gallery = images.length
     ? images
     : [mediaUrl(p.thumbnail_key, PLACEHOLDER_IMAGE)];
@@ -172,6 +178,7 @@ export function mapDetail(p: ProductDetail): UIProduct {
     originalPrice: onSale ? Number(p.price) : null,
     sku: p.sku,
     images: gallery,
+    hoverImage: hover ? mediaUrl(hover.s3_key) : undefined,
     video360: video ? mediaUrl(video.s3_key) : undefined,
     description: p.description ?? "",
     specifications: specsFromDetail(p),
