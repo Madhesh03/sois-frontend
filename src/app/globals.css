@@ -471,7 +471,7 @@ video {
 
 .sois-pcard-img {
   position: relative;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   background: #f3f4f6;
   overflow: hidden;
 }
@@ -3159,7 +3159,7 @@ video {
 }
 .sois-pdp-main-img {
   position: relative;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   border-radius: 16px;
   overflow: hidden;
   background: #f3f4f6;
@@ -3175,8 +3175,8 @@ video {
 }
 .sois-pdp-thumb {
   position: relative;
-  width: 72px;
-  height: 88px;
+  width: 80px;
+  height: 80px;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid transparent;
