@@ -1,6 +1,5 @@
 export const I = {
-  heroBannerShine: "/hero-banner-shine.png",
-  heroBannerCelebrate: "/hero-banner-celebrate.png",
+  heroBanner: "/hero-banner.jpg",
   heroModel:
     "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1000&h=1300&fit=crop&auto=format&q=85",
   heroSlide2:

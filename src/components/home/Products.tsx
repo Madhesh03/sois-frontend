@@ -165,7 +165,7 @@ export function Products() {
                     alt={p.name}
                     fill
                     sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 24vw"
-                    style={{ objectFit: "cover", opacity: showHover ? 0 : 1, transition: "opacity 300ms ease" }}
+                    style={{ objectFit: "contain", opacity: showHover ? 0 : 1, transition: "opacity 300ms ease" }}
                   />
                   {p.hoverImage && (
                     <Image
@@ -177,7 +177,7 @@ export function Products() {
                       style={{
                         position: "absolute",
                         inset: 0,
-                        objectFit: "cover",
+                        objectFit: "contain",
                         opacity: showHover ? 1 : 0,
                         transition: "opacity 300ms ease",
                       }}

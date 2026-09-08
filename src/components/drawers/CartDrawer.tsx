@@ -600,7 +600,7 @@ function ReviewOrder() {
               <img
                 src={item.image}
                 alt={item.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
               />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -1078,7 +1078,7 @@ export function CartDrawer() {
                           style={{
                             width: "100%",
                             height: "100%",
-                            objectFit: "cover",
+                            objectFit: "contain",
                           }}
                         />
                       </Link>

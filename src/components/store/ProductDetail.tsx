@@ -227,7 +227,7 @@ export function ProductDetail({
                 alt={product.name}
                 fill
                 sizes="(max-width: 900px) 100vw, 50vw"
-                style={{ objectFit: "cover" }}
+                style={{ objectFit: "contain" }}
                 priority
               />
             )}
@@ -279,7 +279,7 @@ export function ProductDetail({
                   alt=""
                   fill
                   sizes="80px"
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: "contain" }}
                 />
                 {m.type === "video" && (
                   <span className="sois-pdp-thumb-360">
