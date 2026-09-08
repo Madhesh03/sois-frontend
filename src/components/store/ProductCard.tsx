@@ -41,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             sizes="(max-width: 767px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            style={{ objectFit: "contain", opacity: showHover ? 0 : 1, transition: "opacity 300ms ease" }}
+            style={{ objectFit: "contain", opacity: showHover ? 0 : 1, transition: "opacity 300ms ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
           />
           {product.hoverImage && (
             <Image
@@ -55,7 +55,7 @@ export function ProductCard({ product }: { product: Product }) {
                 inset: 0,
                 objectFit: "contain",
                 opacity: showHover ? 1 : 0,
-                transition: "opacity 300ms ease",
+                transition: "opacity 300ms ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
             />
           )}

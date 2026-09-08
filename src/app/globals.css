@@ -476,6 +476,12 @@ video {
   overflow: hidden;
 }
 
+.pc-img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease;
+  transform-origin: center;
+  will-change: transform;
+}
+
 .sois-pcard-tag {
   position: absolute;
   top: 12px;
