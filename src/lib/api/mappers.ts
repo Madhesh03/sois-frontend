@@ -10,6 +10,9 @@ import type {
   ProductSpec,
 } from "@/lib/catalog";
 import { mediaUrl, PLACEHOLDER_IMAGE } from "./media";
+
+/** Shown as the last slide of every product's image gallery. */
+const BIS_CERTIFICATE_IMAGE = "/bis-certificate.png";
 import type {
   ApiCategory,
   ProductDetail,
@@ -164,9 +167,10 @@ export function mapDetail(p: ProductDetail): UIProduct {
     .map((m) => mediaUrl(m.s3_key));
   const video = (p.media ?? []).find((m) => m.media_type === "video");
   const hover = (p.media ?? []).find((m) => m.is_hover && m.media_type === "image");
-  const gallery = images.length
-    ? images
-    : [mediaUrl(p.thumbnail_key, PLACEHOLDER_IMAGE)];
+  const gallery = [
+    ...(images.length ? images : [mediaUrl(p.thumbnail_key, PLACEHOLDER_IMAGE)]),
+    BIS_CERTIFICATE_IMAGE,
+  ];
 
   return {
     id: p.id,

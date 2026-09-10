@@ -1,5 +1,16 @@
 export const I = {
-  heroBanner: "/hero-banner.jpg",
+  heroBanner: "/hero-banner-1.png",
+  heroBannerSlides: ["/hero-banner-1.png", "/hero-banner-2.png", "/hero-banner-3.png"],
+  bisCertificate: "/bis-certificate.png",
+  occasion1: "/occasion/occasion-1.png",
+  occasion2: "/occasion/occasion-2.png",
+  occasion3: "/occasion/occasion-3.png",
+  occasion4: "/occasion/occasion-4.png",
+  occasion5: "/occasion/occasion-5.png",
+  occasion6: "/occasion/occasion-6.png",
+  occasion7: "/occasion/occasion-7.png",
+  occasion8: "/occasion/occasion-8.png",
+  occasion9: "/occasion/occasion-9.png",
   heroModel:
     "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1000&h=1300&fit=crop&auto=format&q=85",
   heroSlide2:
