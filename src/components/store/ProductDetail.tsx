@@ -9,12 +9,9 @@ import {
   Share2,
   Minus,
   Plus,
-  Star,
   ChevronLeft,
   ChevronRight,
-  Truck,
   ShieldCheck,
-  RefreshCw,
   Rotate3d,
   Ruler,
 } from "lucide-react";
@@ -27,21 +24,6 @@ import { RecentlyViewed } from "@/components/store/RecentlyViewed";
 import { Modal } from "@/components/modals/Modal";
 import { RING_SIZE_CHART, RING_SIZE_TIPS } from "@/lib/sizeChart";
 import { recordRecentlyViewed } from "@/lib/recentlyViewed";
-
-function Stars({ rating }: { rating: number }) {
-  return (
-    <span style={{ display: "inline-flex", gap: 1 }} aria-hidden="true">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          size={14}
-          color={T.forest}
-          fill={i <= Math.round(rating) ? T.forest : "none"}
-        />
-      ))}
-    </span>
-  );
-}
 
 export function ProductDetail({
   product,
@@ -296,13 +278,6 @@ export function ProductDetail({
           <div className="sois-pdp-sub">{product.subtitle}</div>
           <h1 className="sois-pdp-name">{product.name}</h1>
 
-          <div className="sois-pdp-rating">
-            <Stars rating={product.rating} />
-            <span>
-              {product.rating.toFixed(1)} · {product.reviewCount} reviews
-            </span>
-          </div>
-
           <div className="sois-pdp-price-row">
             <span className="sois-pdp-price">{formatPrice(product.price)}</span>
             {product.originalPrice && (
@@ -428,12 +403,6 @@ export function ProductDetail({
 
           {/* Trust row */}
           <div className="sois-pdp-trust">
-            <span>
-              <Truck size={16} /> Free shipping over ₹999
-            </span>
-            <span>
-              <RefreshCw size={16} /> 30-day returns
-            </span>
             <span>
               <ShieldCheck size={16} /> Hallmarked 925
             </span>

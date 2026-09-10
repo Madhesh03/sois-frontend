@@ -71,6 +71,19 @@ export function CategoryGrid({ compact = false }: { compact?: boolean }) {
   // catalogue loads, so cards fall back to their static `meta` copy meanwhile.
   const [counts, setCounts] = useState<Partial<Record<CategorySlug, number>>>({});
   const trackRef = useRef<HTMLDivElement>(null);
+  // Arrows are only useful when the chips actually overflow their track —
+  // showing them on a row that already fits just reads as dead controls.
+  const [overflowing, setOverflowing] = useState(false);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const check = () => setOverflowing(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [compact]);
 
   useEffect(() => {
     let active = true;
@@ -99,8 +112,8 @@ export function CategoryGrid({ compact = false }: { compact?: boolean }) {
   const scrollByCard = (dir: -1 | 1) => {
     const el = trackRef.current;
     if (!el) return;
-    const card = el.querySelector<HTMLElement>(".sois-cat2-card");
-    const step = (card?.offsetWidth ?? 160) + 12;
+    const chip = el.querySelector<HTMLElement>(".sois-cat-chip");
+    const step = (chip?.offsetWidth ?? 110) + 24;
     el.scrollBy({ left: dir * step * 2, behavior: "smooth" });
   };
 
@@ -142,29 +155,45 @@ export function CategoryGrid({ compact = false }: { compact?: boolean }) {
 
       {compact ? (
         <div className="sois-cat-slider">
-          <button
-            type="button"
-            className="sois-cat-slide-btn sois-cat-slide-prev"
-            aria-label="Scroll categories left"
-            onClick={() => scrollByCard(-1)}
-          >
-            <ChevronLeft size={18} strokeWidth={2.4} />
-          </button>
+          {overflowing && (
+            <button
+              type="button"
+              className="sois-cat-slide-btn sois-cat-slide-prev"
+              aria-label="Scroll categories left"
+              onClick={() => scrollByCard(-1)}
+            >
+              <ChevronLeft size={18} strokeWidth={2.4} />
+            </button>
+          )}
 
-          <div className="sois-cat2-grid sois-cat2-grid--compact" ref={trackRef}>
+          <div className="sois-cat-chips" ref={trackRef}>
             {CATEGORIES.map((c) => (
-              <CategoryCard key={c.label} c={c} compact meta={metaFor(c)} priority={false} />
+              <Link key={c.label} href={c.href} className="sois-cat-chip">
+                <span className="sois-cat-chip-img">
+                  <Image
+                    src={c.img}
+                    alt=""
+                    fill
+                    sizes="120px"
+                    style={{ objectFit: "cover" }}
+                  />
+                </span>
+                <span className="sois-cat-chip-label">{c.label}</span>
+                <span className="sois-cat-chip-meta">{metaFor(c)}</span>
+              </Link>
             ))}
           </div>
 
-          <button
-            type="button"
-            className="sois-cat-slide-btn sois-cat-slide-next"
-            aria-label="Scroll categories right"
-            onClick={() => scrollByCard(1)}
-          >
-            <ChevronRight size={18} strokeWidth={2.4} />
-          </button>
+          {overflowing && (
+            <button
+              type="button"
+              className="sois-cat-slide-btn sois-cat-slide-next"
+              aria-label="Scroll categories right"
+              onClick={() => scrollByCard(1)}
+            >
+              <ChevronRight size={18} strokeWidth={2.4} />
+            </button>
+          )}
         </div>
       ) : (
         <div className="sois-cat2-grid">

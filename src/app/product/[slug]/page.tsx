@@ -47,15 +47,8 @@ export default async function ProductPage({
     description: product.description,
     sku: product.sku,
     brand: { "@type": "Brand", name: siteConfig.name },
-    ...(product.reviewCount > 0
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: product.rating,
-            reviewCount: product.reviewCount,
-          },
-        }
-      : {}),
+    // No aggregateRating: ratings aren't shown anywhere on the page, and
+    // Google requires review markup to match visible on-page content.
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",
