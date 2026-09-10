@@ -457,16 +457,16 @@ export function ProductDetail({
           isOpen={chartOpen}
           onClose={() => setChartOpen(false)}
           title="Size Chart"
-          size="md"
+          size="lg"
         >
           <div className="sois-sizechart">
             <Image
               src="/ring-size-chart.png"
               alt="Ring size chart — US sizes 3 to 13.5 with inside diameter in millimetres"
-              width={1024}
-              height={1536}
+              width={1448}
+              height={1086}
               className="sois-sizechart-image"
-              sizes="(max-width: 640px) 90vw, 560px"
+              sizes="(max-width: 800px) 90vw, 750px"
               priority
             />
           </div>
