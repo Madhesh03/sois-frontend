@@ -133,7 +133,7 @@ const CARE_DEFAULT = [
 ];
 
 const SILVER_DEFAULT =
-  "Crafted from hallmarked 925 sterling silver — 92.5% pure silver finished with a durable rhodium plating that resists tarnish. Nickel-free and hypoallergenic, so it stays gentle on sensitive skin.";
+  "Crafted from hallmarked 925 sterling silver — 92.5% pure silver finished with a durable rhodium plating. Nickel-free and hypoallergenic, so it stays gentle on sensitive skin.";
 
 /** Concise seed rows — expanded into full `Product` objects by `build()`. */
 interface Seed {

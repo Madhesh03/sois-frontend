@@ -14,6 +14,15 @@ export interface RazorpayOptions {
   image?: string;
   prefill?: { name?: string; email?: string; contact?: string };
   theme?: { color?: string };
+  /** Per-method toggles for the widget's payment options. */
+  method?: {
+    card?: boolean;
+    upi?: boolean;
+    netbanking?: boolean;
+    wallet?: boolean;
+    emi?: boolean;
+    paylater?: boolean;
+  };
   handler: (response: {
     razorpay_payment_id: string;
     razorpay_order_id: string;
@@ -69,6 +78,16 @@ export function loadRazorpayScript(): Promise<void> {
   return loadPromise;
 }
 
+/**
+ * Methods we don't offer at checkout. Kept here rather than at the call site
+ * so every checkout entry point gets the same set of payment options.
+ */
+const DISABLED_METHODS = {
+  wallet: false,
+  emi: false,
+  paylater: false,
+} as const;
+
 /** Load the script (if needed) and open the Razorpay widget. */
 export async function openRazorpayCheckout(
   options: RazorpayOptions
@@ -77,5 +96,8 @@ export async function openRazorpayCheckout(
   if (!window.Razorpay) {
     throw new Error("Razorpay checkout failed to initialise.");
   }
-  new window.Razorpay(options).open();
+  new window.Razorpay({
+    ...options,
+    method: { ...DISABLED_METHODS, ...options.method },
+  }).open();
 }

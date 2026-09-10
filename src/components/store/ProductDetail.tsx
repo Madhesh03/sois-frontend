@@ -298,7 +298,7 @@ export function ProductDetail({
               className="sois-pdp-stock-dot"
               style={{ background: canPurchase ? T.forest : "#d4183d" }}
             />
-            {canPurchase ? "In stock — ships within 24h" : "Out of stock"}
+            {canPurchase ? "In stock" : "Out of stock"}
           </div>
 
           {/* Size selector — only for sized products (rings, bangles) */}

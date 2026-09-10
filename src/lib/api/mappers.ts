@@ -188,7 +188,7 @@ export function mapDetail(p: ProductDetail): UIProduct {
     specifications: specsFromDetail(p),
     silverDetails:
       p.metal_type === "silver"
-        ? "Crafted from hallmarked 925 sterling silver — 92.5% pure silver with a durable, tarnish-resistant finish. Nickel-free and hypoallergenic."
+        ? "Crafted from hallmarked 925 sterling silver — 92.5% pure silver with a durable finish. Nickel-free and hypoallergenic."
         : p.description ?? "",
     care: p.care_instruction
       ? p.care_instruction.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)

@@ -373,8 +373,9 @@ video {
    where cramped overlay labels looked busy under the page hero. */
 .sois-section.sois-categories--compact {
   padding: 34px 56px 30px;
-  background: #ffffff;
-  border-bottom: 1px solid #eef1ef;
+  /* Sits inside the store shell's own background — an explicit white here
+     read as an odd band between the grey page hero and listing. */
+  background: transparent;
 }
 
 @media (max-width: 1024px) {
