@@ -3707,6 +3707,13 @@ video {
 }
 
 /* Size chart (inside the shared Modal) */
+.sois-sizechart-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
 .sois-sizechart-table {
   width: 100%;
   border-collapse: collapse;
