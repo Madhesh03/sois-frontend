@@ -384,9 +384,31 @@ video {
   }
 }
 
+/* Fixed-size cards in a horizontally scrollable track — 8 categories never
+   fit (or shrink to illegibility) at any viewport, so this slides instead of
+   wrapping/shrinking like the full-size grid. */
+.sois-cat-slider {
+  position: relative;
+}
+
 .sois-cat2-grid--compact {
-  grid-template-columns: repeat(8, 1fr);
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
   gap: 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 2px;
+}
+
+.sois-cat2-grid--compact::-webkit-scrollbar {
+  display: none;
+}
+
+.sois-cat2-grid--compact .sois-cat2-card {
+  flex: 0 0 auto;
+  width: 156px;
+  scroll-snap-align: start;
 }
 
 .sois-cat2-grid--compact .sois-cat2-label {
@@ -402,17 +424,64 @@ video {
   padding: 10px 8px 12px;
 }
 
+.sois-cat-slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #d8ddd9;
+  background: #ffffff;
+  color: #10201d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.sois-cat-slide-btn:hover {
+  background: #f2f4f2;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+}
+
+.sois-cat-slide-prev {
+  left: -14px;
+}
+
+.sois-cat-slide-next {
+  right: -14px;
+}
+
 @media (max-width: 1024px) {
-  .sois-cat2-grid--compact {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+  .sois-cat2-grid--compact .sois-cat2-card {
+    width: 136px;
   }
 }
 
 @media (max-width: 600px) {
   .sois-cat2-grid--compact {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 10px;
+  }
+
+  .sois-cat2-grid--compact .sois-cat2-card {
+    width: 118px;
+  }
+
+  .sois-cat-slide-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sois-cat-slide-prev {
+    left: -8px;
+  }
+
+  .sois-cat-slide-next {
+    right: -8px;
   }
 }
 

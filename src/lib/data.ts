@@ -18,14 +18,20 @@ export const I = {
   heroSlide3:
     "https://images.unsplash.com/photo-1633934542430-0905ccb5f050?w=1000&h=1300&fit=crop&auto=format&q=85",
   ringWhite: "/categories/rings.png",
+  ringWhiteHover: "/categories/rings-hover.png",
   earrings: "/categories/earrings.png",
+  earringsHover: "/categories/earrings-hover.png",
   necklace: "/categories/necklaces.png",
+  necklaceHover: "/categories/necklaces-hover.png",
   bracelets: "/categories/bracelets.png",
+  braceletsHover: "/categories/bracelets-hover.png",
   anklets:
     "https://images.unsplash.com/photo-1669975107668-efe29cd49789?w=600&h=700&fit=crop&auto=format&q=85",
   heartPend: "/categories/pendant-chains.png",
+  heartPendHover: "/categories/pendant-chains-hover.png",
   giftBox: "/categories/gift-box.png",
   prod1: "/categories/all-products.png",
+  prod1Hover: "/categories/all-products-hover.png",
   prod2:
     "https://images.unsplash.com/photo-1639660680788-bf160240864e?w=600&h=720&fit=crop&auto=format&q=85",
   prod3:
@@ -41,6 +47,7 @@ export const I = {
   commitmentTexture:
     "https://images.unsplash.com/photo-1624588057318-5f1b2eb81012?w=700&h=460&fit=crop&auto=format&q=85",
   signatureModel: "/categories/sets.png",
+  signatureModelHover: "/categories/sets-hover.png",
   brandStoryHands: "/hero-campaign.png",
 } as const;
 

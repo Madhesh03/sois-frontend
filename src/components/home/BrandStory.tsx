@@ -8,17 +8,6 @@ export function BrandStory() {
   return (
     <section className="sois-section sois-story" aria-labelledby="story-heading">
       <div className="sois-story-grid">
-        <div className="sois-story-img">
-          <Image
-            className="story-img-tile"
-            src={I.brandStoryHands}
-            alt="Two sisters wearing SOIS sterling silver jewellery, holding hands"
-            fill
-            sizes="(max-width: 767px) 100vw, 45vw"
-            style={{ objectFit: "cover", objectPosition: "top" }}
-          />
-        </div>
-
         <div>
           <Eyebrow>OUR STORY</Eyebrow>
           <h2
@@ -42,6 +31,17 @@ export function BrandStory() {
               Be Yourself. Own Your Shine.
             </span>
           </Link>
+        </div>
+
+        <div className="sois-story-img">
+          <Image
+            className="story-img-tile"
+            src={I.brandStoryHands}
+            alt="Two sisters wearing SOIS sterling silver jewellery, holding hands"
+            fill
+            sizes="(max-width: 767px) 100vw, 45vw"
+            style={{ objectFit: "cover", objectPosition: "50% 35%" }}
+          />
         </div>
       </div>
     </section>

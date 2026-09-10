@@ -13,6 +13,17 @@ export function CraftsmanshipFocus() {
   return (
     <section className="sois-section sois-craft" aria-labelledby="craft-heading">
       <div className="sois-craft-grid">
+        <div className="sois-craft-img" style={{ background: "#10201d" }}>
+          <Image
+            className="craft-img-tile"
+            src={I.bisCertificate}
+            alt="SOIS BIS hallmark certificate of registration"
+            fill
+            sizes="(max-width: 767px) 100vw, 45vw"
+            style={{ objectFit: "contain" }}
+          />
+        </div>
+
         <div>
           <Eyebrow>CERTIFIED PURITY</Eyebrow>
           <h2
@@ -47,17 +58,6 @@ export function CraftsmanshipFocus() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="sois-craft-img" style={{ background: "#10201d" }}>
-          <Image
-            className="craft-img-tile"
-            src={I.bisCertificate}
-            alt="SOIS BIS hallmark certificate of registration"
-            fill
-            sizes="(max-width: 767px) 100vw, 45vw"
-            style={{ objectFit: "contain" }}
-          />
         </div>
       </div>
     </section>
