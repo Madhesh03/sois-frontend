@@ -3,16 +3,23 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { I } from "@/lib/data";
+
+const SLIDE_DURATION = 5000;
 
 export function Hero() {
   const slides = I.heroBannerSlides;
+  const n = slides.length;
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setActive((a) => (a + 1) % slides.length), 5000);
+    const id = setInterval(() => setActive((a) => (a + 1) % n), SLIDE_DURATION);
     return () => clearInterval(id);
-  }, [slides.length]);
+  }, [n]);
+
+  const goPrev = () => setActive((a) => (a - 1 + n) % n);
+  const goNext = () => setActive((a) => (a + 1) % n);
 
   return (
     <section className="sois-hero" aria-labelledby="hero-heading">
@@ -20,54 +27,65 @@ export function Hero() {
         Jewellery made to celebrate who you are
       </h1>
 
-      <Link
-        href="/shop"
+      <div
         className="sois-hero-image"
-        aria-label="Shop the new collection"
-        style={{ position: "relative", display: "block", overflow: "hidden", background: "#10201d" }}
+        style={{ position: "relative", overflow: "hidden", background: "#10201d" }}
       >
-        {slides.map((src, i) => (
-          <Image
-            key={src}
-            src={src}
-            alt="Jewellery made to celebrate who you are"
-            fill
-            priority={i === 0}
-            sizes="100vw"
-            style={{
-              objectFit: "cover",
-              objectPosition: "center",
-              opacity: i === active ? 1 : 0,
-              transition: "opacity 1s ease",
-            }}
-          />
-        ))}
-
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            bottom: 20,
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: 8,
-            zIndex: 2,
-          }}
+        <Link
+          href="/shop"
+          aria-label="Shop the new collection"
+          style={{ position: "absolute", inset: 0, display: "block" }}
         >
           {slides.map((src, i) => (
-            <span
+            <Image
               key={src}
+              src={src}
+              alt="Jewellery made to celebrate who you are"
+              fill
+              priority={i === 0}
+              sizes="100vw"
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: i === active ? "#fff" : "rgba(255,255,255,0.45)",
-                transition: "background 0.3s",
+                objectFit: "cover",
+                objectPosition: "center",
+                opacity: i === active ? 1 : 0,
+                transition: "opacity 1s ease",
               }}
             />
           ))}
+        </Link>
+
+        <div className="sois-hero-controls">
+          <div className="sois-hero-counter">
+            <span>
+              {active + 1} / {n}
+            </span>
+            <div className="sois-hero-progress-track">
+              <div
+                key={active}
+                className="sois-hero-progress-fill"
+                style={{ animationDuration: `${SLIDE_DURATION}ms` }}
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="sois-hero-arrow"
+            aria-label="Previous slide"
+            onClick={goPrev}
+          >
+            <ChevronLeft size={18} strokeWidth={2.4} />
+          </button>
+          <button
+            type="button"
+            className="sois-hero-arrow"
+            aria-label="Next slide"
+            onClick={goNext}
+          >
+            <ChevronRight size={18} strokeWidth={2.4} />
+          </button>
         </div>
-      </Link>
+      </div>
     </section>
   );
 }

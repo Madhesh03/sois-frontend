@@ -96,6 +96,99 @@ video {
   height: 46vw;
 }
 
+/* ─── Hero — slide counter + arrow controls (bottom-left) ─── */
+.sois-hero-controls {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sois-hero-counter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.sois-hero-counter span {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.sois-hero-progress-track {
+  width: 56px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sois-hero-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #fff;
+  border-radius: 2px;
+  animation-name: sois-hero-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes sois-hero-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.sois-hero-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #10201d;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.sois-hero-arrow:hover {
+  background: #e9ece7;
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sois-hero-progress-fill {
+    animation: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .sois-hero-controls {
+    left: 16px;
+    bottom: 16px;
+    gap: 10px;
+  }
+
+  .sois-hero-arrow {
+    width: 34px;
+    height: 34px;
+  }
+}
+
 .sois-sr-only {
   position: absolute;
   width: 1px;
