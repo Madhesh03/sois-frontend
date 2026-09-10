@@ -3706,56 +3706,15 @@ video {
   text-decoration: underline;
 }
 
-/* Size chart (inside the shared Modal) */
+/* Size chart (inside the shared Modal) — the chart graphic is the whole
+   content, so it fills the modal edge to edge under the header. */
+.sois-sizechart {
+  margin: -24px;
+}
 .sois-sizechart-image {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 10px;
-  margin-bottom: 18px;
-}
-.sois-sizechart-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-}
-.sois-sizechart-table th,
-.sois-sizechart-table td {
-  padding: 9px 12px;
-  text-align: left;
-  border-bottom: 1px solid #ececec;
-}
-.sois-sizechart-table th {
-  font-size: 0.74rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #6b6b6b;
-}
-.sois-sizechart-table tr.offered td {
-  background: #f0f7f6;
-  font-weight: 600;
-  color: #115e59;
-}
-.sois-sizechart-note {
-  margin: 12px 0 0;
-  font-size: 0.8rem;
-  color: #6b6b6b;
-}
-.sois-sizechart-subtitle {
-  margin: 22px 0 8px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0a0a0a;
-}
-.sois-sizechart-tips {
-  margin: 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 7px;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #4a4a4a;
 }
 .sois-pdp-actions {
   display: flex;

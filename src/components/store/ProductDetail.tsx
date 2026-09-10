@@ -22,7 +22,6 @@ import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/store/ProductCard";
 import { RecentlyViewed } from "@/components/store/RecentlyViewed";
 import { Modal } from "@/components/modals/Modal";
-import { RING_SIZE_CHART, RING_SIZE_TIPS } from "@/lib/sizeChart";
 import { recordRecentlyViewed } from "@/lib/recentlyViewed";
 
 export function ProductDetail({
@@ -457,7 +456,7 @@ export function ProductDetail({
         <Modal
           isOpen={chartOpen}
           onClose={() => setChartOpen(false)}
-          title="Ring size guide"
+          title="Size Chart"
           size="md"
         >
           <div className="sois-sizechart">
@@ -467,47 +466,9 @@ export function ProductDetail({
               width={1024}
               height={1536}
               className="sois-sizechart-image"
-              sizes="(max-width: 600px) 100vw, 480px"
+              sizes="(max-width: 640px) 90vw, 560px"
+              priority
             />
-
-            <table className="sois-sizechart-table">
-              <thead>
-                <tr>
-                  <th scope="col">Size (US)</th>
-                  <th scope="col">Inside diameter</th>
-                  <th scope="col">Inside circumference</th>
-                </tr>
-              </thead>
-              <tbody>
-                {RING_SIZE_CHART.map((row) => {
-                  const offered = sizes.some((s) => s.size === row.us);
-                  return (
-                    <tr
-                      key={row.us}
-                      className={offered ? "offered" : undefined}
-                    >
-                      <td>
-                        {row.us}
-                        {offered ? " ·" : ""}
-                      </td>
-                      <td>{row.diameterMm.toFixed(1)} mm</td>
-                      <td>{row.circumferenceMm.toFixed(1)} mm</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-
-            <p className="sois-sizechart-note">
-              Highlighted rows are the sizes this piece is made in.
-            </p>
-
-            <h3 className="sois-sizechart-subtitle">How to measure</h3>
-            <ul className="sois-sizechart-tips">
-              {RING_SIZE_TIPS.map((tip) => (
-                <li key={tip}>{tip}</li>
-              ))}
-            </ul>
           </div>
         </Modal>
       )}

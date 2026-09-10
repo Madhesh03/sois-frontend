@@ -52,7 +52,11 @@ export function Modal({
           bottom: 0,
           background: "rgba(0, 0, 0, 0.5)",
           backdropFilter: "blur(4px)",
-          zIndex: 40,
+          // Above the sticky nav (100) and CartDrawer (9998/9999), below
+          // AuthDrawer (10998/10999) so sign-in always stays reachable.
+          // At the old 40/50 the nav painted straight over the modal,
+          // swallowing its title bar and close button.
+          zIndex: 10500,
           animation: "fadeIn 0.3s ease-out",
         }}
         onClick={onClose}
@@ -71,7 +75,7 @@ export function Modal({
           background: T.white,
           borderRadius: "16px",
           boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
-          zIndex: 50,
+          zIndex: 10501,
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
