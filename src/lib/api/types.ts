@@ -461,3 +461,9 @@ export interface TrackingInfo {
   delivered_at: string | null;
   events: ShipmentEvent[];
 }
+
+export interface PincodeServiceability {
+  pincode: string;
+  serviceable: boolean;
+  estimated_delivery_days: number | null;
+}

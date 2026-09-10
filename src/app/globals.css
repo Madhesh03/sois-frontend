@@ -140,6 +140,19 @@ video {
   animation-fill-mode: forwards;
 }
 
+.sois-spin {
+  animation: sois-spin 0.8s linear infinite;
+}
+
+@keyframes sois-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes sois-hero-progress {
   from {
     width: 0%;

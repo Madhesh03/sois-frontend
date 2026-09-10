@@ -14,8 +14,11 @@
  */
 import {
   getAccessToken,
+  getRefreshToken,
   getSessionKey,
   peekSessionKey,
+  setAccessToken,
+  setTokens,
 } from "./session";
 
 export const API_BASE_URL =
@@ -172,11 +175,55 @@ async function parse<T>(res: Response): Promise<{ data: T; meta?: unknown }> {
   });
 }
 
+/**
+ * The 30-minute customer access token has no silent-refresh path of its own —
+ * this dedupes concurrent 401s into a single call to /auth/customer/refresh/
+ * so a page with several in-flight requests doesn't fire the refresh request
+ * once per request.
+ */
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefreshToken(): Promise<boolean> {
+  const refresh = getRefreshToken();
+  if (!refresh) return false;
+
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        const res = await fetch(buildUrl("/auth/customer/refresh/"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ refresh }),
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          setTokens(null);
+          return false;
+        }
+        const body = await res.json().catch(() => null);
+        const access = body?.data?.access;
+        if (!access) {
+          setTokens(null);
+          return false;
+        }
+        setAccessToken(access);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+  }
+  return refreshPromise;
+}
+
 async function request<T>(
   method: string,
   path: string,
   bodyData: unknown,
-  opts: RequestOptions = {}
+  opts: RequestOptions = {},
+  _retriedAfterRefresh = false
 ): Promise<{ data: T; meta?: unknown }> {
   const hasBody = bodyData !== undefined && method !== "GET";
   let res: Response;
@@ -197,6 +244,24 @@ async function request<T>(
       details: err instanceof Error ? err.message : String(err),
     });
   }
+
+  // Expired access token: refresh once and retry the original request before
+  // surfacing an error. Skipped for calls that opted out of auth (login,
+  // register) and for the retry itself, to avoid looping on a dead refresh
+  // token.
+  if (
+    res.status === 401 &&
+    opts.auth !== false &&
+    !_retriedAfterRefresh &&
+    getAccessToken() &&
+    getRefreshToken()
+  ) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      return request<T>(method, path, bodyData, opts, true);
+    }
+  }
+
   return parse<T>(res);
 }
 

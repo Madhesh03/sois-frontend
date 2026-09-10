@@ -9,6 +9,8 @@ import { T } from "@/lib/tokens";
 import { formatPrice } from "@/lib/catalog";
 import { checkoutApi, ApiError } from "@/lib/api";
 import { openRazorpayCheckout } from "@/lib/razorpay";
+import { usePincodeCheck } from "@/hooks/usePincodeCheck";
+import { PincodeStatusLine } from "@/components/PincodeStatusLine";
 import {
   X,
   Trash2,
@@ -59,6 +61,7 @@ function ShippingForm() {
     pincode: shippingInfo?.pincode ?? "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const pincodeStatus = usePincodeCheck(formData.pincode);
 
   const proceed = (info: ShippingInfo) => {
     setShippingInfo(info);
@@ -80,6 +83,8 @@ function ShippingForm() {
     if (!formData.city) newErrors.city = "Required";
     if (!formData.state) newErrors.state = "Required";
     if (!formData.pincode) newErrors.pincode = "Required";
+    else if (pincodeStatus.state === "unserviceable")
+      newErrors.pincode = "Not deliverable to this pincode";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -423,21 +428,27 @@ function ShippingForm() {
             value={formData.pincode}
             onChange={handleChange}
             placeholder="Pincode"
+            inputMode="numeric"
+            maxLength={6}
             style={{
               width: "100%",
               padding: "10px 12px",
               fontSize: "0.9rem",
-              border: `1px solid ${errors.pincode ? "#d4183d" : T.border}`,
+              border: `1px solid ${
+                errors.pincode || pincodeStatus.state === "unserviceable" ? "#d4183d" : T.border
+              }`,
               borderRadius: "8px",
               background: T.surface,
               boxSizing: "border-box",
             }}
           />
+          <PincodeStatusLine status={pincodeStatus} />
         </div>
       </div>
 
       <button
         type="submit"
+        disabled={pincodeStatus.state === "checking"}
         style={{
           width: "100%",
           padding: "12px",
@@ -449,7 +460,8 @@ function ShippingForm() {
           color: T.white,
           border: "none",
           borderRadius: "8px",
-          cursor: "pointer",
+          cursor: pincodeStatus.state === "checking" ? "not-allowed" : "pointer",
+          opacity: pincodeStatus.state === "checking" ? 0.7 : 1,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -919,8 +931,20 @@ export function CartDrawer() {
     setCheckoutStep,
     getTotal,
   } = useCart();
+  const { isAuthenticated, openModal } = useAuth();
 
   if (!cartOpen) return null;
+
+  // Sign-in is required to check out (Confirm & Pay also re-checks this as
+  // a last-line guard, but catching it here means a guest never fills out
+  // an address just to be told to sign in at the very last step).
+  const goToCheckout = () => {
+    if (!isAuthenticated) {
+      openModal("login");
+      return;
+    }
+    setCheckoutStep("shipping");
+  };
 
   // Previous step for the header back button. Cart is the first step and
   // confirmation is terminal (order placed), so neither shows a back button.
@@ -1238,7 +1262,7 @@ export function CartDrawer() {
             </div>
 
             <button
-              onClick={() => setCheckoutStep("shipping")}
+              onClick={goToCheckout}
               style={{
                 width: "100%",
                 padding: "12px",

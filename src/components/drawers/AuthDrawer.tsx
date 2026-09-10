@@ -588,7 +588,10 @@ export function AuthDrawer() {
           bottom: 0,
           background: "rgba(0, 0, 0, 0.5)",
           backdropFilter: "blur(4px)",
-          zIndex: 9998,
+          // Above CartDrawer's 9998/9999 — sign-in can be triggered while
+          // the cart drawer is still open (e.g. from checkout), and must
+          // render on top of it rather than behind it.
+          zIndex: 10998,
           animation: "fadeIn 0.3s ease-out",
         }}
         onClick={closeModal}
@@ -605,7 +608,7 @@ export function AuthDrawer() {
           maxWidth: 450,
           background: T.white,
           boxShadow: "-20px 0 60px rgba(0, 0, 0, 0.3)",
-          zIndex: 9999,
+          zIndex: 10999,
           display: "flex",
           flexDirection: "column",
           animation: "slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1)",

@@ -37,6 +37,12 @@ export function setTokens(tokens: TokenPair | null) {
   }
 }
 
+/** Updates just the access token — used after a silent refresh. */
+export function setAccessToken(token: string) {
+  if (!isBrowser()) return;
+  window.localStorage.setItem(ACCESS_KEY, token);
+}
+
 export function isAuthenticated(): boolean {
   return getAccessToken() !== null;
 }

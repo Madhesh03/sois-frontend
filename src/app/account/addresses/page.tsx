@@ -4,6 +4,8 @@ import { useState } from "react";
 import { MapPin, Plus, Trash2, Pencil } from "lucide-react";
 import { AccountShell } from "@/components/account/AccountShell";
 import { useCart, ShippingInfo } from "@/context/CartContext";
+import { usePincodeCheck } from "@/hooks/usePincodeCheck";
+import { PincodeStatusLine } from "@/components/PincodeStatusLine";
 
 const EMPTY: ShippingInfo = {
   fullName: "",
@@ -32,6 +34,7 @@ export default function AddressesPage() {
   const [editing, setEditing] = useState<null | "new" | ShippingInfo>(null);
   const [form, setForm] = useState<ShippingInfo>(EMPTY);
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const pincodeStatus = usePincodeCheck(form.pincode);
 
   const openAdd = () => {
     setForm(EMPTY);
@@ -57,6 +60,7 @@ export default function AddressesPage() {
     (Object.keys(form) as (keyof ShippingInfo)[]).forEach((k) => {
       if (k !== "email" && !form[k]) errs[k] = true;
     });
+    if (pincodeStatus.state === "unserviceable") errs.pincode = true;
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
@@ -98,20 +102,32 @@ export default function AddressesPage() {
                 <span className="sois-address-form-label">{f.label}</span>
                 <input
                   value={form[f.name] ?? ""}
+                  inputMode={f.name === "pincode" ? "numeric" : undefined}
+                  maxLength={f.name === "pincode" ? 6 : undefined}
                   onChange={(e) => {
                     setForm((p) => ({ ...p, [f.name]: e.target.value }));
                     if (errors[f.name])
                       setErrors((p) => ({ ...p, [f.name]: false }));
                   }}
                   style={{
-                    borderColor: errors[f.name] ? "#d4183d" : undefined,
+                    borderColor:
+                      errors[f.name] || (f.name === "pincode" && pincodeStatus.state === "unserviceable")
+                        ? "#d4183d"
+                        : undefined,
                   }}
                 />
+                {f.name === "pincode" && (
+                  <PincodeStatusLine status={pincodeStatus} />
+                )}
               </label>
             ))}
           </div>
           <div className="sois-address-form-actions">
-            <button type="submit" className="sois-account-cta">
+            <button
+              type="submit"
+              className="sois-account-cta"
+              disabled={pincodeStatus.state === "checking"}
+            >
               {editing === "new" ? "Save Address" : "Update Address"}
             </button>
             <button
