@@ -1678,6 +1678,13 @@ video {
   .sois-personalisation {
     padding: 92px 96px;
   }
+
+  /* Hero — fill the viewport below the nav so the whole banner reads on
+     landing, no scroll needed, instead of the width-locked aspect ratio
+     used on smaller screens. */
+  .sois-hero-image {
+    height: clamp(560px, calc(100vh - 118px), 860px);
+  }
 }
 
 /* ─── Mobile: 320px – 767px ─── */
