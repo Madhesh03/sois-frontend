@@ -1250,6 +1250,39 @@ video {
   position: relative;
   overflow: hidden;
   min-height: 520px;
+  border-radius: 18px;
+  box-shadow: 0 28px 60px -24px rgba(17, 94, 89, 0.32);
+}
+
+.sois-story-quote-mark {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 4.5rem;
+  line-height: 1;
+  color: #cee8d2;
+  margin-bottom: -18px;
+}
+
+.sois-story-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #115e59;
+  border: 1px solid #115e59;
+  padding: 13px 28px;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.sois-story-cta:hover {
+  background: #115e59;
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 /* ─── FAQ — homepage section (desktop) ─── */
