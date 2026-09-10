@@ -8,7 +8,7 @@ import { StoreShell } from "@/components/store/StoreShell";
 const FAQS: { q: string; a: React.ReactNode }[] = [
   {
     q: "What is your jewellery made of?",
-    a: "Every SOIS piece is crafted from hallmarked 925 sterling silver — 92.5% pure silver with a durable, tarnish-resistant rhodium finish. It’s nickel-free and hypoallergenic, so it’s gentle on sensitive skin.",
+    a: "Every SOIS piece is crafted from hallmarked 925 sterling silver — 92.5% pure silver with a durable rhodium finish. It’s nickel-free and hypoallergenic, so it’s gentle on sensitive skin.",
   },
   {
     q: "How do I care for my sterling silver?",
@@ -42,8 +42,8 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
     q: "What is your return and refund policy?",
     a: (
       <>
-        You can return eligible items within 30 days of delivery. See our{" "}
-        <Link href="/return-policy">Return Policy</Link> and{" "}
+        Eligible items can be returned once the conditions in our policy are
+        met. See our <Link href="/return-policy">Return Policy</Link> and{" "}
         <Link href="/refund-policy">Refund Policy</Link> for full details.
       </>
     ),

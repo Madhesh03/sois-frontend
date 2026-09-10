@@ -37,7 +37,7 @@ export function BrandStory() {
             alt="Two sisters wearing SOIS sterling silver jewellery, holding hands"
             fill
             sizes="(max-width: 767px) 100vw, 45vw"
-            style={{ objectFit: "cover", objectPosition: "50% 35%" }}
+            style={{ objectFit: "cover", objectPosition: "50% 68%" }}
           />
         </div>
       </div>

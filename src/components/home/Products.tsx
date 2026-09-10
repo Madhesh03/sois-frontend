@@ -158,6 +158,11 @@ export function Products() {
                   className="sois-pcard-img"
                   onMouseEnter={() => setHoveredId(p.id)}
                   onMouseLeave={() => setHoveredId(null)}
+                  // Touch has no hover, so pressing the card reveals the
+                  // second shot the same way hovering does on desktop.
+                  onTouchStart={() => setHoveredId(p.id)}
+                  onTouchEnd={() => setHoveredId(null)}
+                  onTouchCancel={() => setHoveredId(null)}
                 >
                   <Image
                     className="pc-img"

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { StoreShell } from "@/components/store/StoreShell";
 import { ProductListing } from "@/components/store/ProductListing";
+import { CategoryGrid } from "@/components/home/CategoryGrid";
 import {
   categories,
   getCategoryBySlug,
@@ -26,7 +27,7 @@ export async function generateMetadata({
   if (!category) return { title: "Category" };
   return {
     title: `${category.name} — 925 Sterling Silver`,
-    description: `Shop SOIS ${category.name.toLowerCase()} — ${category.tagline}. Hallmarked 925 sterling silver, free shipping over ₹999.`,
+    description: `Shop SOIS ${category.name.toLowerCase()} — ${category.tagline}. Hallmarked 925 sterling silver, nickel-free and hypoallergenic.`,
   };
 }
 
@@ -59,6 +60,8 @@ export default async function CategoryPage({
         <h1 className="sois-page-hero-title">{category.name}</h1>
         <p className="sois-page-hero-sub">{category.tagline}</p>
       </section>
+
+      <CategoryGrid compact />
 
       <section className="sois-listing">
         <Suspense fallback={<div className="sois-listing-layout" />}>

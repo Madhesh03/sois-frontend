@@ -29,6 +29,11 @@ export function ProductCard({ product }: { product: Product }) {
         className="sois-pcard-img"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        // Touch has no hover, so pressing the card reveals the second shot
+        // the same way hovering does on desktop.
+        onTouchStart={() => setHovered(true)}
+        onTouchEnd={() => setHovered(false)}
+        onTouchCancel={() => setHovered(false)}
       >
         <Link
           href={`/product/${product.slug}`}

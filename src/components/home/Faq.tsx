@@ -10,10 +10,6 @@ const faqs = [
     a: "Orders are processed within 1–3 business days, and standard shipping usually takes 3–7 business days depending on your location. You'll receive a tracking link by email/SMS as soon as your order is dispatched.",
   },
   {
-    q: "Do you offer free shipping?",
-    a: "Yes — enjoy free shipping on all orders above ₹1,500. For orders below that, a flat shipping fee of ₹99 applies.",
-  },
-  {
     q: "Can I cancel or change my order after it's placed?",
     a: "To keep dispatch times fast, orders are processed immediately and cannot be cancelled, modified, or changed once placed. Please double-check your shipping details and item choices before completing payment.",
   },
