@@ -162,26 +162,6 @@ video {
   }
 }
 
-.sois-hero-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: #fff;
-  color: #10201d;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-  flex-shrink: 0;
-}
-
-.sois-hero-arrow:hover {
-  background: #e9ece7;
-  transform: translateY(-1px);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .sois-hero-progress-fill {
     animation: none;
@@ -193,12 +173,6 @@ video {
   .sois-hero-controls {
     left: 16px;
     bottom: 16px;
-    gap: 10px;
-  }
-
-  .sois-hero-arrow {
-    width: 34px;
-    height: 34px;
   }
 }
 
@@ -390,6 +364,55 @@ video {
     opacity: 1;
     transform: none;
     font-size: 0.55rem;
+  }
+}
+
+/* ─── Compact category strip (shop/collections page) — same cards, smaller ─── */
+.sois-section.sois-categories--compact {
+  padding: 32px 56px 28px;
+}
+
+@media (max-width: 1024px) {
+  .sois-section.sois-categories--compact {
+    padding: 28px 32px 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sois-section.sois-categories--compact {
+    padding: 20px 16px;
+  }
+}
+
+.sois-cat2-grid--compact {
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+}
+
+.sois-cat2-grid--compact .sois-cat2-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+}
+
+.sois-cat2-grid--compact .sois-cat2-cta {
+  display: none;
+}
+
+.sois-cat2-grid--compact .sois-cat2-body {
+  padding: 10px 8px 12px;
+}
+
+@media (max-width: 1024px) {
+  .sois-cat2-grid--compact {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sois-cat2-grid--compact {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 }
 

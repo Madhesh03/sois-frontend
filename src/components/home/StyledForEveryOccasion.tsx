@@ -7,15 +7,15 @@ import { I } from "@/lib/data";
 import { T } from "@/lib/tokens";
 
 const slides = [
-  { label: "Everyday Shine", image: I.occasion1 },
-  { label: "Festive Glam", image: I.occasion2 },
-  { label: "Office Elegance", image: I.occasion3 },
-  { label: "Date Night", image: I.occasion4 },
-  { label: "Wedding Sparkle", image: I.occasion5 },
-  { label: "After Hours", image: I.occasion6 },
-  { label: "Defined Impression", image: I.occasion7 },
-  { label: "Night Out", image: I.occasion8 },
-  { label: "Gifted Moments", image: I.occasion9 },
+  { label: "Evening Glam", image: I.occasion1 },
+  { label: "Everyday Charm", image: I.occasion2 },
+  { label: "Lazy Sunday", image: I.occasion3 },
+  { label: "Wedding Sparkle", image: I.occasion4 },
+  { label: "Date Night", image: I.occasion5 },
+  { label: "Journaling Moments", image: I.occasion6 },
+  { label: "Office Hours", image: I.occasion7 },
+  { label: "Gifted Moments", image: I.occasion8 },
+  { label: "Power Move", image: I.occasion9 },
 ];
 
 export function StyledForEveryOccasion() {

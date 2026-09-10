@@ -29,10 +29,10 @@ const CATEGORIES: {
   { label: "Pendant Chains", href: "/category/necklaces", img: I.heartPend, meta: "Explore styles", catSlug: "necklaces" },
   { label: "Bracelets", href: "/category/bracelets", img: I.bracelets, meta: "Explore styles", catSlug: "bracelets" },
   { label: "Sets", href: "/category/sets", img: I.signatureModel, meta: "Curated sets", catSlug: "sets" },
-  { label: "Surprise / Gift Box", href: "/category/gifts", img: I.editorial, meta: "Curated gifting", catSlug: "gifts" },
+  { label: "Surprise / Gift Box", href: "/category/gifts", img: I.giftBox, meta: "Curated gifting", catSlug: "gifts" },
 ];
 
-export function CategoryGrid() {
+export function CategoryGrid({ compact = false }: { compact?: boolean }) {
   // Live per-category product counts (keyed by CategorySlug). Empty until the
   // catalogue loads, so cards fall back to their static `meta` copy meanwhile.
   const [counts, setCounts] = useState<Partial<Record<CategorySlug, number>>>({});
@@ -62,37 +62,42 @@ export function CategoryGrid() {
   };
 
   return (
-    <section className="sois-section sois-categories" aria-labelledby="categories-heading">
-      <div className="sois-section-header">
-        <div>
-          <Eyebrow>EXPLORE</Eyebrow>
-          <h2 id="categories-heading" style={{ fontSize: "clamp(1.6rem, 3vw, 2.1rem)", fontWeight: 800, letterSpacing: "-0.025em", color: T.ink }}>
-            Explore by Category
-          </h2>
+    <section
+      className={`sois-section sois-categories${compact ? " sois-categories--compact" : ""}`}
+      aria-labelledby={compact ? undefined : "categories-heading"}
+    >
+      {!compact && (
+        <div className="sois-section-header">
+          <div>
+            <Eyebrow>EXPLORE</Eyebrow>
+            <h2 id="categories-heading" style={{ fontSize: "clamp(1.6rem, 3vw, 2.1rem)", fontWeight: 800, letterSpacing: "-0.025em", color: T.ink }}>
+              Explore by Category
+            </h2>
+          </div>
+          <Link
+            href="/shop"
+            className="sois-section-link"
+            style={{
+              fontSize: "0.74rem",
+              color: T.forest,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              transition: "opacity 0.2s",
+              borderBottom: `1px solid ${T.sageDark}`,
+              paddingBottom: 2,
+              flexShrink: 0,
+            }}
+          >
+            View all <ArrowUpRight size={14} />
+          </Link>
         </div>
-        <Link
-          href="/shop"
-          className="sois-section-link"
-          style={{
-            fontSize: "0.74rem",
-            color: T.forest,
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontWeight: 700,
-            letterSpacing: "0.06em",
-            transition: "opacity 0.2s",
-            borderBottom: `1px solid ${T.sageDark}`,
-            paddingBottom: 2,
-            flexShrink: 0,
-          }}
-        >
-          View all <ArrowUpRight size={14} />
-        </Link>
-      </div>
+      )}
 
-      <div className="sois-cat2-grid">
+      <div className={`sois-cat2-grid${compact ? " sois-cat2-grid--compact" : ""}`}>
         {CATEGORIES.map((c, i) => (
           <Link key={c.label} href={c.href} className="sois-cat2-card" aria-label={c.label}>
             <Image
@@ -100,9 +105,9 @@ export function CategoryGrid() {
               src={c.img}
               alt={c.label}
               fill
-              sizes="(max-width: 600px) 50vw, (max-width: 1024px) 25vw, 22vw"
+              sizes={compact ? "(max-width: 600px) 33vw, (max-width: 1024px) 18vw, 12vw" : "(max-width: 600px) 50vw, (max-width: 1024px) 25vw, 22vw"}
               style={{ objectFit: "cover" }}
-              priority={i < 4}
+              priority={!compact && i < 4}
             />
             <span className="sois-cat2-veil" aria-hidden="true" />
             <span className="sois-cat2-frame" aria-hidden="true" />

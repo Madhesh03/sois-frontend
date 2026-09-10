@@ -11,8 +11,8 @@ export function BrandStory() {
         <div className="sois-story-img">
           <Image
             className="story-img-tile"
-            src={I.brandStoryImg}
-            alt="The story behind SOIS sterling silver jewellery"
+            src={I.brandStoryHands}
+            alt="Two sisters wearing SOIS sterling silver jewellery, holding hands"
             fill
             sizes="(max-width: 767px) 100vw, 45vw"
             style={{ objectFit: "cover", objectPosition: "top" }}

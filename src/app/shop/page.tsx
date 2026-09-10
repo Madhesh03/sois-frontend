@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { StoreShell } from "@/components/store/StoreShell";
 import { ProductListing } from "@/components/store/ProductListing";
+import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { getAllProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
@@ -45,6 +46,8 @@ export default async function ShopPage({
           Hallmarked 925 sterling silver, handcrafted for everyday luxury.
         </p>
       </section>
+
+      {!q && !filter && <CategoryGrid compact />}
 
       <section className="sois-listing">
         <Suspense fallback={<div className="sois-listing-layout" />}>
