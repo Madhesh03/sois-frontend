@@ -3,48 +3,47 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { I } from "@/lib/data";
 import { T } from "@/lib/tokens";
-import { CategorySlug, getAllProducts } from "@/lib/catalog";
+import { CategorySlug } from "@/lib/catalog";
 
-// Two-row category grid (4 × 2 on desktop). Slugs map to existing routes so
-// functionality is unchanged — Pendant Chains lives under necklaces, the gift
-// box under /category/gifts. Only the presentation is new.
-//
-// `catSlug` (when set) drives a live product count from the catalogue API,
-// replacing the placeholder `meta`; entries without one keep their static copy.
+// Two-row category grid (4 × 2 on desktop). Pendants live under the same
+// Necklaces category as everywhere else on the site (nav, shop filters) —
+// there's no separate "Pendant Chains" card. All Products spans two grid
+// cells so the 7 cards still fill the full 8-cell 4×2 layout.
 const CATEGORIES: {
   label: string;
   href: string;
   img: string;
-  meta: string;
   catSlug?: CategorySlug;
+  big?: boolean;
 }[] = [
-  { label: "All Products", href: "/shop", img: I.prod1, meta: "Shop everything" },
-  { label: "Rings", href: "/category/rings", img: I.ringWhite, meta: "Explore styles", catSlug: "rings" },
-  { label: "Earrings", href: "/category/earrings", img: I.earrings, meta: "Explore styles", catSlug: "earrings" },
-  { label: "Necklaces", href: "/category/necklaces", img: I.necklace, meta: "Explore styles", catSlug: "necklaces" },
-  { label: "Pendant Chains", href: "/category/necklaces", img: I.heartPend, meta: "Explore styles", catSlug: "necklaces" },
-  { label: "Bracelets", href: "/category/bracelets", img: I.bracelets, meta: "Explore styles", catSlug: "bracelets" },
-  { label: "Sets", href: "/category/sets", img: I.signatureModel, meta: "Curated sets", catSlug: "sets" },
-  { label: "Surprise / Gift Box", href: "/category/gifts", img: I.giftBox, meta: "Curated gifting", catSlug: "gifts" },
+  { label: "All Products", href: "/shop", img: I.prod1, big: true },
+  { label: "Rings", href: "/category/rings", img: I.ringWhite, catSlug: "rings" },
+  { label: "Earrings", href: "/category/earrings", img: I.earrings, catSlug: "earrings" },
+  { label: "Necklaces", href: "/category/necklaces", img: I.necklace, catSlug: "necklaces" },
+  { label: "Bracelets", href: "/category/bracelets", img: I.bracelets, catSlug: "bracelets" },
+  { label: "Sets", href: "/category/sets", img: I.signatureModel, catSlug: "sets" },
+  { label: "Surprise / Gift Box", href: "/category/gifts", img: I.giftBox, catSlug: "gifts" },
 ];
 
 function CategoryCard({
   c,
   compact,
   priority,
-  meta,
 }: {
   c: (typeof CATEGORIES)[number];
   compact: boolean;
   priority: boolean;
-  meta: string;
 }) {
   return (
-    <Link href={c.href} className="sois-cat2-card" aria-label={c.label}>
+    <Link
+      href={c.href}
+      className={`sois-cat2-card${c.big && !compact ? " sois-cat2-card--big" : ""}`}
+      aria-label={c.label}
+    >
       <Image
         className="sois-cat2-img"
         src={c.img}
@@ -58,18 +57,12 @@ function CategoryCard({
       <span className="sois-cat2-frame" aria-hidden="true" />
       <span className="sois-cat2-body">
         <span className="sois-cat2-label">{c.label}</span>
-        <span className="sois-cat2-cta">
-          {meta} <ArrowRight size={12} strokeWidth={2.4} />
-        </span>
       </span>
     </Link>
   );
 }
 
 export function CategoryGrid({ compact = false }: { compact?: boolean }) {
-  // Live per-category product counts (keyed by CategorySlug). Empty until the
-  // catalogue loads, so cards fall back to their static `meta` copy meanwhile.
-  const [counts, setCounts] = useState<Partial<Record<CategorySlug, number>>>({});
   const trackRef = useRef<HTMLDivElement>(null);
   // Arrows are only useful when the chips actually overflow their track —
   // showing them on a row that already fits just reads as dead controls.
@@ -84,30 +77,6 @@ export function CategoryGrid({ compact = false }: { compact?: boolean }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [compact]);
-
-  useEffect(() => {
-    let active = true;
-    getAllProducts()
-      .then((all) => {
-        if (!active) return;
-        const tally: Partial<Record<CategorySlug, number>> = {};
-        for (const p of all) tally[p.category] = (tally[p.category] ?? 0) + 1;
-        setCounts(tally);
-      })
-      .catch(() => {
-        /* keep static meta on failure */
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const metaFor = (c: (typeof CATEGORIES)[number]): string => {
-    if (!c.catSlug) return c.meta;
-    const n = counts[c.catSlug];
-    if (n == null) return c.meta; // still loading
-    return n === 1 ? "1 style" : `${n} styles`;
-  };
 
   const scrollByCard = (dir: -1 | 1) => {
     const el = trackRef.current;
@@ -179,7 +148,6 @@ export function CategoryGrid({ compact = false }: { compact?: boolean }) {
                   />
                 </span>
                 <span className="sois-cat-chip-label">{c.label}</span>
-                <span className="sois-cat-chip-meta">{metaFor(c)}</span>
               </Link>
             ))}
           </div>
@@ -198,7 +166,7 @@ export function CategoryGrid({ compact = false }: { compact?: boolean }) {
       ) : (
         <div className="sois-cat2-grid">
           {CATEGORIES.map((c, i) => (
-            <CategoryCard key={c.label} c={c} compact={false} meta={metaFor(c)} priority={i < 4} />
+            <CategoryCard key={c.label} c={c} compact={false} priority={i < 4} />
           ))}
         </div>
       )}

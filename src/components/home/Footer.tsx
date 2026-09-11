@@ -74,7 +74,6 @@ export function Footer() {
         <div className="sois-footer-brand">
           <div>
             <div className="sois-footer-logo">SOIS</div>
-            <div className="sois-footer-logo-sub">STERLING SILVER JEWELLERY</div>
           </div>
 
           <div className="sois-footer-social">

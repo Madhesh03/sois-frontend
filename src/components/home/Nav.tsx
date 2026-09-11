@@ -194,11 +194,6 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
               height={402}
               priority
             />
-            <span className="sois-hdr-logo-sub">
-              <span className="sois-hdr-logo-rule" />
-              STERLING SILVER
-              <span className="sois-hdr-logo-rule" />
-            </span>
           </a>
 
           {/* Desktop nav links — left-aligned beside the logo */}
