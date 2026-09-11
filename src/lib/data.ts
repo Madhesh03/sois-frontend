@@ -262,7 +262,7 @@ export const siteConfig = {
   name: "SOIS",
   title: "SOIS — Premium 925 Sterling Silver Jewellery",
   description:
-    "Shop hallmarked 925 sterling silver jewellery from SOIS. Handcrafted rings, earrings, necklaces, bracelets & anklets — BIS hallmarked, nickel-free and hypoallergenic.",
+    "Shop hallmarked 925 sterling silver jewellery from SOIS. Handcrafted rings, earrings, necklaces & bracelets — BIS hallmarked, nickel-free and hypoallergenic.",
   url: "https://sois.in",
   locale: "en_IN",
   keywords: [

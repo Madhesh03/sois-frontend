@@ -10,7 +10,7 @@ import { getAllProducts } from "@/lib/catalog";
 export const metadata: Metadata = {
   title: "Shop All Jewellery",
   description:
-    "Browse the full SOIS collection of hallmarked 925 sterling silver jewellery — rings, earrings, necklaces, bracelets, anklets and gift sets.",
+    "Browse the full SOIS collection of hallmarked 925 sterling silver jewellery — rings, earrings, necklaces, bracelets and gift sets.",
 };
 
 export default async function ShopPage({

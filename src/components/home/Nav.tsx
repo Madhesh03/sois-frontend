@@ -18,13 +18,12 @@ const navLinks: { label: string; href: string }[] = [
   { label: "Best Sellers", href: "/shop?filter=best" },
   { label: "About", href: "/about" },
 ];
-const categories = ["All Categories", "Rings", "Earrings", "Necklaces", "Bracelets", "Anklets", "Sets"];
+const categories = ["All Categories", "Rings", "Earrings", "Necklaces", "Bracelets", "Sets"];
 const categorySlugs: Record<string, string> = {
   Rings: "rings",
   Earrings: "earrings",
   Necklaces: "necklaces",
   Bracelets: "bracelets",
-  Anklets: "anklets",
   Sets: "sets",
 };
 const QUICK_TERMS = ["Rings", "Necklaces", "Bracelets", "Earrings", "Gifts"];
@@ -395,7 +394,7 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
             </Link>
           ))}
           <div className="sois-mobile-menu-divider" />
-          {["Rings", "Earrings", "Necklaces", "Bracelets", "Anklets", "Sets"].map((c) => (
+          {["Rings", "Earrings", "Necklaces", "Bracelets", "Sets"].map((c) => (
             <Link
               key={c}
               href={`/category/${categorySlugs[c]}`}

@@ -113,12 +113,6 @@ export const categories: Category[] = [
     image: I.bracelets,
   },
   {
-    slug: "anklets",
-    name: "Anklets",
-    tagline: "Delicate everyday anklets",
-    image: I.anklets,
-  },
-  {
     slug: "sets",
     name: "Sets",
     tagline: "Matching pieces, made to wear together",

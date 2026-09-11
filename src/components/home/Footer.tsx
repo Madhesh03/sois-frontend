@@ -27,7 +27,6 @@ export function Footer() {
         { label: "Earrings", href: "/category/earrings" },
         { label: "Necklaces", href: "/category/necklaces" },
         { label: "Bracelets", href: "/category/bracelets" },
-        { label: "Anklets", href: "/category/anklets" },
         { label: "Gift Sets", href: "/category/gifts" },
       ],
     },
