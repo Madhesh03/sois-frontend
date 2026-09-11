@@ -66,25 +66,52 @@ function subtitleFor(metalType: string, purity: string): string {
   return purity ? `${label} · ${purity}`.replace("· 925 · ", "· ") : label;
 }
 
+// Free-text admin tags that map onto each storefront merchandising bucket,
+// matched case-insensitively. Whatever staff type on the product ("New
+// Arrivals", "best selling", …) lands the product in the matching section.
+export const TAG_ALIASES = {
+  new: ["new", "new arrival", "new arrivals"],
+  bestSeller: [
+    "best seller",
+    "best sellers",
+    "best selling",
+    "bestseller",
+    "bestsellers",
+  ],
+  sale: ["sale", "on sale"],
+} as const;
+
+/** Case-insensitive membership test of a product's tags against an alias list. */
+export function hasTag(
+  tags: readonly string[] | undefined,
+  aliases: readonly string[]
+): boolean {
+  if (!tags?.length) return false;
+  const norm = tags.map((t) => t.trim().toLowerCase());
+  return aliases.some((a) => norm.includes(a));
+}
+
 function derivedBadge(opts: {
   isFeatured: boolean;
   onSale: boolean;
   createdAt: string;
+  tags?: string[];
 }): UIProduct["badge"] {
-  // Deliberate merchandising signals (staff marked it a bestseller, it's
-  // discounted) take priority over the generic recency heuristic below —
-  // otherwise a freshly-seeded catalogue, where every product is "new" for
-  // its first 30 days, would show "New" on every card and "Best Seller" /
-  // "Sale" would never surface at all.
-  if (opts.isFeatured) return "Best Seller";
-  if (opts.onSale) return "Sale";
+  // Deliberate merchandising signals (staff marked it a bestseller via
+  // is_featured or an explicit tag, it's discounted) take priority over the
+  // generic recency heuristic below — otherwise a freshly-seeded catalogue,
+  // where every product is "new" for its first 30 days, would show "New" on
+  // every card and "Best Seller" / "Sale" would never surface at all.
+  if (opts.isFeatured || hasTag(opts.tags, TAG_ALIASES.bestSeller))
+    return "Best Seller";
+  if (opts.onSale || hasTag(opts.tags, TAG_ALIASES.sale)) return "Sale";
 
-  // "New" only as a fallback, for products with neither signal.
+  // "New" — either an explicit tag or the recency fallback.
   const created = new Date(opts.createdAt).getTime();
-  const isNew =
+  const isRecent =
     Number.isFinite(created) &&
     Date.now() - created < 30 * 24 * 60 * 60 * 1000;
-  if (isNew) return "New";
+  if (isRecent || hasTag(opts.tags, TAG_ALIASES.new)) return "New";
   return null;
 }
 
@@ -115,15 +142,17 @@ export function mapListItem(p: ProductListItem): UIProduct {
     silverDetails: "",
     care: [],
     inStock: p.is_in_stock,
-    isNew,
-    isBestSeller: p.is_featured,
+    isNew: isNew || hasTag(p.tags, TAG_ALIASES.new),
+    isBestSeller: p.is_featured || hasTag(p.tags, TAG_ALIASES.bestSeller),
     rating: 0,
     reviewCount: 0,
     badge: derivedBadge({
       isFeatured: p.is_featured,
       onSale,
       createdAt: p.created_at,
+      tags: p.tags,
     }),
+    tags: p.tags ?? [],
     // The list API only tells us *whether* a product is sized, not per-size
     // stock — that arrives on the detail response (see mapDetail).
     hasSizes: p.has_sizes,
@@ -200,15 +229,17 @@ export function mapDetail(p: ProductDetail): UIProduct {
     inStock: p.is_in_stock,
     isNew:
       Date.now() - new Date(p.created_at).getTime() <
-      30 * 24 * 60 * 60 * 1000,
-    isBestSeller: p.is_featured,
+        30 * 24 * 60 * 60 * 1000 || hasTag(p.tags, TAG_ALIASES.new),
+    isBestSeller: p.is_featured || hasTag(p.tags, TAG_ALIASES.bestSeller),
     rating: 0,
     reviewCount: 0,
     badge: derivedBadge({
       isFeatured: p.is_featured,
       onSale,
       createdAt: p.created_at,
+      tags: p.tags,
     }),
+    tags: p.tags ?? [],
     hasSizes: p.has_sizes,
     sizeUnit: p.size_unit || undefined,
     variantLabel: p.variant_label || undefined,

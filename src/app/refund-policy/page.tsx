@@ -47,8 +47,8 @@ export default function RefundPolicyPage() {
 
       <h2>Shipping Charges</h2>
       <p>
-        Original shipping charges (where applicable) are non-refundable unless
-        the return is due to a defective or incorrect item.
+        Shipping is free on all orders, so there are no shipping charges to
+        refund. Refunds cover the item amount you paid.
       </p>
 
       <h2>Late or Missing Refunds</h2>

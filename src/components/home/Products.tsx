@@ -12,6 +12,7 @@ import {
   getAllProducts,
   badgeColors,
 } from "@/lib/catalog";
+import { hasTag, TAG_ALIASES } from "@/lib/api";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -80,11 +81,15 @@ export function Products() {
   const visible = useMemo(() => {
     switch (activeFilter) {
       case "New Arrivals":
+        // `isNew` already folds in the admin "New Arrivals" tag (see mapListItem).
         return all.filter((p) => p.isNew).slice(0, MAX_CARDS);
       case "Best Sellers":
+        // `isBestSeller` already folds in the admin "Best Selling" tag.
         return all.filter((p) => p.isBestSeller).slice(0, MAX_CARDS);
       case "On Sale":
-        return all.filter((p) => p.originalPrice != null).slice(0, MAX_CARDS);
+        return all
+          .filter((p) => p.originalPrice != null || hasTag(p.tags, TAG_ALIASES.sale))
+          .slice(0, MAX_CARDS);
       case "All":
       default:
         return (top.length ? top : all).slice(0, MAX_CARDS);

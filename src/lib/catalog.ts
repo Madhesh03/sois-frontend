@@ -61,6 +61,13 @@ export interface Product {
   reviewCount: number;
   /** Marketing badge shown on the card — derived, never hand-set. */
   badge: "New" | "Best Seller" | "Sale" | null;
+  /**
+   * Free-text merchandising labels set in admin (e.g. "New Arrivals", "Best
+   * Selling"). Drives the storefront's tag-based sections/filters in addition
+   * to the derived `isNew` / `isBestSeller` heuristics. Optional so the static
+   * fallback catalogue doesn't have to spell it out on every entry.
+   */
+  tags?: string[];
   /** True when the product is offered in discrete sizes (rings, bangles). */
   hasSizes?: boolean;
   /** Size unit label, e.g. "US". */
@@ -755,10 +762,16 @@ export function filterProducts(
     if (f.priceMax != null && p.price > f.priceMax) return false;
     if (f.availability === "in-stock" && !p.inStock) return false;
     if (f.badges.length) {
+      // `isNew`/`isBestSeller` already fold in the admin "New Arrivals"/"Best
+      // Selling" tags (see mapListItem). Sale also honours an explicit "sale"
+      // tag on top of an actual discount.
+      const saleTagged = p.tags?.some((t) =>
+        ["sale", "on sale"].includes(t.trim().toLowerCase())
+      );
       const matches =
         (f.badges.includes("new") && p.isNew) ||
         (f.badges.includes("best") && p.isBestSeller) ||
-        (f.badges.includes("sale") && p.originalPrice != null);
+        (f.badges.includes("sale") && (p.originalPrice != null || saleTagged));
       if (!matches) return false;
     }
     return true;

@@ -33,9 +33,9 @@ export default function ShippingPolicyPage() {
 
       <h2>Shipping Charges</h2>
       <p>
-        We offer <strong>free shipping on all orders above ₹999</strong>. A
-        nominal shipping fee may apply to orders below this value, which will be
-        shown at checkout before payment.
+        We offer <strong>free shipping on all orders</strong>, with no minimum
+        order value. The price you see at checkout is the price you pay — there
+        are no shipping fees added.
       </p>
 
       <h2>Order Tracking</h2>

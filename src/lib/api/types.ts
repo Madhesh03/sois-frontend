@@ -158,6 +158,8 @@ export interface ProductListItem {
   has_sizes: boolean;
   status: ProductStatus;
   is_featured: boolean;
+  /** Free-text merchandising labels set in admin, e.g. ["New Arrivals"]. */
+  tags: string[];
   thumbnail_key: string;
   primary_image: { s3_key: string; alt_text: string } | null;
   hover_image: { s3_key: string; alt_text: string } | null;
