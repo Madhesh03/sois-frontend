@@ -766,7 +766,7 @@ export function filterProducts(
       // Selling" tags (see mapListItem). Sale also honours an explicit "sale"
       // tag on top of an actual discount.
       const saleTagged = p.tags?.some((t) =>
-        ["sale", "on sale"].includes(t.trim().toLowerCase())
+        ["sale", "onsale"].includes(t.toLowerCase().replace(/[^a-z0-9]/g, ""))
       );
       const matches =
         (f.badges.includes("new") && p.isNew) ||

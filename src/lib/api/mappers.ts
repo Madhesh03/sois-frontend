@@ -66,28 +66,28 @@ function subtitleFor(metalType: string, purity: string): string {
   return purity ? `${label} · ${purity}`.replace("· 925 · ", "· ") : label;
 }
 
-// Free-text admin tags that map onto each storefront merchandising bucket,
-// matched case-insensitively. Whatever staff type on the product ("New
-// Arrivals", "best selling", …) lands the product in the matching section.
+// Normalise a tag to its bare alphanumerics so spacing/casing/punctuation
+// don't matter: "New Arrivals", "new-arrivals" and "newarrivals" all collapse
+// to "newarrivals".
+const normTag = (t: string) => t.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+// Free-text admin tags that map onto each storefront merchandising bucket.
+// Whatever staff type on the product ("New Arrivals", "best selling",
+// "bestselling", …) lands it in the matching section. Values are stored
+// normalised so the match is space/case/punctuation-insensitive.
 export const TAG_ALIASES = {
-  new: ["new", "new arrival", "new arrivals"],
-  bestSeller: [
-    "best seller",
-    "best sellers",
-    "best selling",
-    "bestseller",
-    "bestsellers",
-  ],
-  sale: ["sale", "on sale"],
+  new: ["new", "newarrival", "newarrivals"],
+  bestSeller: ["bestseller", "bestsellers", "bestselling"],
+  sale: ["sale", "onsale"],
 } as const;
 
-/** Case-insensitive membership test of a product's tags against an alias list. */
+/** Whether any of a product's tags falls into the given alias bucket. */
 export function hasTag(
   tags: readonly string[] | undefined,
   aliases: readonly string[]
 ): boolean {
   if (!tags?.length) return false;
-  const norm = tags.map((t) => t.trim().toLowerCase());
+  const norm = tags.map(normTag);
   return aliases.some((a) => norm.includes(a));
 }
 
