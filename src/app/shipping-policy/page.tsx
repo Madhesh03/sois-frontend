@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalPage } from "@/components/legal/LegalPage";
 
 export const metadata: Metadata = {
@@ -46,9 +47,12 @@ export default function ShippingPolicyPage() {
 
       <h2>Delivery Issues</h2>
       <p>
-        If your order is delayed, marked as delivered but not received, or
-        arrives damaged, please contact us within 48 hours of the delivery date
-        so we can help resolve it quickly.
+        If your order is delayed or marked as delivered but not received,
+        please contact us within 48 hours of the delivery date so we can help
+        resolve it quickly. If your order arrives damaged, defective,
+        incorrect or incomplete, see our{" "}
+        <Link href="/return-policy">Returns, Refunds &amp; Exchange Policy</Link>{" "}
+        — a mandatory unboxing video is required for any such claim.
       </p>
 
       <h2>Serviceable Areas</h2>

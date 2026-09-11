@@ -39,12 +39,19 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
     ),
   },
   {
-    q: "What is your return and refund policy?",
+    q: "Can I cancel or change my order after it's placed?",
+    a: "Once an order has been successfully placed, it cannot be cancelled or modified — orders are processed for packing and shipping shortly after confirmation. Please double-check your product, size, quantity, and shipping address before completing your purchase.",
+  },
+  {
+    q: "What is your return, refund and exchange policy?",
     a: (
       <>
-        Eligible items can be returned once the conditions in our policy are
-        met. See our <Link href="/return-policy">Return Policy</Link> and{" "}
-        <Link href="/refund-policy">Refund Policy</Link> for full details.
+        Damaged, defective, incorrect or missing items can be claimed within
+        48 hours of delivery with a mandatory, unedited unboxing video.
+        Returns aren&apos;t accepted for change of mind or an incorrectly
+        selected size. See our{" "}
+        <Link href="/return-policy">Returns, Refunds &amp; Exchange Policy</Link>{" "}
+        for full details.
       </>
     ),
   },

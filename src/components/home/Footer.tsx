@@ -36,7 +36,7 @@ export function Footer() {
       links: [
         { label: "Track Order", href: "/account/orders" },
         { label: "Shipping Policy", href: "/shipping-policy" },
-        { label: "Return Policy", href: "/return-policy" },
+        { label: "Returns, Refunds & Exchange", href: "/return-policy" },
         { label: "FAQs", href: "/faq" },
         { label: "Contact Us", href: "/contact" },
       ],
@@ -125,7 +125,7 @@ export function Footer() {
       <div className="sois-footer-contact">
         <a href="mailto:support@soisstore.com" className="sois-footer-contact-item">support@soisstore.com</a>
         <span className="sois-footer-contact-sep">·</span>
-        <a href="tel:+917540008075" className="sois-footer-contact-item">+91 75400 08075</a>
+        <a href="tel:+9173052721953" className="sois-footer-contact-item">+91 73052721953</a>
       </div>
 
       <div className="sois-footer-bottom">
