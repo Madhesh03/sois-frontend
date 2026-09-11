@@ -125,7 +125,7 @@ export function Footer() {
       <div className="sois-footer-contact">
         <a href="mailto:support@soisstore.com" className="sois-footer-contact-item">support@soisstore.com</a>
         <span className="sois-footer-contact-sep">·</span>
-        <a href="tel:+9173052721953" className="sois-footer-contact-item">+91 73052721953</a>
+        <a href="tel:+917305272195" className="sois-footer-contact-item">+91 73052 72195</a>
       </div>
 
       <div className="sois-footer-bottom">
