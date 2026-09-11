@@ -719,7 +719,7 @@ function ReviewOrder() {
           }}
         >
           <span style={{ fontSize: "0.85rem", color: T.muted }}>Shipping</span>
-          <span style={{ fontSize: "0.85rem", color: T.forest }}>Free</span>
+          <span style={{ fontSize: "0.85rem", color: T.muted }}>Calculated at checkout</span>
         </div>
         <div
           style={{

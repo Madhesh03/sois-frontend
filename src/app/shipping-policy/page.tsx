@@ -34,9 +34,8 @@ export default function ShippingPolicyPage() {
 
       <h2>Shipping Charges</h2>
       <p>
-        We offer <strong>free shipping on all orders</strong>, with no minimum
-        order value. The price you see at checkout is the price you pay — there
-        are no shipping fees added.
+        Applicable shipping charges, if any, are calculated at checkout
+        before you complete payment.
       </p>
 
       <h2>Order Tracking</h2>
