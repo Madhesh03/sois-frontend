@@ -3663,17 +3663,32 @@ video {
   gap: 10px;
 }
 .sois-pdp-size {
-  min-width: 48px;
-  height: 44px;
-  padding: 0 12px;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 2px solid #d8d0c8;
+  border-radius: 50%;
   background: #ffffff;
   color: #0a0a0a;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+/* A thin inner ring, evoking the band's inner edge, so the swatch reads as a ring rather than a plain dot. */
+.sois-pdp-size::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.25;
+  pointer-events: none;
 }
 .sois-pdp-size:hover:not(:disabled) {
   border-color: #115e59;
@@ -3682,6 +3697,9 @@ video {
   border-color: #115e59;
   background: #115e59;
   color: #ffffff;
+}
+.sois-pdp-size.active::before {
+  opacity: 0.6;
 }
 .sois-pdp-size.oos {
   opacity: 0.45;
