@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { StoreShell } from "@/components/store/StoreShell";
 import { ProductListing } from "@/components/store/ProductListing";
@@ -16,6 +16,17 @@ import {
 export function generateStaticParams() {
   return categories.map((c) => ({ slug: c.slug }));
 }
+
+// "Gifts" isn't a jewellery category — it's the dedicated gift-hamper listing.
+// Any gift-ish slug lands the shopper on /gift-hampers instead of a 404.
+const GIFT_ALIASES = new Set([
+  "gifts",
+  "gift",
+  "gift-hamper",
+  "gift-hampers",
+  "hampers",
+  "hamper",
+]);
 
 export async function generateMetadata({
   params,
@@ -39,6 +50,7 @@ export default async function CategoryPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { slug } = await params;
+  if (GIFT_ALIASES.has(slug.toLowerCase())) redirect("/gift-hampers");
   const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
