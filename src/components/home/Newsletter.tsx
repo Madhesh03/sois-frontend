@@ -60,10 +60,15 @@ export function Newsletter() {
             By subscribing, you agree to receive marketing emails. Unsubscribe anytime. No spam, ever.
           </p>
           <div style={{ display: "flex", gap: 20, marginTop: 32, flexWrap: "wrap" }}>
-            {["Instagram", "Pinterest", "WhatsApp"].map((s) => (
+            {[
+              { label: "Instagram", href: "https://instagram.com/soisstore.co" },
+              { label: "WhatsApp", href: "https://wa.me/917305272195" },
+            ].map(({ label: s, href }) => (
               <a
                 key={s}
-                href="#"
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   fontSize: "0.7rem",
                   color: T.forest,
