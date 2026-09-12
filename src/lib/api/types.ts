@@ -172,6 +172,10 @@ export interface SizeStock {
   size: string;
   qty: number;
   is_in_stock: boolean;
+  /** This variation's own list price — a larger ring uses more metal, so it can cost more than the base product. */
+  price: number | null;
+  /** `price` after the product discount; what the size actually sells for. */
+  effective_price: number | null;
 }
 
 export interface StoneDetail {

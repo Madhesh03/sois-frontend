@@ -86,10 +86,13 @@ export function ProductDetail({
     ? sizes.some((s) => s.inStock)
     : product.inStock;
   const maxQty = Infinity;
-  const discount = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
-      )
+
+  // A size can carry its own price (more metal in a larger ring), so once one
+  // is picked the page quotes that variation rather than the base product.
+  const price = chosen?.price ?? product.price;
+  const originalPrice = chosen?.price != null ? chosen.originalPrice ?? null : product.originalPrice;
+  const discount = originalPrice
+    ? Math.round(((originalPrice - price) / originalPrice) * 100)
     : 0;
 
   // Gallery media = product images plus an optional 360° video as the last item.
@@ -104,7 +107,7 @@ export function ProductDetail({
   const payload = {
     id: product.id,
     name: product.name,
-    price: product.price,
+    price,
     image: product.images[0],
     ...(needsSize && selectedSize ? { size: selectedSize } : {}),
   };
@@ -302,10 +305,10 @@ export function ProductDetail({
           <h1 className="sois-pdp-name">{product.name}</h1>
 
           <div className="sois-pdp-price-row">
-            <span className="sois-pdp-price">{formatPrice(product.price)}</span>
-            {product.originalPrice && (
+            <span className="sois-pdp-price">{formatPrice(price)}</span>
+            {originalPrice && (
               <span className="sois-pdp-orig">
-                {formatPrice(product.originalPrice)}
+                {formatPrice(originalPrice)}
               </span>
             )}
             {discount > 0 && (

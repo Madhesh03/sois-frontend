@@ -39,7 +39,7 @@ export function Footer() {
       links: [
         { label: "Rings", href: "/category/rings" },
         { label: "Earrings", href: "/category/earrings" },
-        { label: "Necklaces", href: "/category/necklaces" },
+        { label: "Chain/Necklaces", href: "/category/necklaces" },
         { label: "Bracelets", href: "/category/bracelets" },
         { label: "Gift Sets", href: "/category/gifts" },
       ],

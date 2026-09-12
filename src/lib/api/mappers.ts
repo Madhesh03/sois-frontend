@@ -248,6 +248,15 @@ export function mapDetail(p: ProductDetail): UIProduct {
           size: s.size,
           qty: s.qty,
           inStock: s.is_in_stock,
+          ...(s.effective_price != null
+            ? {
+                price: Number(s.effective_price),
+                originalPrice:
+                  s.price != null && Number(s.price) > Number(s.effective_price)
+                    ? Number(s.price)
+                    : null,
+              }
+            : {}),
         }))
       : undefined,
   };

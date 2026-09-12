@@ -85,6 +85,10 @@ export interface ProductSize {
   size: string;
   qty: number;
   inStock: boolean;
+  /** What this size sells for, when it overrides the product's own price. */
+  price?: number;
+  /** Pre-discount price for this size, when it is on sale. */
+  originalPrice?: number | null;
 }
 
 export const categories: Category[] = [
@@ -102,7 +106,7 @@ export const categories: Category[] = [
   },
   {
     slug: "necklaces",
-    name: "Necklaces",
+    name: "Chain/Necklaces",
     tagline: "Pendants & layering chains",
     image: I.necklace,
   },

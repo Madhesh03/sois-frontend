@@ -12,7 +12,7 @@ import { CategorySlug } from "@/lib/catalog";
 // Two-row category grid (4 × 2 on desktop). Pendants live under the same
 // Necklaces category as everywhere else on the site (nav, shop filters) —
 // there's no separate "Pendant Chains" card. All Products spans two grid
-// cells so the 7 cards still fill the full 8-cell 4×2 layout.
+// cells below 1024px only; on desktop every card is one uniform cell.
 const CATEGORIES: {
   label: string;
   href: string;
@@ -23,7 +23,7 @@ const CATEGORIES: {
   { label: "All Products", href: "/shop", img: I.prod1, big: true },
   { label: "Rings", href: "/category/rings", img: I.ringWhite, catSlug: "rings" },
   { label: "Earrings", href: "/category/earrings", img: I.earrings, catSlug: "earrings" },
-  { label: "Necklaces", href: "/category/necklaces", img: I.necklace, catSlug: "necklaces" },
+  { label: "Chain/Necklaces", href: "/category/necklaces", img: I.necklace, catSlug: "necklaces" },
   { label: "Bracelets", href: "/category/bracelets", img: I.bracelets, catSlug: "bracelets" },
   { label: "Sets", href: "/category/sets", img: I.signatureModel, catSlug: "sets" },
   { label: "Surprise / Gift Box", href: "/category/gifts", img: I.giftBox, catSlug: "gifts" },

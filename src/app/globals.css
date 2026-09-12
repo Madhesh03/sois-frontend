@@ -226,11 +226,13 @@ video {
   isolation: isolate;
 }
 
-/* All Products spans two columns so 7 category cards still fill the full
-   8-cell 4×2 grid instead of leaving a gap. */
-.sois-cat2-card--big {
-  grid-column: span 2;
-  aspect-ratio: 12 / 5;
+/* Desktop keeps every card a single uniform cell; below 1024px All Products
+   spans two columns so the narrower grid's rows still fill out. */
+@media (max-width: 1024px) {
+  .sois-cat2-card--big {
+    grid-column: span 2;
+    aspect-ratio: 12 / 5;
+  }
 }
 .sois-cat2-card:hover,
 .sois-cat2-card:focus-visible {
