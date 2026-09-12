@@ -813,9 +813,8 @@ export function sortProducts(products: Product[], sort: SortKey): Product[] {
 }
 
 export function formatPrice(value: number): string {
-  return `₹${value.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+  return `₹${Math.round(value).toLocaleString("en-IN", {
+    maximumFractionDigits: 0,
   })}`;
 }
 

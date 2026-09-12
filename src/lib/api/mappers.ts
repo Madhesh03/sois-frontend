@@ -97,21 +97,26 @@ function derivedBadge(opts: {
   createdAt: string;
   tags?: string[];
 }): UIProduct["badge"] {
-  // Deliberate merchandising signals (staff marked it a bestseller via
-  // is_featured or an explicit tag, it's discounted) take priority over the
-  // generic recency heuristic below — otherwise a freshly-seeded catalogue,
-  // where every product is "new" for its first 30 days, would show "New" on
-  // every card and "Best Seller" / "Sale" would never surface at all.
-  if (opts.isFeatured || hasTag(opts.tags, TAG_ALIASES.bestSeller))
-    return "Best Seller";
-  if (opts.onSale || hasTag(opts.tags, TAG_ALIASES.sale)) return "Sale";
+  // An explicit tag set by staff (e.g. via bulk edit) is the strongest
+  // signal and must win over the automatic price/recency heuristics below —
+  // otherwise re-tagging a discounted product "new" would silently keep
+  // showing "Sale" forever, since discount_percent never clears itself.
+  if (hasTag(opts.tags, TAG_ALIASES.bestSeller)) return "Best Seller";
+  if (hasTag(opts.tags, TAG_ALIASES.sale)) return "Sale";
+  if (hasTag(opts.tags, TAG_ALIASES.new)) return "New";
 
-  // "New" — either an explicit tag or the recency fallback.
+  // No explicit tag — fall back to automatic merchandising signals
+  // (is_featured / discount / recency), otherwise a freshly-seeded
+  // catalogue, where every product is "new" for its first 30 days, would
+  // show "New" on every card and "Best Seller" / "Sale" would never surface.
+  if (opts.isFeatured) return "Best Seller";
+  if (opts.onSale) return "Sale";
+
   const created = new Date(opts.createdAt).getTime();
   const isRecent =
     Number.isFinite(created) &&
     Date.now() - created < 30 * 24 * 60 * 60 * 1000;
-  if (isRecent || hasTag(opts.tags, TAG_ALIASES.new)) return "New";
+  if (isRecent) return "New";
   return null;
 }
 
