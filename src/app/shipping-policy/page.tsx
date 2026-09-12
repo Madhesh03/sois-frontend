@@ -34,8 +34,8 @@ export default function ShippingPolicyPage() {
 
       <h2>Shipping Charges</h2>
       <p>
-        Applicable shipping charges, if any, are calculated at checkout
-        before you complete payment.
+        We currently offer free shipping on all orders across India — no
+        minimum order value required.
       </p>
 
       <h2>Order Tracking</h2>

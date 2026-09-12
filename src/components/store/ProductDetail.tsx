@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Rotate3d,
   Ruler,
+  Truck,
 } from "lucide-react";
 import { Product, formatPrice, categories, badgeColors } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
@@ -428,6 +429,9 @@ export function ProductDetail({
           <div className="sois-pdp-trust">
             <span>
               <ShieldCheck size={16} /> Hallmarked 925
+            </span>
+            <span>
+              <Truck size={16} /> Free Shipping
             </span>
           </div>
 

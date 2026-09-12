@@ -2,6 +2,7 @@ import { T } from "@/lib/tokens";
 
 const items = [
   "925 STERLING SILVER GUARANTEED",
+  "FREE SHIPPING ON ALL ORDERS",
   "HALLMARKED & CERTIFIED",
   "10,000+ HAPPY CUSTOMERS",
   "LIFETIME SHINE GUARANTEE",

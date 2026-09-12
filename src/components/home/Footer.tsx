@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ComponentType } from "react";
 import Link from "next/link";
-import { Instagram, Heart, ChevronDown } from "lucide-react";
+import { Instagram, Heart, ChevronDown, Truck } from "lucide-react";
 import { T } from "@/lib/tokens";
 import { useWishlist } from "@/context/WishlistContext";
 
@@ -128,6 +128,16 @@ export function Footer() {
             <div>
               <div className="sois-footer-hallmark-title">Hallmarked Silver</div>
               <div className="sois-footer-hallmark-sub">Certified purity guaranteed</div>
+            </div>
+          </div>
+
+          <div className="sois-footer-hallmark">
+            <div className="sois-footer-hallmark-badge">
+              <Truck size={18} color={T.sage} />
+            </div>
+            <div>
+              <div className="sois-footer-hallmark-title">Free Shipping</div>
+              <div className="sois-footer-hallmark-sub">On all orders across India</div>
             </div>
           </div>
         </div>
