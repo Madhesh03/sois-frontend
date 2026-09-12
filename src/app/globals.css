@@ -245,6 +245,13 @@ video {
   transition: transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
 }
+/* The All Products shot is a portrait-ish product photo; the big card's
+   12:5 aspect ratio (mobile/tablet) is far wider than that, so a centered
+   cover crop clips the pendant/earrings at the bottom. Bias the crop down
+   toward the jewellery instead of the empty chain/background above it. */
+.sois-cat2-card--big .sois-cat2-img {
+  object-position: 50% 78%;
+}
 .sois-cat2-card:hover .sois-cat2-img,
 .sois-cat2-card:focus-visible .sois-cat2-img {
   transform: scale(1.09);
