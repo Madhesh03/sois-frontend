@@ -486,7 +486,7 @@ export function ProductDetail({
           <div className="sois-sizechart">
             <Image
               src="/ring-size-chart.png"
-              alt="Ring size chart — US sizes 3 to 13.5 with inside diameter in millimetres"
+              alt="Ring size chart — inside diameter and circumference in millimetres, with US/Canada, UK/Australia, Europe, and India size equivalents"
               width={1448}
               height={1086}
               className="sois-sizechart-image"
