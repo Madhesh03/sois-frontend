@@ -18,6 +18,29 @@ import {
 import { Product, formatPrice, categories, badgeColors } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
+
+/** Ring-band-with-solitaire outline, drawn behind the size number so a size swatch reads as a ring rather than a plain circle/square. */
+function RingSizeIcon() {
+  return (
+    <svg viewBox="0 0 48 54" className="sois-pdp-size-icon" aria-hidden="true">
+      <circle cx="24" cy="32" r="17" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M17.5 18.5 L14 23 M30.5 18.5 L34 23"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M24 4 L29 11 L24 18 L19 11 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/store/ProductCard";
 import { RecentlyViewed } from "@/components/store/RecentlyViewed";
@@ -335,7 +358,8 @@ export function ProductDetail({
                         setSizeError(false);
                       }}
                     >
-                      {s.size}
+                      <RingSizeIcon />
+                      <span className="sois-pdp-size-num">{s.size}</span>
                     </button>
                   );
                 })}
