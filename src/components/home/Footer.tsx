@@ -2,12 +2,13 @@
 
 import { useEffect, useState, type ComponentType } from "react";
 import Link from "next/link";
-import { Instagram, Heart, ChevronDown, Truck } from "lucide-react";
+import { Instagram, Facebook, Heart, ChevronDown, Truck } from "lucide-react";
 import { T } from "@/lib/tokens";
 import { useWishlist } from "@/context/WishlistContext";
 
 const WHATSAPP_NUMBER = "917305272195";
 const INSTAGRAM_HANDLE = "soisstore.co";
+const FACEBOOK_URL = "https://www.facebook.com/share/18MX3MHLiT/?mibextid=wwXIfr";
 
 function WhatsAppIcon({ size = 15, color = T.sage }: { size?: number; color?: string }) {
   return (
@@ -80,8 +81,9 @@ export function Footer() {
     onClick?: () => void;
   }[] = [
     { Icon: Instagram, label: "Instagram", href: `https://instagram.com/${INSTAGRAM_HANDLE}` },
-    { Icon: Heart, label: "Wishlist", onClick: openWishlist },
+    { Icon: Facebook, label: "Facebook", href: FACEBOOK_URL },
     { Icon: WhatsAppIcon, label: "WhatsApp", href: `https://wa.me/${WHATSAPP_NUMBER}` },
+    { Icon: Heart, label: "Wishlist", onClick: openWishlist },
   ];
 
   return (

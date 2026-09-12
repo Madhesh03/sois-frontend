@@ -250,17 +250,19 @@ video {
   transform: scale(1.09);
 }
 
-/* Bottom-weighted veil so the label always reads over any image */
+/* Bottom-weighted veil so the label always reads over any image — kept
+   shallow and light so it only shades the label strip, not the product
+   photo above it. */
 .sois-cat2-veil {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.82) 0%,
-    rgba(0, 0, 0, 0.4) 38%,
-    rgba(0, 0, 0, 0.08) 68%,
-    transparent 100%
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.18) 20%,
+    rgba(0, 0, 0, 0.04) 34%,
+    transparent 46%
   );
   transition: background 0.45s ease;
 }
@@ -268,10 +270,10 @@ video {
 .sois-cat2-card:focus-visible .sois-cat2-veil {
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.88) 0%,
-    rgba(0, 0, 0, 0.5) 42%,
-    rgba(0, 0, 0, 0.16) 74%,
-    transparent 100%
+    rgba(0, 0, 0, 0.58) 0%,
+    rgba(0, 0, 0, 0.22) 22%,
+    rgba(0, 0, 0, 0.05) 38%,
+    transparent 50%
   );
 }
 

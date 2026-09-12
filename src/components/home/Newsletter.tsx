@@ -62,6 +62,7 @@ export function Newsletter() {
           <div style={{ display: "flex", gap: 20, marginTop: 32, flexWrap: "wrap" }}>
             {[
               { label: "Instagram", href: "https://instagram.com/soisstore.co" },
+              { label: "Facebook", href: "https://www.facebook.com/share/18MX3MHLiT/?mibextid=wwXIfr" },
               { label: "WhatsApp", href: "https://wa.me/917305272195" },
             ].map(({ label: s, href }) => (
               <a
