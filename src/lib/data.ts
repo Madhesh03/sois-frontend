@@ -1,6 +1,6 @@
 export const I = {
   heroBanner: "/hero-banner-1.png",
-  heroBannerSlides: ["/hero-banner-1.png", "/hero-banner-2.png", "/hero-banner-3.png"],
+  heroBannerSlides: ["/hero-banner-2.png", "/hero-banner-1.png", "/hero-banner-3.png"],
   bisCertificate: "/bis-certificate.png",
   occasion1: "/occasion/occasion-1.png",
   occasion2: "/occasion/occasion-2.png",
