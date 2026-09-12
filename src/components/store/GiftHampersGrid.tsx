@@ -52,7 +52,9 @@ export function GiftHampersGrid({ hampers }: { hampers: Product[] }) {
                   alt={h.name}
                   fill
                   sizes="(max-width: 767px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  style={{ objectFit: "contain" }}
+                  // Hamper photos are full-bleed lifestyle shots — fill the card
+                  // frame (cover) rather than letterboxing them (contain).
+                  style={{ objectFit: "cover" }}
                 />
                 {selected && (
                   <span
