@@ -24,7 +24,7 @@ export const I = {
   anklets:
     "https://images.unsplash.com/photo-1669975107668-efe29cd49789?w=600&h=700&fit=crop&auto=format&q=85",
   heartPend: "/categories/pendant-chains.png",
-  giftBox: "/categories/gift-box.png",
+  giftBox: "/categories/gift-box-v2.png",
   prod1: "/categories/all-products.png",
   prod2:
     "https://images.unsplash.com/photo-1639660680788-bf160240864e?w=600&h=720&fit=crop&auto=format&q=85",
