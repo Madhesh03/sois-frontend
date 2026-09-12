@@ -46,3 +46,16 @@ export function clearCart(): Promise<{ success: boolean; message: string }> {
 export function mergeCart(sessionKey: string): Promise<Cart> {
   return apiPost<Cart>("/orders/cart/merge/", { session_key: sessionKey });
 }
+
+/**
+ * Choose the gift hamper that packs the cart, or clear it by passing null. The
+ * box count is derived server-side from the piece count and returned on the
+ * cart's `gift_hamper` field.
+ */
+export function setGiftHamper(productId: string | null): Promise<Cart> {
+  return apiPost<Cart>(
+    "/orders/cart/gift-hamper/",
+    { product_id: productId },
+    opts
+  );
+}

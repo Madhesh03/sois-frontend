@@ -21,6 +21,7 @@ import {
   MapPin,
   Check,
   ShieldCheck,
+  Gift,
 } from "lucide-react";
 
 // Resolve a product's detail-page path from its name (slugified — the product
@@ -496,8 +497,19 @@ function ShippingForm() {
 }
 
 function ReviewOrder() {
-  const { items, shippingInfo, setCheckoutStep, getTotal, getItemCount, clearCart } =
-    useCart();
+  const {
+    items,
+    shippingInfo,
+    setCheckoutStep,
+    getTotal,
+    getItemCount,
+    clearCart,
+    giftHamper,
+  } = useCart();
+  const itemsSubtotal = items.reduce(
+    (sum, i) => sum + i.price * i.quantity,
+    0
+  );
   const { isAuthenticated, openModal } = useAuth();
   const { loadOrder } = useOrders();
 
@@ -708,9 +720,25 @@ function ReviewOrder() {
         >
           <span style={{ fontSize: "0.85rem", color: T.muted }}>Subtotal</span>
           <span style={{ fontSize: "0.85rem", color: T.ink }}>
-            {formatPrice(getTotal())}
+            {formatPrice(itemsSubtotal)}
           </span>
         </div>
+        {giftHamper && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: 8,
+            }}
+          >
+            <span style={{ fontSize: "0.85rem", color: T.muted }}>
+              Gift hamper × {giftHamper.boxes}
+            </span>
+            <span style={{ fontSize: "0.85rem", color: T.ink }}>
+              {formatPrice(Number(giftHamper.line_total))}
+            </span>
+          </div>
+        )}
         <div
           style={{
             display: "flex",
@@ -930,6 +958,8 @@ export function CartDrawer() {
     checkoutStep,
     setCheckoutStep,
     getTotal,
+    giftHamper,
+    setGiftHamper,
   } = useCart();
   const { isAuthenticated, openModal } = useAuth();
 
@@ -1248,6 +1278,68 @@ export function CartDrawer() {
               background: T.surface,
             }}
           >
+            {/* Gift packaging (add-on) */}
+            {giftHamper ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  marginBottom: 12,
+                  padding: "10px 12px",
+                  background: T.sage,
+                  borderRadius: 8,
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: "0.82rem",
+                    color: T.ink,
+                  }}
+                >
+                  <Gift size={15} color={T.forest} />
+                  {giftHamper.name} × {giftHamper.boxes} ·{" "}
+                  {formatPrice(Number(giftHamper.line_total))}
+                </span>
+                <button
+                  onClick={() => setGiftHamper(null)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: T.muted,
+                    fontSize: "0.75rem",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/gift-hampers"
+                onClick={closeCart}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 12,
+                  padding: "10px 12px",
+                  border: `1px dashed ${T.borderDk}`,
+                  borderRadius: 8,
+                  fontSize: "0.82rem",
+                  color: T.forest,
+                  textDecoration: "none",
+                }}
+              >
+                <Gift size={15} /> Add gift packaging
+              </Link>
+            )}
+
             <div
               style={{
                 display: "flex",

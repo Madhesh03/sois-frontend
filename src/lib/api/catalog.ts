@@ -34,6 +34,7 @@ export async function listProducts(
         max_price: query.max_price,
         in_stock: query.in_stock,
         featured: query.featured,
+        gift_hamper: query.gift_hamper ? "true" : undefined,
         ordering: query.ordering,
         page: query.page,
         page_size: query.page_size,

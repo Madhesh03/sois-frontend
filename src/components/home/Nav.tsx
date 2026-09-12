@@ -16,6 +16,7 @@ const navLinks: { label: string; href: string }[] = [
   { label: "Collections", href: "/shop" },
   { label: "New Arrivals", href: "/shop?filter=new" },
   { label: "Best Sellers", href: "/shop?filter=best" },
+  { label: "Gift Hampers", href: "/gift-hampers" },
   { label: "About", href: "/about" },
 ];
 const categories = ["All Categories", "Rings", "Earrings", "Necklaces", "Bracelets", "Sets"];

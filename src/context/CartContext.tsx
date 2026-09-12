@@ -8,7 +8,11 @@ import React, {
   useState,
 } from "react";
 import { cartApi, addressApi, mediaUrl } from "@/lib/api";
-import type { Cart as ApiCart, Address as ApiAddress } from "@/lib/api";
+import type {
+  Cart as ApiCart,
+  Address as ApiAddress,
+  GiftHamperLine,
+} from "@/lib/api";
 import { useAuth } from "./AuthContext";
 
 export interface CartItem {
@@ -86,6 +90,11 @@ export interface CartContextType {
   saveAddress: (info: ShippingInfo) => void;
   updateSavedAddress: (oldInfo: ShippingInfo, nextInfo: ShippingInfo) => void;
   removeSavedAddress: (info: ShippingInfo) => void;
+  /** Chosen gift hamper + how many boxes the cart needs (server-computed), or
+   *  null. `getTotal()` already includes its price. */
+  giftHamper: GiftHamperLine | null;
+  /** Choose a hamper design by product id, or pass null to remove packaging. */
+  setGiftHamper: (productId: string | null) => void;
   getTotal: () => number;
   getItemCount: () => number;
 }
@@ -155,6 +164,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("cart");
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<ShippingInfo[]>([]);
+  const [giftHamper, setGiftHamperState] = useState<GiftHamperLine | null>(null);
 
   // composite line key → server cart-item id, for update/remove API calls.
   const itemIdByLine = useRef<Record<string, string>>({});
@@ -184,6 +194,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
     itemIdByLine.current = map;
     setItems(next);
+    // Server recomputes the hamper box count on every cart mutation, so this
+    // keeps the auto-count in sync as items are added/removed.
+    setGiftHamperState(cart.gift_hamper ?? null);
   };
 
   const syncCart = async () => {
@@ -314,11 +327,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    setGiftHamperState(null);
     setShippingInfo(null);
     setCheckoutStep("cart");
     cartApi.clearCart().catch(() => {
       /* ignore */
     });
+  };
+
+  /** Choose (or clear, with null) the gift hamper packing the cart. The server
+   *  returns the fresh cart with the recomputed box count. */
+  const setGiftHamper = (productId: string | null) => {
+    // Optimistic: clearing hides the line instantly; a selection waits for the
+    // server response to know the box count.
+    if (productId === null) setGiftHamperState(null);
+    cartApi
+      .setGiftHamper(productId)
+      .then(applyCart)
+      .catch(() => {
+        /* keep current state if the API is unreachable */
+      });
   };
 
   const openCart = () => {
@@ -370,7 +398,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getTotal = () => {
-    return items.reduce((total, item) => total + item.price * item.quantity, 0);
+    const itemsTotal = items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+    return itemsTotal + (giftHamper ? Number(giftHamper.line_total) : 0);
   };
 
   const getItemCount = () => {
@@ -399,6 +431,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         saveAddress,
         updateSavedAddress,
         removeSavedAddress,
+        giftHamper,
+        setGiftHamper,
         getTotal,
         getItemCount,
       }}

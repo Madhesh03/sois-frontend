@@ -645,6 +645,21 @@ export async function getProductsByCategory(
   return all.filter((p) => p.category === slug);
 }
 
+/** Gift hampers for the dedicated /gift-hampers page. Empty when the backend
+ *  is unreachable — there is no static fallback (hampers are store-specific). */
+export async function getGiftHampers(): Promise<Product[]> {
+  try {
+    const { catalogApi, mapListItem } = await import("@/lib/api");
+    const { items } = await catalogApi.listProducts({
+      gift_hamper: true,
+      page_size: 100,
+    });
+    return items.map(mapListItem);
+  } catch {
+    return [];
+  }
+}
+
 /** Top-selling products for the homepage "Top Products" section. */
 export async function getTopProducts(limit = 8): Promise<Product[]> {
   try {

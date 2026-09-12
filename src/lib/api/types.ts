@@ -158,6 +158,7 @@ export interface ProductListItem {
   has_sizes: boolean;
   status: ProductStatus;
   is_featured: boolean;
+  is_gift_hamper: boolean;
   /** Free-text merchandising labels set in admin, e.g. ["New Arrivals"]. */
   tags: string[];
   thumbnail_key: string;
@@ -216,6 +217,7 @@ export interface ProductDetail {
   size_stock: SizeStock[];
   care_instruction: string;
   is_featured: boolean;
+  is_gift_hamper: boolean;
   tags: string[];
   thumbnail_key: string;
   media: ProductMedia[];
@@ -243,6 +245,8 @@ export interface ProductQuery {
   max_price?: number;
   in_stock?: boolean;
   featured?: boolean;
+  /** true → only gift hampers (dedicated page); omitted → hampers excluded. */
+  gift_hamper?: boolean;
   ordering?: string;
   page?: number;
   page_size?: number;
@@ -261,11 +265,28 @@ export interface CartItem {
   added_at: string;
 }
 
+/** The gift hamper packing an order + how many boxes the cart currently needs. */
+export interface GiftHamperLine {
+  product_id: string;
+  name: string;
+  slug: string;
+  thumbnail_key: string;
+  thumbnail_url: string | null;
+  capacity: number;
+  boxes: number;
+  pieces: number;
+  unit_price: number;
+  line_total: number;
+}
+
 export interface Cart {
   id: string;
   items: CartItem[];
   total: number;
   item_count: number;
+  /** Null when no gift packaging chosen. `total` is jewellery only — add
+   *  gift_hamper.line_total for the grand total. */
+  gift_hamper: GiftHamperLine | null;
   updated_at: string;
 }
 
