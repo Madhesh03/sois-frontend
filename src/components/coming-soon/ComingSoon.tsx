@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Instagram, Mail, Phone, ArrowRight, Check } from "lucide-react";
 import { business } from "@/lib/business";
 import { I } from "@/lib/data";
+import { Countdown } from "./Countdown";
 
 const policyLinks = [
   { label: "Privacy Policy", href: "/privacy-policy" },
@@ -333,6 +334,8 @@ export function ComingSoon() {
             </h1>
 
             <Ornament />
+
+            <Countdown />
 
             <p className="sois-cs-statement">
               SOIS is more than a jewellery brand. It&rsquo;s a celebration of

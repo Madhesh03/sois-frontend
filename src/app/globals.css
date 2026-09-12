@@ -5415,6 +5415,84 @@ video {
   );
 }
 
+/* ── Launch countdown ──────────────────────────────────────────
+   Sits directly under the ornament so "Coming Soon" is answered by
+   "when" before the eye reaches the brand statement. */
+.sois-cs-count {
+  margin: 0 0 clamp(20px, 2.8vh, 30px);
+}
+/* Holds the strip's height before the first client tick, so the copy
+   below doesn't jump when the numbers appear. */
+.sois-cs-count-empty {
+  height: clamp(66px, 9vh, 88px);
+}
+
+.sois-cs-count-label {
+  margin: 0 0 11px;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-indent: 0.26em;
+  text-transform: uppercase;
+  color: var(--cs-faint);
+}
+
+.sois-cs-count-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(14px, 3vw, 30px);
+}
+
+.sois-cs-count-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  /* Fixed advance per cell — the seconds digit changes every tick, and
+     without this the whole row shuffles sideways on each one. */
+  min-width: clamp(50px, 8.5vw, 66px);
+}
+
+/* Hairline divider in the ornament's gold, so the strip reads as part of
+   the same family of rules rather than a separate widget. */
+.sois-cs-count-sep {
+  position: absolute;
+  left: calc(clamp(14px, 3vw, 30px) / -2);
+  top: 10%;
+  bottom: 36%;
+  width: 1px;
+  background: var(--cs-gold-line);
+}
+
+.sois-cs-count-num {
+  font-family: var(--font-logo), Georgia, serif;
+  font-size: clamp(1.7rem, min(4.4vw, 5.6vh), 2.7rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--cs-forest);
+  font-variant-numeric: tabular-nums;
+}
+
+.sois-cs-count-unit {
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-transform: uppercase;
+  color: var(--cs-faint);
+}
+
+.sois-cs-count-live {
+  margin: 0;
+  font-family: var(--font-logo), Georgia, serif;
+  font-size: clamp(1.05rem, 3vw, 1.45rem);
+  letter-spacing: 0.05em;
+  color: var(--cs-gold);
+}
+
 .sois-cs-statement {
   max-width: 46ch;
   margin: 0;
