@@ -16,7 +16,7 @@ import {
   Ruler,
   Truck,
 } from "lucide-react";
-import { Product, formatPrice, categories, badgeColors } from "@/lib/catalog";
+import { Product, formatPrice, discountPercent, categories, badgeColors } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 
@@ -91,9 +91,7 @@ export function ProductDetail({
   // is picked the page quotes that variation rather than the base product.
   const price = chosen?.price ?? product.price;
   const originalPrice = chosen?.price != null ? chosen.originalPrice ?? null : product.originalPrice;
-  const discount = originalPrice
-    ? Math.round(((originalPrice - price) / originalPrice) * 100)
-    : 0;
+  const discount = discountPercent(price, originalPrice);
 
   // Gallery media = product images plus an optional 360° video as the last item.
   const media: { type: "image" | "video"; src: string }[] = [

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Heart } from "lucide-react";
-import { Product, formatPrice, badgeColors } from "@/lib/catalog";
+import { Product, formatPrice, discountPercent, badgeColors } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -108,7 +108,11 @@ export function ProductCard({ product }: { product: Product }) {
               {formatPrice(product.originalPrice)}
             </span>
           )}
-          {product.originalPrice && <span className="sois-pcard-save">SALE</span>}
+          {product.originalPrice && (
+            <span className="sois-pcard-save">
+              {discountPercent(product.price, product.originalPrice)}% OFF
+            </span>
+          )}
         </div>
         {product.hasSizes ? (
           // Sized products (e.g. rings) need a size chosen before adding, so this

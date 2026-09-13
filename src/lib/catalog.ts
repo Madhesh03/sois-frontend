@@ -818,6 +818,15 @@ export function formatPrice(value: number): string {
   })}`;
 }
 
+/** Percentage off, rounded, for a discounted price — 0 when not on sale. */
+export function discountPercent(
+  price: number,
+  originalPrice: number | null | undefined
+): number {
+  if (!originalPrice || originalPrice <= price) return 0;
+  return Math.round(((originalPrice - price) / originalPrice) * 100);
+}
+
 /**
  * Card badge colours, keyed by the badge text itself (not just "is it new")
  * so New / Best Seller / Sale read as visually distinct tags rather than the

@@ -8,6 +8,7 @@ import { Eyebrow } from "@/components/shared/Eyebrow";
 import {
   Product,
   formatPrice,
+  discountPercent,
   getTopProducts,
   getAllProducts,
   badgeColors,
@@ -226,7 +227,11 @@ export function Products() {
                   <div className="sois-pcard-price-row">
                     <span className="sois-pcard-price">{formatPrice(p.price)}</span>
                     {p.originalPrice && <span className="sois-pcard-orig">{formatPrice(p.originalPrice)}</span>}
-                    {p.originalPrice && <span className="sois-pcard-save">SALE</span>}
+                    {p.originalPrice && (
+                      <span className="sois-pcard-save">
+                        {discountPercent(p.price, p.originalPrice)}% OFF
+                      </span>
+                    )}
                   </div>
                   {p.hasSizes ? (
                     // Sized products need a size chosen first, so this links to the PDP's
