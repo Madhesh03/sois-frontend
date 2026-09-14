@@ -34,6 +34,8 @@ export interface ProductSpec {
 export interface Product {
   id: string;
   slug: string;
+  /** True for gift-hamper packaging products (added on top of an order). */
+  isGiftHamper?: boolean;
   name: string;
   subtitle: string;
   category: CategorySlug;

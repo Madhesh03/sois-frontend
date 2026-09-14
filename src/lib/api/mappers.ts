@@ -134,6 +134,7 @@ export function mapListItem(p: ProductListItem): UIProduct {
   return {
     id: p.id,
     slug: p.slug,
+    isGiftHamper: p.is_gift_hamper,
     name: p.name,
     subtitle: subtitleFor(p.metal_type, p.purity),
     category: toCategorySlug(null, p.category_name),
@@ -209,6 +210,7 @@ export function mapDetail(p: ProductDetail): UIProduct {
   return {
     id: p.id,
     slug: p.slug,
+    isGiftHamper: p.is_gift_hamper,
     name: p.name,
     subtitle: subtitleFor(p.metal_type, p.purity),
     category: toCategorySlug(p.category?.slug, p.category?.name),

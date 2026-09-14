@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Gift, Check } from "lucide-react";
 import { Product, formatPrice } from "@/lib/catalog";
 import { T } from "@/lib/tokens";
@@ -45,7 +46,7 @@ export function GiftHampersGrid({ hampers }: { hampers: Product[] }) {
           const selected = selectedId === h.id;
           return (
             <article className="sois-scard" key={h.id}>
-              <div className="sois-pcard-img">
+              <Link href={`/gift-hampers/${h.slug}`} className="sois-pcard-img" aria-label={`View ${h.name}`}>
                 <Image
                   className="pc-img"
                   src={h.images[0]}
@@ -64,13 +65,15 @@ export function GiftHampersGrid({ hampers }: { hampers: Product[] }) {
                     SELECTED
                   </span>
                 )}
-              </div>
+              </Link>
 
               <div className="sois-pcard-body">
                 <div className="sois-pcard-sub">
                   Holds up to {HAMPER_CAPACITY} pieces
                 </div>
-                <div className="sois-pcard-name">{h.name}</div>
+                <Link href={`/gift-hampers/${h.slug}`} className="sois-pcard-name">
+                  {h.name}
+                </Link>
                 <div className="sois-pcard-price-row">
                   <span className="sois-pcard-price">{formatPrice(h.price)}</span>
                   <span
