@@ -79,12 +79,13 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
       return;
     }
     let cancelled = false;
+    const slug = categorySlugs[searchCat];
     const handle = setTimeout(async () => {
-      const list = await searchProducts(q);
+      // Pass the category to the API so switching it re-queries (and scopes)
+      // server-side, instead of client-filtering a query-only result set.
+      const list = await searchProducts(q, slug);
       if (cancelled) return;
-      const slug = categorySlugs[searchCat];
-      const scoped = slug ? list.filter((p) => p.category === slug) : list;
-      setResults(scoped.slice(0, MAX_RESULTS));
+      setResults(list.slice(0, MAX_RESULTS));
     }, 200);
     return () => {
       cancelled = true;

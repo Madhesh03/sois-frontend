@@ -718,20 +718,32 @@ export async function getProductsByIds(
   }
 }
 
-export async function searchProducts(query: string): Promise<Product[]> {
+export async function searchProducts(
+  query: string,
+  category?: string
+): Promise<Product[]> {
   const q = query.trim();
   if (!q) return [];
   try {
     const { catalogApi, mapListItem } = await import("@/lib/api");
-    const { items } = await catalogApi.listProducts({ q, page_size: 50 });
+    // Scope the query to the selected category server-side so changing the
+    // category actually re-queries the API (rather than re-filtering a
+    // query-only result set client-side, which never fired a request and
+    // wrongly showed "no results" when the top matches were other categories).
+    const { items } = await catalogApi.listProducts({
+      q,
+      category,
+      page_size: 50,
+    });
     return items.map(mapListItem);
   } catch {
     const needle = q.toLowerCase();
     return MOCK_PRODUCTS.filter(
       (p) =>
-        p.name.toLowerCase().includes(needle) ||
-        p.category.toLowerCase().includes(needle) ||
-        p.description.toLowerCase().includes(needle)
+        (!category || p.category === category) &&
+        (p.name.toLowerCase().includes(needle) ||
+          p.category.toLowerCase().includes(needle) ||
+          p.description.toLowerCase().includes(needle))
     );
   }
 }

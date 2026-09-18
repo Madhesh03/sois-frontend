@@ -20,8 +20,19 @@ export default function OrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { getOrder } = useOrders();
+  const { getOrder, loadOrder, loading } = useOrders();
   const order = getOrder(id);
+
+  // Cold landing from an email CTA (/account/orders/<id>): the orders list may
+  // not be in context yet, so fetch this one directly by id. Without this the
+  // page flashes "Order not found" for a real order until the list loads.
+  const [fetching, setFetching] = useState(false);
+  useEffect(() => {
+    if (order || loading || fetching) return;
+    setFetching(true);
+    loadOrder(id).finally(() => setFetching(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, order, loading]);
 
   // Real carrier tracking (courier, AWB, live events) — separate from
   // `order.timeline`, which is a coarse status stepper derived from the
@@ -48,7 +59,12 @@ export default function OrderDetailPage({
 
   return (
     <AccountShell title="Order Details">
-      {!order ? (
+      {!order && (loading || fetching) ? (
+        <div className="sois-account-empty-state">
+          <Package size={30} />
+          <p className="sois-empty-title">Loading order…</p>
+        </div>
+      ) : !order ? (
         <div className="sois-account-empty-state">
           <Package size={30} />
           <p className="sois-empty-title">Order not found</p>
