@@ -211,7 +211,10 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  const getOrder = (id: string) => orders.find((o) => o.id === id);
+  // Match by UUID id or by order_number: new email CTAs link by id, older
+  // (already-delivered) ones link by order_number.
+  const getOrder = (id: string) =>
+    orders.find((o) => o.id === id || o.orderNumber === id);
 
   const loadOrder = async (orderId: string): Promise<Order | null> => {
     try {
