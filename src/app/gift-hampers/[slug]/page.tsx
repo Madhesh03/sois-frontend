@@ -17,12 +17,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const hamper = await getProductBySlug(slug);
   if (!hamper) return { title: "Gift Hamper" };
+  // Own canonical + og:url so sharing links to this hamper, not the home page
+  // (see the product page for the iOS share rationale).
+  const path = `/gift-hampers/${slug}`;
   return {
     title: hamper.name,
     description: hamper.description,
+    alternates: { canonical: path },
     openGraph: {
       title: `${hamper.name} | ${siteConfig.name}`,
       description: hamper.description,
+      url: path,
       images: hamper.images[0] ? [{ url: hamper.images[0] }] : undefined,
     },
   };

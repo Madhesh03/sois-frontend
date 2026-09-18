@@ -12,6 +12,7 @@ import {
   getProductsByCategory,
   CategorySlug,
 } from "@/lib/catalog";
+import { siteConfig } from "@/lib/data";
 
 export function generateStaticParams() {
   return categories.map((c) => ({ slug: c.slug }));
@@ -36,9 +37,18 @@ export async function generateMetadata({
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);
   if (!category) return { title: "Category" };
+  // Own canonical + og:url so this category (not the home page) is what gets
+  // shared/indexed (see the product page for the iOS share rationale).
+  const path = `/category/${slug}`;
   return {
     title: `${category.name} — 925 Sterling Silver`,
     description: `Shop SOIS ${category.name.toLowerCase()} — ${category.tagline}. Hallmarked 925 sterling silver, nickel-free and hypoallergenic.`,
+    alternates: { canonical: path },
+    openGraph: {
+      title: `${category.name} | ${siteConfig.name}`,
+      description: `Shop SOIS ${category.name.toLowerCase()} — ${category.tagline}.`,
+      url: path,
+    },
   };
 }
 

@@ -17,12 +17,18 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Product" };
+  // Own canonical + og:url per product. Without these the page inherits the
+  // root layout's home-page canonical/og:url, so sharing a product on iOS
+  // (whose share sheet reads og:url/canonical) links to the home page.
+  const path = `/product/${slug}`;
   return {
     title: product.name,
     description: product.description,
+    alternates: { canonical: path },
     openGraph: {
       title: `${product.name} | ${siteConfig.name}`,
       description: product.description,
+      url: path,
       images: [{ url: product.images[0] }],
     },
   };
