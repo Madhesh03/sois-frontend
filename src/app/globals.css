@@ -3465,6 +3465,16 @@ video {
     align-items: start;
   }
 }
+/* Grid items default to a min-width of their content's min-content size,
+   so long unbreakable info-panel content (or the thumbnail strip) can force
+   this column wider than the viewport — which the global `overflow-x: clip`
+   then silently crops instead of wrapping/shrinking. min-width: 0 lets both
+   columns shrink to the track's actual width, matching the same fix already
+   applied to `.sois-scard` etc. elsewhere in this file. */
+.sois-pdp-gallery,
+.sois-pdp-info {
+  min-width: 0;
+}
 .sois-pdp-gallery {
   display: flex;
   flex-direction: column;
@@ -3593,8 +3603,56 @@ video {
   font-weight: 800;
   letter-spacing: -0.03em;
   color: #0a0a0a;
-  margin: 0 0 12px;
+  margin: 0;
   line-height: 1.1;
+}
+
+/* ── Wishlist (over the image, top-right) + Share (beside the name) ──
+   Mirrors the Flipkart/Amazon PDP convention instead of stacking both as
+   plain text buttons below Add to Bag. */
+.sois-pdp-wishlist {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+  transition: background 0.2s ease;
+}
+.sois-pdp-wishlist.active {
+  background: #d1e7e2;
+}
+.sois-pdp-name-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.sois-pdp-share {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b5563;
+  padding: 4px 0;
+  margin-top: 2px;
+}
+.sois-pdp-share:hover {
+  color: #115e59;
 }
 .sois-pdp-rating {
   display: flex;
@@ -3819,25 +3877,6 @@ video {
 .sois-pdp-buy:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-.sois-pdp-secondary {
-  display: flex;
-  gap: 22px;
-  margin-bottom: 22px;
-}
-.sois-pdp-secondary button {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #4b5563;
-}
-.sois-pdp-secondary button.active {
-  color: #115e59;
 }
 .sois-pdp-trust {
   display: flex;

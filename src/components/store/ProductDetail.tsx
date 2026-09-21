@@ -244,6 +244,15 @@ export function ProductDetail({
               </span>
             )}
 
+            <button
+              type="button"
+              aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+              onClick={() => addToWishlist(payload)}
+              className={`sois-touch-target sois-pdp-wishlist${wished ? " active" : ""}`}
+            >
+              <Heart size={18} fill={wished ? T.forest : "none"} color={T.forest} />
+            </button>
+
             {activeMedia.type === "video" && (
               <span className="sois-pdp-360-badge">
                 <Rotate3d size={14} /> 360° View
@@ -300,7 +309,18 @@ export function ProductDetail({
         {/* Info */}
         <div className="sois-pdp-info">
           <div className="sois-pdp-sub">{product.subtitle}</div>
-          <h1 className="sois-pdp-name">{product.name}</h1>
+          <div className="sois-pdp-name-row">
+            <h1 className="sois-pdp-name">{product.name}</h1>
+            <button
+              type="button"
+              onClick={handleShare}
+              className="sois-pdp-share"
+              aria-label="Share this product"
+            >
+              <Share2 size={16} />
+              {shareMsg || "Share"}
+            </button>
+          </div>
 
           <div className="sois-pdp-price-row">
             <span className="sois-pdp-price">{formatPrice(price)}</span>
@@ -408,21 +428,6 @@ export function ProductDetail({
               onClick={() => addChosenQuantity()}
             >
               <ShoppingBag size={16} /> Add to Bag
-            </button>
-          </div>
-
-          <div className="sois-pdp-secondary">
-            <button
-              type="button"
-              onClick={() => addToWishlist(payload)}
-              className={wished ? "active" : ""}
-            >
-              <Heart size={16} fill={wished ? T.forest : "none"} />
-              {wished ? "Wishlisted" : "Wishlist"}
-            </button>
-            <button type="button" onClick={handleShare}>
-              <Share2 size={16} />
-              {shareMsg || "Share"}
             </button>
           </div>
 

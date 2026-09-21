@@ -16,6 +16,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
+  // No `openGraph` key here: Next.js inherits the root layout's openGraph
+  // (including its fallback image), so a share still shows SOIS branding
+  // rather than falling back to the bare favicon.
   if (!product) return { title: "Product" };
   // Own canonical + og:url per product. Without these the page inherits the
   // root layout's home-page canonical/og:url, so sharing a product on iOS
@@ -29,7 +32,14 @@ export async function generateMetadata({
       title: `${product.name} | ${siteConfig.name}`,
       description: product.description,
       url: path,
-      images: [{ url: product.images[0] }],
+      images: [
+        {
+          url: product.images[0],
+          width: 1200,
+          height: 1200,
+          alt: product.name,
+        },
+      ],
     },
   };
 }

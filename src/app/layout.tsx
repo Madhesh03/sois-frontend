@@ -54,11 +54,24 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: siteConfig.title,
     description: siteConfig.description,
+    // Site-wide fallback so any page that doesn't set its own openGraph
+    // image (a category page, or a product page whose metadata lookup
+    // failed) still shares with real SOIS branding instead of the crawler
+    // falling back to the browser favicon.
+    images: [
+      {
+        url: "/hero-banner-1.png",
+        width: 1536,
+        height: 762,
+        alt: siteConfig.title,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.title,
     description: siteConfig.description,
+    images: ["/hero-banner-1.png"],
   },
   alternates: {
     canonical: siteConfig.url,
