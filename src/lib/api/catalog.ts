@@ -8,6 +8,8 @@ import type {
   ProductListItem,
   ProductQuery,
   Review,
+  ReviewImage,
+  ReviewMediaPresign,
 } from "./types";
 
 export interface ProductPage {
@@ -124,4 +126,67 @@ export function submitReview(input: {
   body?: string;
 }): Promise<Review> {
   return apiPost<Review>("/catalog/reviews/", input);
+}
+
+export interface ReviewPage {
+  items: Review[];
+  meta: PageMeta;
+}
+
+/**
+ * Site-wide feed of APPROVED reviews across all products — the homepage
+ * carousel and every product page share this one feed rather than a
+ * per-product one, so `product` is optional and unused by most callers.
+ * Public endpoint, no auth.
+ */
+export async function listReviews(
+  query: { page?: number; page_size?: number; product?: string } = {},
+  signal?: AbortSignal
+): Promise<ReviewPage> {
+  const { data, meta } = await apiGetWithMeta<Review[]>("/catalog/reviews/", {
+    auth: false,
+    signal,
+    params: {
+      page: query.page,
+      page_size: query.page_size,
+      product: query.product,
+    },
+  });
+  const m = (meta as PageMeta) ?? {
+    total: data.length,
+    page: 1,
+    page_size: data.length,
+  };
+  return { items: data, meta: m };
+}
+
+/** Step 1 of the review-photo upload: get a presigned S3 PUT URL. Review
+ *  must belong to the calling customer. */
+export function presignReviewMedia(
+  reviewId: string,
+  input: { file_name: string; mime_type: string }
+): Promise<ReviewMediaPresign> {
+  return apiPost<ReviewMediaPresign>(
+    `/catalog/reviews/${reviewId}/media/presign/`,
+    input
+  );
+}
+
+/** Step 2 (PUT the raw file bytes straight to S3) is `uploadToPresignedUrl`
+ *  from `./returns` — reused as-is rather than duplicated here. */
+
+/** Step 3: confirm the upload so the backend creates the ReviewImage record. */
+export function confirmReviewMedia(
+  reviewId: string,
+  input: {
+    s3_key: string;
+    file_name?: string;
+    mime_type?: string;
+    file_size?: number;
+  }
+): Promise<ReviewImage> {
+  return apiPost<ReviewImage>(
+    `/catalog/reviews/${reviewId}/media/confirm/`,
+    input
+  );
 }

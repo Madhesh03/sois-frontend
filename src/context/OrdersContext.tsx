@@ -21,6 +21,11 @@ export interface OrderItem {
   image: string;
   quantity: number;
   size?: string;
+  /** Real backend order-item id (`id` above is the product id) — required
+   *  as `order_item_id` when submitting a review for this line item. */
+  orderItemId: string;
+  /** Whether the customer has already reviewed this order item. */
+  isReviewed: boolean;
 }
 
 export interface OrderEvent {
@@ -153,6 +158,8 @@ function mapApiOrder(o: ApiOrder): Order {
       image: mediaUrl(it.thumbnail_key),
       quantity: it.quantity,
       size: it.selected_size || undefined,
+      orderItemId: it.id,
+      isReviewed: it.is_reviewed,
     })),
     shipping,
     paymentMethod:

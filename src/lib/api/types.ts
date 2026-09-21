@@ -229,15 +229,33 @@ export interface ProductDetail {
   updated_at: string;
 }
 
+export interface ReviewImage {
+  id: string;
+  s3_key: string;
+  view_url?: string;
+  file_name?: string;
+  mime_type?: string;
+  sort_order?: number;
+}
+
 export interface Review {
   id: string;
   product: string;
+  product_name: string;
   rating: number;
   title: string;
   body: string;
   customer_name: string;
   is_approved: boolean;
+  is_rejected: boolean;
+  images: ReviewImage[];
   created_at: string;
+}
+
+export interface ReviewMediaPresign {
+  presigned_url: string;
+  s3_key: string;
+  expires_in: number;
 }
 
 export interface ProductQuery {

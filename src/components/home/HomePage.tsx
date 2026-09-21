@@ -11,6 +11,7 @@ import { CraftsmanshipFocus } from "@/components/home/CraftsmanshipFocus";
 import { Commitment } from "@/components/home/Commitment";
 import { JewelleryCareGuide } from "@/components/home/JewelleryCareGuide";
 import { BrandStory } from "@/components/home/BrandStory";
+import { ReviewsStrip } from "@/components/reviews/ReviewsStrip";
 import { Faq } from "@/components/home/Faq";
 import { Newsletter } from "@/components/home/Newsletter";
 import { Footer } from "@/components/home/Footer";
@@ -75,6 +76,7 @@ export function HomePage() {
           <Commitment />
           <JewelleryCareGuide />
           <BrandStory />
+          <ReviewsStrip title="Loved by our customers" />
           <Faq />
           <Newsletter />
         </main>
