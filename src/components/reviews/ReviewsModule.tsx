@@ -16,26 +16,17 @@ type SortKey = "recent" | "highest" | "lowest";
 type StarFilter = 0 | 1 | 2 | 3 | 4 | 5; // 0 = All
 
 /**
- * Full ratings & reviews module for one product — breakdown bars, star
- * filter chips, sort, a customer-photos grid, and an expandable review
- * list. Scoped to `productId` (the backend product UUID; `ProductDetail`
- * only has one once the real catalogue loads — see catalog.ts's
- * backend-first-with-mock-fallback `getProductBySlug`). Renders nothing
- * until the product has at least one approved review (unlike the
- * site-wide homepage strip, which needs 3+ before it's worth a carousel).
+ * Full ratings & reviews module for one product (the /product/[slug]/reviews
+ * page) — breakdown bars, star filter chips, sort, a customer-photos grid,
+ * and an expandable review list. Scoped to `productId`, the backend product
+ * UUID (see catalog.ts's backend-first-with-mock-fallback `getProductBySlug`).
  */
 export function ReviewsModule({
   productId,
   title = "Ratings & Reviews",
-  showTitle = true,
-  embedded = false,
 }: {
   productId: string;
   title?: string;
-  /** Hide the built-in heading — used inside the "View All" modal, which has its own title bar. */
-  showTitle?: boolean;
-  /** Drop the outer page margin/max-width — used inside the "View All" modal. */
-  embedded?: boolean;
 }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,11 +76,22 @@ export function ReviewsModule({
     return sorted;
   }, [reviews, starFilter, sort]);
 
-  if (loading || failed || stats.total === 0) return null;
+  if (loading) return null;
+
+  if (failed || stats.total === 0) {
+    return (
+      <section className="sois-rvw">
+        <h1 className="sois-rvw-title">{title}</h1>
+        <p className="sois-rvw-empty">
+          {failed ? "Reviews couldn't be loaded right now." : "No reviews for this product yet."}
+        </p>
+      </section>
+    );
+  }
 
   return (
-    <section className={embedded ? "sois-rvw sois-rvw--embedded" : "sois-rvw"} id="reviews">
-      {showTitle && <h2 className="sois-rvw-title">{title}</h2>}
+    <section className="sois-rvw">
+      <h1 className="sois-rvw-title">{title}</h1>
 
       <RatingBreakdown stats={stats} />
 

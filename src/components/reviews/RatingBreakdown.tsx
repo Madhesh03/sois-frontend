@@ -24,7 +24,7 @@ export function RatingBreakdown({ stats }: { stats: ReviewStats }) {
           return (
             <div className="sois-rb-row" key={star}>
               <span className="sois-rb-row-label">
-                {star} <Star size={11} fill="#4b5563" color="#4b5563" />
+                {star} <Star size={11} fill="#d1fae5" color="#d1fae5" />
               </span>
               <span className="sois-rb-row-track">
                 <span

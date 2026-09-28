@@ -45,7 +45,6 @@ function RingSizeIcon() {
 import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/store/ProductCard";
 import { RecentlyViewed } from "@/components/store/RecentlyViewed";
-import { ReviewsModule } from "@/components/reviews/ReviewsModule";
 import { ReviewsSummary } from "@/components/reviews/ReviewsSummary";
 import { Modal } from "@/components/modals/Modal";
 import { recordRecentlyViewed } from "@/lib/recentlyViewed";
@@ -67,8 +66,6 @@ export function ProductDetail({
   const [selectedSize, setSelectedSize] = useState("");
   const [sizeError, setSizeError] = useState(false);
   const [chartOpen, setChartOpen] = useState(false);
-  const [reviewsOpen, setReviewsOpen] = useState(false);
-
   // Log this product to the client-side recently-viewed history (used by the
   // strip below and on other product pages). Re-runs when the product changes.
   useEffect(() => {
@@ -473,9 +470,6 @@ export function ProductDetail({
         </div>
       </div>
 
-      {/* This product's ratings summary — full breakdown/filters/sort live behind "View All" */}
-      <ReviewsSummary productId={product.id} onViewAll={() => setReviewsOpen(true)} />
-
       {/* Related */}
       {related.length > 0 && (
         <section className="sois-pdp-related">
@@ -488,18 +482,11 @@ export function ProductDetail({
         </section>
       )}
 
+      {/* Ratings summary — full breakdown/filters/sort live at /product/[slug]/reviews */}
+      <ReviewsSummary productId={product.id} productSlug={product.slug} />
+
       {/* Recently viewed — hydrated client-side from localStorage history */}
       <RecentlyViewed excludeId={product.id} />
-
-      {/* Full ratings & reviews detail — breakdown, filters, sort, photos, list */}
-      <Modal
-        isOpen={reviewsOpen}
-        onClose={() => setReviewsOpen(false)}
-        title="Ratings & Reviews"
-        size="lg"
-      >
-        <ReviewsModule productId={product.id} showTitle={false} embedded />
-      </Modal>
 
       {/* Size chart */}
       {needsSize && (

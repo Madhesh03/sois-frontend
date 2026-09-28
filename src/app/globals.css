@@ -887,58 +887,216 @@ video {
   transform: scale(1.14);
 }
 
-.sois-reviews-strip {
-  max-width: 1200px;
-  margin: 60px auto 0;
-  padding: 0 20px;
-}
-@media (min-width: 768px) {
-  .sois-reviews-strip {
-    padding: 0 40px;
-  }
+/* ─── Homepage testimonials ─── */
+.sois-section.sois-testi {
+  background: #f3f8f7;
 }
 
-.sois-reviews-strip-head {
+.sois-testi-head,
+.sois-testi-track,
+.sois-testi-nav {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sois-testi-head {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 0 0 20px;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
-.sois-reviews-strip-title {
-  font-size: clamp(1.3rem, 4vw, 1.7rem);
+.sois-testi-title {
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  margin: 0;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
   color: #0a0a0a;
+  margin: 0;
 }
 
-.sois-reviews-strip-badge {
-  display: inline-flex;
+.sois-testi-summary {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.85rem;
+  gap: 14px;
+  padding: 14px 20px;
+  background: #ffffff;
+  border: 1px solid #e3ecea;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.sois-testi-score {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #115e59;
+  line-height: 1;
+}
+
+.sois-testi-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.76rem;
   color: #6b7280;
 }
-.sois-reviews-strip-badge strong {
-  color: #0a0a0a;
-  font-weight: 800;
-}
 
-.sois-reviews-track {
+.sois-testi-track {
   display: flex;
-  gap: 14px;
+  gap: 20px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-bottom: 6px;
+  padding: 4px 2px 8px;
+}
+.sois-testi-track::-webkit-scrollbar {
+  display: none;
 }
 
-.sois-reviews-track::-webkit-scrollbar {
-  display: none;
+.sois-testi-card {
+  position: relative;
+  flex: 0 0 calc((100% - 40px) / 3);
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e3ecea;
+  border-radius: 18px;
+  padding: 28px 26px 22px;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.sois-testi-card:hover {
+  box-shadow: 0 14px 34px rgba(17, 94, 89, 0.08);
+  transform: translateY(-2px);
+}
+
+.sois-testi-quote {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  color: #d1fae5;
+  fill: #d1fae5;
+}
+
+.sois-testi-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 2px 0 0;
+}
+
+.sois-testi-body {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #4b5563;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sois-testi-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #eef2f1;
+}
+
+.sois-testi-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #115e59;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.sois-testi-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.sois-testi-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0a0a0a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sois-testi-product {
+  font-size: 0.72rem;
+  color: #8891a4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sois-testi-date {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.sois-testi-nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+.sois-testi-nav button {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #d5e3e0;
+  background: #ffffff;
+  color: #115e59;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.sois-testi-nav button:hover {
+  background: #115e59;
+  border-color: #115e59;
+  color: #ffffff;
+}
+
+@media (max-width: 1024px) {
+  .sois-testi-card {
+    flex-basis: calc((100% - 20px) / 2);
+  }
+}
+@media (max-width: 767px) {
+  .sois-testi-head {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+  .sois-testi-card {
+    flex-basis: 86%;
+    padding: 22px 20px 18px;
+  }
+  .sois-testi-nav {
+    display: none;
+  }
 }
 
 /* Review card — fixed-width carousel slide by default; `--list` variant
@@ -1281,8 +1439,7 @@ video {
 .sois-rvw-lightbox {
   position: fixed;
   inset: 0;
-  /* Above Modal's backdrop/panel (10500/10501) since this module usually
-     renders inside the "View All" modal. */
+  /* Above the sticky nav and drawers. */
   z-index: 10600;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
@@ -1298,12 +1455,67 @@ video {
   object-fit: contain;
 }
 
-/* Inside the "View All" modal: no page margin/max-width, the Modal already
-   provides its own padded, scrollable container. */
-.sois-rvw--embedded {
-  margin: 0;
+/* ─── Product reviews page (/product/[slug]/reviews) ─── */
+.sois-rvpage {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+@media (min-width: 768px) {
+  .sois-rvpage {
+    padding: 32px 40px 96px;
+  }
+}
+.sois-rvpage .sois-rvw {
+  margin-top: 28px;
   padding: 0;
-  max-width: none;
+}
+.sois-rvpage-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+.sois-rvpage-back:hover {
+  color: #115e59;
+}
+.sois-rvpage-product {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  text-decoration: none;
+  background: #ffffff;
+}
+.sois-rvpage-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+.sois-rvpage-product-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.sois-rvpage-product-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+.sois-rvpage-product-price {
+  font-size: 0.85rem;
+  color: #4b5563;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1312,8 +1524,8 @@ video {
    which opens the full ReviewsModule in a modal.
    ═══════════════════════════════════════════════════════════════ */
 .sois-rvsum {
-  max-width: 900px;
-  margin: 40px auto 0;
+  max-width: 1200px;
+  margin: 60px auto 0;
   padding: 0 20px;
 }
 @media (min-width: 768px) {
@@ -1331,7 +1543,7 @@ video {
 }
 
 .sois-rvsum-title {
-  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-size: clamp(1.3rem, 4vw, 1.7rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   margin: 0;
@@ -1342,10 +1554,7 @@ video {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
+  text-decoration: none;
   color: #4b5563;
   font-size: 0.82rem;
 }
@@ -1380,14 +1589,12 @@ video {
 
 .sois-rvsum-photo {
   position: relative;
+  display: block;
   width: 72px;
   height: 72px;
   border-radius: 10px;
   overflow: hidden;
   background: #f3f4f6;
-  border: none;
-  padding: 0;
-  cursor: pointer;
   flex-shrink: 0;
 }
 
@@ -1421,7 +1628,7 @@ video {
   color: #115e59;
   font-weight: 700;
   font-size: 0.85rem;
-  cursor: pointer;
+  text-decoration: none;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 .sois-rvsum-viewall:hover {
