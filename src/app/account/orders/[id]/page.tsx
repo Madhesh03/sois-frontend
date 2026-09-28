@@ -2,7 +2,7 @@
 
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Truck, Package, ExternalLink, Star } from "lucide-react";
+import { Truck, Package, ExternalLink } from "lucide-react";
 import { AccountShell } from "@/components/account/AccountShell";
 import { useOrders } from "@/context/OrdersContext";
 import {
@@ -13,7 +13,7 @@ import {
 import { formatPrice } from "@/lib/catalog";
 import { shippingApi } from "@/lib/api";
 import type { TrackingInfo } from "@/lib/api";
-import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { ItemReviewPanel } from "@/components/reviews/ItemReviewPanel";
 
 export default function OrderDetailPage({
   params,
@@ -62,29 +62,23 @@ export default function OrderDetailPage({
     };
   }, [order]);
 
-  // Which order item currently has its inline review form open, keyed by
-  // the real order-item id (not the product id).
-  const [openReviewFor, setOpenReviewFor] = useState<string | null>(null);
-  // Order items reviewed during this session. The order in context isn't
-  // refetched after a successful submit, so this tracks the change locally
-  // (keyed by orderItemId) until the next `refresh()`/`loadOrder()`.
-  const [justReviewed, setJustReviewed] = useState<Set<string>>(new Set());
-
   // Arriving from the review-request email (?review=1): scroll the items
   // panel into view and, if there's exactly one item left to review, open
-  // its form directly.
+  // its review sheet directly.
+  const fromReviewEmail = sp.review === "1";
+  const reviewable = order?.items.filter((it) => !it.myReview) ?? [];
+  const autoOpenFor =
+    fromReviewEmail && order?.status === "delivered" && reviewable.length === 1
+      ? reviewable[0].orderItemId
+      : null;
   useEffect(() => {
-    if (!order || sp.review !== "1") return;
+    if (!order || !fromReviewEmail) return;
     itemsPanelRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
-    const reviewable = order.items.filter(
-      (it) => !it.isReviewed && !justReviewed.has(it.orderItemId)
-    );
-    if (reviewable.length === 1) setOpenReviewFor(reviewable[0].orderItemId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order, sp]);
+  }, [order?.id, fromReviewEmail]);
 
   return (
     <AccountShell title="Order Details">
@@ -174,61 +168,29 @@ export default function OrderDetailPage({
               Items ({order.items.reduce((n, i) => n + i.quantity, 0)})
             </h3>
             <div className="sois-order-items">
-              {order.items.map((it) => {
-                const reviewed =
-                  it.isReviewed || justReviewed.has(it.orderItemId);
-                const canReview = order.status === "delivered" && !reviewed;
-                const formOpen = openReviewFor === it.orderItemId;
-                return (
-                  <div key={it.orderItemId} className="sois-order-item-block">
-                    <div className="sois-order-item">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={it.image} alt={it.name} />
-                      <div className="sois-order-item-main">
-                        <span className="sois-order-item-name">{it.name}</span>
-                        <span className="sois-order-item-qty">
-                          Qty {it.quantity}
-                        </span>
-                      </div>
-                      <span className="sois-order-item-price">
-                        {formatPrice(it.price * it.quantity)}
+              {order.items.map((it) => (
+                <div key={it.orderItemId} className="sois-order-item-block">
+                  <div className="sois-order-item">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={it.image} alt={it.name} />
+                    <div className="sois-order-item-main">
+                      <span className="sois-order-item-name">{it.name}</span>
+                      <span className="sois-order-item-qty">
+                        Qty {it.quantity}
                       </span>
                     </div>
-
-                    {reviewed && (
-                      <span className="sois-order-item-reviewed">
-                        <Star size={13} fill="#115E59" color="#115E59" />{" "}
-                        Reviewed
-                      </span>
-                    )}
-
-                    {canReview && !formOpen && (
-                      <button
-                        type="button"
-                        className="sois-order-item-review-btn"
-                        onClick={() => setOpenReviewFor(it.orderItemId)}
-                      >
-                        <Star size={13} /> Write a review
-                      </button>
-                    )}
-
-                    {canReview && formOpen && (
-                      <ReviewForm
-                        productId={it.id}
-                        orderItemId={it.orderItemId}
-                        onCancel={() => setOpenReviewFor(null)}
-                        onDone={() => {
-                          setJustReviewed((prev) => {
-                            const next = new Set(prev);
-                            next.add(it.orderItemId);
-                            return next;
-                          });
-                        }}
-                      />
-                    )}
+                    <span className="sois-order-item-price">
+                      {formatPrice(it.price * it.quantity)}
+                    </span>
                   </div>
-                );
-              })}
+                  {order.status === "delivered" && (
+                    <ItemReviewPanel
+                      item={it}
+                      autoOpen={autoOpenFor === it.orderItemId}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

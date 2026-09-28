@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { ShippingInfo } from "./CartContext";
 import { useAuth } from "./AuthContext";
 import { ordersApi, mediaUrl } from "@/lib/api";
-import type { Order as ApiOrder, ApiOrderStatus } from "@/lib/api";
+import type { Order as ApiOrder, ApiOrderStatus, Review } from "@/lib/api";
 
 export type OrderStatus =
   | "placed"
@@ -26,6 +26,8 @@ export interface OrderItem {
   orderItemId: string;
   /** Whether the customer has already reviewed this order item. */
   isReviewed: boolean;
+  /** The customer's own review of this item, if any (for edit + stars). */
+  myReview: Review | null;
 }
 
 export interface OrderEvent {
@@ -41,6 +43,9 @@ export interface Order {
    *  backend-created orders — falls back to `id` for local/legacy records. */
   orderNumber?: string;
   date: string;
+  /** Last status change (backend `updated_at`) — shown as the delivered /
+   *  cancelled date on the orders list. */
+  updatedAt: string;
   items: OrderItem[];
   shipping: ShippingInfo;
   paymentMethod: string;
@@ -66,6 +71,9 @@ interface OrdersContextType {
    * it's there immediately, without waiting for the next `refresh()`.
    */
   loadOrder: (orderId: string) => Promise<Order | null>;
+  /** Fold a just-created/edited review into the matching order item, so the
+   *  list and detail screens update without a refetch. */
+  setItemReview: (orderItemId: string, review: Review) => void;
 }
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
@@ -151,6 +159,7 @@ function mapApiOrder(o: ApiOrder): Order {
     id: o.id,
     orderNumber: o.order_number,
     date: o.created_at,
+    updatedAt: o.updated_at,
     items: o.items.map((it) => ({
       id: it.product_id,
       name: it.product_name,
@@ -159,7 +168,8 @@ function mapApiOrder(o: ApiOrder): Order {
       quantity: it.quantity,
       size: it.selected_size || undefined,
       orderItemId: it.id,
-      isReviewed: it.is_reviewed,
+      isReviewed: it.is_reviewed || !!it.my_review,
+      myReview: it.my_review ?? null,
     })),
     shipping,
     paymentMethod:
@@ -234,6 +244,22 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const setItemReview = (orderItemId: string, review: Review) => {
+    const patch = (o: Order): Order =>
+      o.items.some((it) => it.orderItemId === orderItemId)
+        ? {
+            ...o,
+            items: o.items.map((it) =>
+              it.orderItemId === orderItemId
+                ? { ...it, isReviewed: true, myReview: review }
+                : it
+            ),
+          }
+        : o;
+    setOrders((prev) => prev.map(patch));
+    setLastOrder((prev) => (prev ? patch(prev) : prev));
+  };
+
   return (
     <OrdersContext.Provider
       value={{
@@ -243,6 +269,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
         getOrder,
         refresh,
         loadOrder,
+        setItemReview,
       }}
     >
       {children}

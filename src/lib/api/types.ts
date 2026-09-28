@@ -405,6 +405,8 @@ export interface OrderItem {
   discount_percent: number;
   line_total: number;
   is_reviewed: boolean;
+  /** The customer's own review of this item (customer order endpoints only). */
+  my_review?: Review | null;
 }
 
 export interface Order {

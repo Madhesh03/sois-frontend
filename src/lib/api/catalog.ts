@@ -1,5 +1,5 @@
 /** Public catalog endpoints (`/catalog/*`). */
-import { apiGetWithMeta, apiGet, apiPost } from "./client";
+import { apiGetWithMeta, apiGet, apiPost, apiPatch, apiDelete } from "./client";
 import type {
   ApiCategory,
   ApiCollection,
@@ -126,6 +126,22 @@ export function submitReview(input: {
   body?: string;
 }): Promise<Review> {
   return apiPost<Review>("/catalog/reviews/", input);
+}
+
+/** Edit the caller's own review. Moderation state is unchanged server-side. */
+export function updateReview(
+  reviewId: string,
+  input: { rating?: number; title?: string; body?: string }
+): Promise<Review> {
+  return apiPatch<Review>(`/catalog/reviews/${reviewId}/`, input);
+}
+
+/** Remove one photo from the caller's own review. */
+export function deleteReviewImage(
+  reviewId: string,
+  imageId: string
+): Promise<null> {
+  return apiDelete<null>(`/catalog/reviews/${reviewId}/media/${imageId}/`);
 }
 
 export interface ReviewPage {

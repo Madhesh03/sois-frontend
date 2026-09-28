@@ -1132,52 +1132,163 @@ video {
   cursor: pointer;
 }
 
-.sois-review-form-done {
-  padding: 14px 16px;
-  margin-top: 4px;
-  border: 1px solid #d1fae5;
-  border-radius: 10px;
-  background: #ecfdf5;
-  color: #065f46;
+.sois-review-form-rating-label {
+  margin-left: 12px;
   font-size: 0.85rem;
+  font-weight: 700;
+  color: #115e59;
 }
 
-.sois-review-form-warning {
-  margin: 6px 0 0;
-  color: #92400e;
-  font-size: 0.78rem;
-}
-
-/* Order-item review CTA (account → order detail) */
 .sois-order-item-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-.sois-order-item-review-btn {
-  align-self: flex-start;
-  display: inline-flex;
+/* Myntra-style rating strip under a delivered order item */
+.sois-item-review {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 0 0 12px 12px;
+  background: #f0f7f6;
+}
+.sois-item-review-main {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  padding: 8px 14px;
-  border: 1px solid #115e59;
-  border-radius: 8px;
-  background: #ffffff;
+  min-width: 0;
+}
+.sois-item-review .sois-stars {
+  gap: 6px;
+}
+.sois-item-review-caption {
+  font-size: 0.8rem;
+  color: #374151;
+}
+.sois-item-review-warning {
+  font-size: 0.74rem;
+  color: #92400e;
+}
+.sois-item-review-cta {
+  flex-shrink: 0;
+  padding: 6px 0;
+  border: none;
+  background: none;
   color: #115e59;
-  font-size: 0.76rem;
+  font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
 }
+.sois-item-review-cta:hover {
+  text-decoration: underline;
+}
 
-.sois-order-item-reviewed {
-  align-self: flex-start;
-  display: inline-flex;
+/* Review sheet: bottom sheet on mobile, centred dialog on desktop */
+.sois-review-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.76rem;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  animation: soisFadeIn 0.2s ease-out;
+}
+.sois-review-sheet {
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+.sois-review-sheet .sois-review-form {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+}
+.sois-review-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.sois-review-sheet-head img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+.sois-review-sheet-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.sois-review-sheet-title span {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #115e59;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+.sois-review-sheet-title strong {
+  font-size: 0.92rem;
+  color: #0a0a0a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sois-review-sheet-close {
+  flex-shrink: 0;
+  display: flex;
+  padding: 6px;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #374151;
+  cursor: pointer;
+}
+@media (max-width: 767px) {
+  .sois-review-sheet-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .sois-review-sheet {
+    max-width: none;
+    max-height: 90vh;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    animation: soisSheetUp 0.25s ease-out;
+  }
+}
+@keyframes soisFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes soisSheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* Social proof strip */
@@ -4592,6 +4703,134 @@ video {
   font-weight: 700;
   color: #115e59;
   font-size: 0.9rem;
+}
+
+/* Order cards (account → My Orders), Myntra-style */
+.sois-order-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  background: #ffffff;
+}
+.sois-order-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.sois-order-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  color: #374151;
+}
+.sois-order-card-status {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.sois-order-card-status-label {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0a0a0a;
+}
+.sois-order-card-status-sub {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+.sois-order-card.is-delivered .sois-order-card-icon {
+  background: #d1fae5;
+  color: #047857;
+}
+.sois-order-card.is-delivered .sois-order-card-status-label {
+  color: #047857;
+}
+.sois-order-card.is-cancelled .sois-order-card-icon {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.sois-order-card.is-cancelled .sois-order-card-status-label {
+  color: #b91c1c;
+}
+.sois-order-card.is-shipped .sois-order-card-icon {
+  background: #e0f2fe;
+  color: #075985;
+}
+.sois-order-card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  color: #6b7280;
+}
+.sois-order-card-meta strong {
+  font-size: 0.9rem;
+  color: #115e59;
+}
+.sois-order-card-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.sois-order-card-product {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: background 0.15s;
+}
+.sois-order-card-product:hover {
+  background: #fafafa;
+}
+.sois-order-card-product img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+.sois-order-card-product-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.sois-order-card-product-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0a0a0a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.sois-order-card-product-meta {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+.sois-order-card-chevron {
+  flex-shrink: 0;
+  color: #374151;
 }
 
 /* Status badge */
