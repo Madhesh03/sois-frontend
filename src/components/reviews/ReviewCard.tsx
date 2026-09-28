@@ -2,24 +2,44 @@ import Image from "next/image";
 import { mediaUrl } from "@/lib/api";
 import type { Review } from "@/lib/api";
 import { Stars } from "./Stars";
-
-function formatReviewDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+import { formatReviewDate, reviewerInitials } from "./reviewStats";
 
 /**
- * One review in the site-wide feed. Shows which product it's about
- * (`product_name`) since this same card renders on the homepage and on
- * every product page, not scoped to the product currently on screen.
+ * One review. Used both as a fixed-width carousel slide (homepage strip)
+ * and as a full-width list row (product ratings & reviews module) via
+ * `variant`. Shows `product_name` since the feed is site-wide, not scoped
+ * to the product currently on screen.
  */
-export function ReviewCard({ review }: { review: Review }) {
+export function ReviewCard({
+  review,
+  variant = "carousel",
+}: {
+  review: Review;
+  variant?: "carousel" | "list";
+}) {
   return (
-    <article className="sois-review-card">
-      <Stars rating={review.rating} size={14} />
+    <article
+      className={
+        variant === "list"
+          ? "sois-review-card sois-review-card--list"
+          : "sois-review-card"
+      }
+    >
+      <div className="sois-review-top">
+        <div className="sois-review-avatar" aria-hidden="true">
+          {reviewerInitials(review.customer_name)}
+        </div>
+        <div className="sois-review-top-text">
+          <span className="sois-review-name">{review.customer_name}</span>
+          <span className="sois-review-date">
+            {formatReviewDate(review.created_at)}
+          </span>
+        </div>
+        <span className="sois-review-rating-chip">
+          <Stars rating={review.rating} size={12} />
+        </span>
+      </div>
+
       <div className="sois-review-product">{review.product_name}</div>
       {review.title && <div className="sois-review-title">{review.title}</div>}
       {review.body && <p className="sois-review-body">{review.body}</p>}
@@ -32,20 +52,13 @@ export function ReviewCard({ review }: { review: Review }) {
                 src={mediaUrl(img.view_url || img.s3_key)}
                 alt=""
                 fill
-                sizes="44px"
+                sizes="52px"
                 style={{ objectFit: "cover" }}
               />
             </div>
           ))}
         </div>
       )}
-
-      <div className="sois-review-meta">
-        <span className="sois-review-name">{review.customer_name}</span>
-        <span className="sois-review-date">
-          {formatReviewDate(review.created_at)}
-        </span>
-      </div>
     </article>
   );
 }
