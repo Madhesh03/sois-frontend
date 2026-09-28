@@ -15,15 +15,14 @@ const PHOTO_TILE_LIMIT = 5;
 type SortKey = "recent" | "highest" | "lowest";
 type StarFilter = 0 | 1 | 2 | 3 | 4 | 5; // 0 = All
 
-const MIN_REVIEWS_TO_SHOW = 3;
-
 /**
  * Full ratings & reviews module for one product — breakdown bars, star
  * filter chips, sort, a customer-photos grid, and an expandable review
  * list. Scoped to `productId` (the backend product UUID; `ProductDetail`
  * only has one once the real catalogue loads — see catalog.ts's
  * backend-first-with-mock-fallback `getProductBySlug`). Renders nothing
- * until there are at least `MIN_REVIEWS_TO_SHOW` reviews for this product.
+ * until the product has at least one approved review (unlike the
+ * site-wide homepage strip, which needs 3+ before it's worth a carousel).
  */
 export function ReviewsModule({
   productId,
@@ -80,7 +79,7 @@ export function ReviewsModule({
     return sorted;
   }, [reviews, starFilter, sort]);
 
-  if (loading || failed || stats.total < MIN_REVIEWS_TO_SHOW) return null;
+  if (loading || failed || stats.total === 0) return null;
 
   return (
     <section className="sois-rvw" id="reviews">
