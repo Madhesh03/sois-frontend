@@ -18,14 +18,20 @@ type StarFilter = 0 | 1 | 2 | 3 | 4 | 5; // 0 = All
 const MIN_REVIEWS_TO_SHOW = 3;
 
 /**
- * Full ratings & reviews module — breakdown bars, star filter chips, sort,
- * a customer-photos grid, and an expandable review list. Reads the same
- * site-wide approved-reviews feed as the homepage strip (the product
- * catalogue is still mock data, so the feed isn't reliably scopable to one
- * product — see ReviewsStrip). Renders nothing until there are at least
- * `MIN_REVIEWS_TO_SHOW` reviews.
+ * Full ratings & reviews module for one product — breakdown bars, star
+ * filter chips, sort, a customer-photos grid, and an expandable review
+ * list. Scoped to `productId` (the backend product UUID; `ProductDetail`
+ * only has one once the real catalogue loads — see catalog.ts's
+ * backend-first-with-mock-fallback `getProductBySlug`). Renders nothing
+ * until there are at least `MIN_REVIEWS_TO_SHOW` reviews for this product.
  */
-export function ReviewsModule({ title = "Ratings & Reviews" }: { title?: string }) {
+export function ReviewsModule({
+  productId,
+  title = "Ratings & Reviews",
+}: {
+  productId: string;
+  title?: string;
+}) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -38,7 +44,7 @@ export function ReviewsModule({ title = "Ratings & Reviews" }: { title?: string 
     let active = true;
     const controller = new AbortController();
     catalogApi
-      .listReviews({ page: 1, page_size: PAGE_SIZE }, controller.signal)
+      .listReviews({ product: productId, page: 1, page_size: PAGE_SIZE }, controller.signal)
       .then(({ items }) => {
         if (active) setReviews(items);
       })
@@ -52,7 +58,7 @@ export function ReviewsModule({ title = "Ratings & Reviews" }: { title?: string 
       active = false;
       controller.abort();
     };
-  }, []);
+  }, [productId]);
 
   const stats = useMemo(() => computeReviewStats(reviews), [reviews]);
 
@@ -149,7 +155,7 @@ export function ReviewsModule({ title = "Ratings & Reviews" }: { title?: string 
       ) : (
         <div className="sois-rvw-list">
           {visibleReviews.slice(0, visibleCount).map((r) => (
-            <ReviewCard key={r.id} review={r} variant="list" />
+            <ReviewCard key={r.id} review={r} variant="list" showProduct={false} />
           ))}
         </div>
       )}

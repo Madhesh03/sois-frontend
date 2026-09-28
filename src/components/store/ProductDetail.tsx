@@ -486,8 +486,8 @@ export function ProductDetail({
       {/* Recently viewed — hydrated client-side from localStorage history */}
       <RecentlyViewed excludeId={product.id} />
 
-      {/* Site-wide approved-reviews feed with ratings breakdown, filters & sort */}
-      <ReviewsModule title="Ratings & Reviews" />
+      {/* This product's approved reviews, with ratings breakdown, filters & sort */}
+      <ReviewsModule productId={product.id} title="Ratings & Reviews" />
 
       {/* Size chart */}
       {needsSize && (
