@@ -1281,7 +1281,9 @@ video {
 .sois-rvw-lightbox {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  /* Above Modal's backdrop/panel (10500/10501) since this module usually
+     renders inside the "View All" modal. */
+  z-index: 10600;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
@@ -1294,6 +1296,137 @@ video {
   max-height: 100%;
   border-radius: 12px;
   object-fit: contain;
+}
+
+/* Inside the "View All" modal: no page margin/max-width, the Modal already
+   provides its own padded, scrollable container. */
+.sois-rvw--embedded {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Ratings & Reviews summary (product page) — compact teaser with a
+   rating badge, photo strip, two review previews and "View All",
+   which opens the full ReviewsModule in a modal.
+   ═══════════════════════════════════════════════════════════════ */
+.sois-rvsum {
+  max-width: 900px;
+  margin: 40px auto 0;
+  padding: 0 20px;
+}
+@media (min-width: 768px) {
+  .sois-rvsum {
+    padding: 0 40px;
+  }
+}
+
+.sois-rvsum-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sois-rvsum-title {
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #0a0a0a;
+}
+
+.sois-rvsum-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: #4b5563;
+  font-size: 0.82rem;
+}
+
+.sois-rvsum-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #115e59;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.sois-rvsum-counts {
+  font-weight: 600;
+}
+
+.sois-rvsum-photos {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: 16px;
+  padding-bottom: 2px;
+}
+.sois-rvsum-photos::-webkit-scrollbar {
+  display: none;
+}
+
+.sois-rvsum-photo {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sois-rvsum-preview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media (min-width: 640px) {
+  .sois-rvsum-preview {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.sois-rvsum-preview .sois-review-card {
+  flex-basis: auto;
+  width: 100%;
+  scroll-snap-align: none;
+}
+
+.sois-rvsum-viewall {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  background: #ffffff;
+  color: #115e59;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.sois-rvsum-viewall:hover {
+  background: #f0fdfa;
+  border-color: #115e59;
 }
 
 /* Inline review form (account → order detail) */

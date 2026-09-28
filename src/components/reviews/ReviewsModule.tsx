@@ -27,9 +27,15 @@ type StarFilter = 0 | 1 | 2 | 3 | 4 | 5; // 0 = All
 export function ReviewsModule({
   productId,
   title = "Ratings & Reviews",
+  showTitle = true,
+  embedded = false,
 }: {
   productId: string;
   title?: string;
+  /** Hide the built-in heading — used inside the "View All" modal, which has its own title bar. */
+  showTitle?: boolean;
+  /** Drop the outer page margin/max-width — used inside the "View All" modal. */
+  embedded?: boolean;
 }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,8 +88,8 @@ export function ReviewsModule({
   if (loading || failed || stats.total === 0) return null;
 
   return (
-    <section className="sois-rvw" id="reviews">
-      <h2 className="sois-rvw-title">{title}</h2>
+    <section className={embedded ? "sois-rvw sois-rvw--embedded" : "sois-rvw"} id="reviews">
+      {showTitle && <h2 className="sois-rvw-title">{title}</h2>}
 
       <RatingBreakdown stats={stats} />
 
