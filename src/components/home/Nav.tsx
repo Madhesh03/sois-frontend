@@ -120,6 +120,19 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
     closeMenu();
   };
 
+  // Selecting a category navigates straight to that category's listing (or
+  // /shop for "All Categories"), carrying any typed query along — picking a
+  // category should change the page, not just silently re-scope the search.
+  const handleCategoryChange = (value: string) => {
+    setSearchCat(value);
+    const slug = categorySlugs[value];
+    const base = slug ? `/category/${slug}` : "/shop";
+    const q = query.trim();
+    const qs = q ? `?${new URLSearchParams({ q }).toString()}` : "";
+    router.push(base + qs);
+    setSearchFocused(false);
+  };
+
   const goToProduct = (p: Product) => {
     router.push(`/product/${p.slug}`);
     setSearchFocused(false);
@@ -269,7 +282,7 @@ export function Nav({ scrolled }: { scrolled: boolean }) {
                 <select
                   aria-label="Product category"
                   value={searchCat}
-                  onChange={(e) => setSearchCat(e.target.value)}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                 >
                   {categories.map((c) => (
                     <option key={c} value={c}>
