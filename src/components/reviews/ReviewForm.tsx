@@ -8,6 +8,12 @@ import { Stars } from "./Stars";
 
 const MAX_IMAGES = 5;
 const ACCEPTED_MIME = ["image/jpeg", "image/png", "image/webp"];
+// iPhone photos are usually HEIC/HEIF, which S3/browsers can't render — we
+// convert them to JPEG in the browser before upload. Some pickers report an
+// empty type for HEIC, so we also sniff the filename extension.
+const HEIC_MIME = ["image/heic", "image/heif"];
+const isHeicFile = (f: File) =>
+  HEIC_MIME.includes(f.type) || /\.(heic|heif)$/i.test(f.name);
 
 export const RATING_LABELS = ["", "Very bad", "Bad", "Average", "Good", "Very good"];
 
@@ -53,6 +59,7 @@ export function ReviewForm({
   );
   const [images, setImages] = useState<PickedImage[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,19 +75,59 @@ export function ReviewForm({
 
   const totalImages = keptImages.length + images.length;
 
-  const addFiles = (fileList: FileList | null) => {
+  const addFiles = async (fileList: FileList | null) => {
     if (!fileList) return;
-    const picked = Array.from(fileList).filter((f) =>
-      ACCEPTED_MIME.includes(f.type)
+    const incoming = Array.from(fileList);
+    setPreparing(true);
+
+    const prepared: PickedImage[] = [];
+    let rejected = 0;
+    for (const original of incoming) {
+      let file = original;
+      if (isHeicFile(original)) {
+        try {
+          // heic2any is browser-only and heavy (libheif wasm) — load it lazily
+          // so it never ships in the initial bundle or runs on the server.
+          const heic2any = (await import("heic2any")).default;
+          const converted = await heic2any({
+            blob: original,
+            toType: "image/jpeg",
+            quality: 0.9,
+          });
+          const blob = Array.isArray(converted) ? converted[0] : converted;
+          file = new File(
+            [blob],
+            original.name.replace(/\.(heic|heif)$/i, ".jpg"),
+            { type: "image/jpeg" }
+          );
+        } catch {
+          rejected += 1;
+          continue;
+        }
+      } else if (!ACCEPTED_MIME.includes(file.type)) {
+        rejected += 1;
+        continue;
+      }
+      prepared.push({ file, previewUrl: URL.createObjectURL(file) });
+    }
+
+    setPreparing(false);
+
+    if (prepared.length) {
+      setImages((prev) => {
+        const room = Math.max(0, MAX_IMAGES - keptImages.length - prev.length);
+        // Revoke previews we can't keep (over the per-review cap).
+        prepared.slice(room).forEach((p) => URL.revokeObjectURL(p.previewUrl));
+        return [...prev, ...prepared.slice(0, room)];
+      });
+    }
+
+    setError(
+      rejected > 0
+        ? `${rejected} photo${rejected > 1 ? "s" : ""} couldn't be added. ` +
+            "Please use JPG, PNG, WEBP, or HEIC images."
+        : null
     );
-    setImages((prev) => {
-      const room = Math.max(0, MAX_IMAGES - keptImages.length - prev.length);
-      const next = picked.slice(0, room).map((file) => ({
-        file,
-        previewUrl: URL.createObjectURL(file),
-      }));
-      return [...prev, ...next];
-    });
   };
 
   const removeImage = (idx: number) => {
@@ -255,7 +302,7 @@ export function ReviewForm({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
           multiple
           hidden
           onChange={(e) => {
@@ -266,7 +313,9 @@ export function ReviewForm({
       </div>
 
       <p className="sois-review-form-hint">
-        {totalImages >= MAX_IMAGES
+        {preparing
+          ? "Processing photo…"
+          : totalImages >= MAX_IMAGES
           ? `Maximum of ${MAX_IMAGES} photos reached.`
           : `Add up to ${MAX_IMAGES} photos (${totalImages}/${MAX_IMAGES}).`}
       </p>
@@ -286,7 +335,7 @@ export function ReviewForm({
         <button
           type="submit"
           className="sois-review-form-submit"
-          disabled={submitting}
+          disabled={submitting || preparing}
         >
           {submitting ? "Saving…" : isEdit ? "Update review" : "Submit review"}
         </button>
