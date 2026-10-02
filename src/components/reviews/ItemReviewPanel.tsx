@@ -84,6 +84,10 @@ export function ItemReviewPanel({ item, autoOpen = false }: ItemReviewPanelProps
 
 /** Read-only view of a submitted review — reviews are write-once, no editing. */
 function ReviewView({ review }: { review: Review }) {
+  // Tapping a photo opens it full-size in the shared review lightbox
+  // (.sois-rvw-lightbox, z-index above the review sheet).
+  const [lightbox, setLightbox] = useState<string | null>(null);
+
   return (
     <div className="sois-review-form sois-review-view">
       <div className="sois-review-form-row">
@@ -100,12 +104,22 @@ function ReviewView({ review }: { review: Review }) {
 
       {review.images.length > 0 && (
         <div className="sois-review-form-images">
-          {review.images.map((img) => (
-            <div key={img.id} className="sois-review-form-thumb">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={mediaUrl(img.view_url || img.s3_key)} alt="" />
-            </div>
-          ))}
+          {review.images.map((img) => {
+            const url = mediaUrl(img.view_url || img.s3_key);
+            return (
+              <button
+                key={img.id}
+                type="button"
+                className="sois-review-form-thumb"
+                style={{ border: "none", padding: 0, cursor: "zoom-in" }}
+                onClick={() => setLightbox(url)}
+                aria-label="View photo"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" />
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -114,6 +128,13 @@ function ReviewView({ review }: { review: Review }) {
           Your review isn&apos;t published as it didn&apos;t meet our review
           guidelines.
         </p>
+      )}
+
+      {lightbox && (
+        <div className="sois-rvw-lightbox" onClick={() => setLightbox(null)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={lightbox} alt="" />
+        </div>
       )}
     </div>
   );
