@@ -1738,6 +1738,12 @@ video {
   margin: 0;
 }
 
+.sois-review-form-hint {
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin: -2px 0 0;
+}
+
 .sois-review-form-actions {
   display: flex;
   gap: 10px;

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useOrders, type OrderItem } from "@/context/OrdersContext";
-import { ReviewForm } from "./ReviewForm";
+import { mediaUrl, type Review } from "@/lib/api";
+import { ReviewForm, RATING_LABELS } from "./ReviewForm";
 import { Stars } from "./Stars";
 
 interface ItemReviewPanelProps {
@@ -15,7 +16,8 @@ interface ItemReviewPanelProps {
 /**
  * Myntra-style rating strip shown under a delivered order item. Unreviewed:
  * tappable empty stars — tapping one opens the review sheet with that rating
- * preselected. Reviewed: the customer's stars plus "Edit Review".
+ * preselected. Reviewed: the customer's stars plus "View Review" — a review is
+ * write-once, so after submitting it's shown read-only (no edit).
  */
 export function ItemReviewPanel({ item, autoOpen = false }: ItemReviewPanelProps) {
   const { setItemReview } = useOrders();
@@ -53,27 +55,67 @@ export function ItemReviewPanel({ item, autoOpen = false }: ItemReviewPanelProps
           className="sois-item-review-cta"
           onClick={() => open(review?.rating ?? 0)}
         >
-          {review ? "Edit Review" : "Write Review"}
+          {review ? "View Review" : "Write Review"}
         </button>
       </div>
 
       {sheetRating !== null && (
         <ReviewSheet item={item} onClose={() => setSheetRating(null)}>
-          <ReviewForm
-            productId={item.id}
-            orderItemId={item.orderItemId}
-            existing={review}
-            initialRating={sheetRating}
-            onCancel={() => setSheetRating(null)}
-            onDone={(saved, warn) => {
-              setItemReview(item.orderItemId, saved);
-              setWarning(warn);
-              setSheetRating(null);
-            }}
-          />
+          {review ? (
+            <ReviewView review={review} />
+          ) : (
+            <ReviewForm
+              productId={item.id}
+              orderItemId={item.orderItemId}
+              initialRating={sheetRating}
+              onCancel={() => setSheetRating(null)}
+              onDone={(saved, warn) => {
+                setItemReview(item.orderItemId, saved);
+                setWarning(warn);
+                setSheetRating(null);
+              }}
+            />
+          )}
         </ReviewSheet>
       )}
     </>
+  );
+}
+
+/** Read-only view of a submitted review — reviews are write-once, no editing. */
+function ReviewView({ review }: { review: Review }) {
+  return (
+    <div className="sois-review-form sois-review-view">
+      <div className="sois-review-form-row">
+        <Stars rating={review.rating} size={28} />
+        {review.rating > 0 && (
+          <span className="sois-review-form-rating-label">
+            {RATING_LABELS[review.rating]}
+          </span>
+        )}
+      </div>
+
+      {review.title && <div className="sois-review-title">{review.title}</div>}
+      {review.body && <p className="sois-review-body">{review.body}</p>}
+
+      {review.images.length > 0 && (
+        <div className="sois-review-form-images">
+          {review.images.map((img) => (
+            <div key={img.id} className="sois-review-form-thumb">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={mediaUrl(img.view_url || img.s3_key)} alt="" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {review.is_rejected && (
+        <p className="sois-review-form-error">
+          Your review isn&apos;t published as it didn&apos;t meet our review
+          guidelines.
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -104,14 +146,14 @@ function ReviewSheet({
         className="sois-review-sheet"
         role="dialog"
         aria-modal="true"
-        aria-label={item.myReview ? "Edit your review" : "Write a review"}
+        aria-label={item.myReview ? "Your review" : "Write a review"}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sois-review-sheet-head">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={item.image} alt="" />
           <div className="sois-review-sheet-title">
-            <span>{item.myReview ? "Edit your review" : "Rate this product"}</span>
+            <span>{item.myReview ? "Your review" : "Rate this product"}</span>
             <strong>{item.name}</strong>
           </div>
           <button

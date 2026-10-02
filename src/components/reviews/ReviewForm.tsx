@@ -9,7 +9,7 @@ import { Stars } from "./Stars";
 const MAX_IMAGES = 5;
 const ACCEPTED_MIME = ["image/jpeg", "image/png", "image/webp"];
 
-const RATING_LABELS = ["", "Very bad", "Bad", "Average", "Good", "Very good"];
+export const RATING_LABELS = ["", "Very bad", "Bad", "Average", "Good", "Very good"];
 
 interface PickedImage {
   file: File;
@@ -264,6 +264,12 @@ export function ReviewForm({
           }}
         />
       </div>
+
+      <p className="sois-review-form-hint">
+        {totalImages >= MAX_IMAGES
+          ? `Maximum of ${MAX_IMAGES} photos reached.`
+          : `Add up to ${MAX_IMAGES} photos (${totalImages}/${MAX_IMAGES}).`}
+      </p>
 
       {error && <p className="sois-review-form-error">{error}</p>}
 
