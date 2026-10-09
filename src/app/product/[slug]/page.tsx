@@ -4,10 +4,31 @@ import { StoreShell } from "@/components/store/StoreShell";
 import { ProductDetail } from "@/components/store/ProductDetail";
 import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
 import { siteConfig } from "@/lib/data";
+import { catalogApi } from "@/lib/api";
+import {
+  computeReviewStats,
+  type ReviewStats,
+} from "@/components/reviews/reviewStats";
 
 // Product pages are rendered on demand from the live catalogue API, so there is
 // no build-time slug list to pre-render.
 export const dynamicParams = true;
+
+// Review stats for the Product structured data, mirroring the on-page
+// ReviewsSummary badge (same endpoint, same page size, same compute). Returns
+// null on failure so a reviews outage never breaks the product page.
+async function getReviewStats(productId: string): Promise<ReviewStats | null> {
+  try {
+    const { items } = await catalogApi.listReviews({
+      product: productId,
+      page: 1,
+      page_size: 20,
+    });
+    return computeReviewStats(items);
+  } catch {
+    return null;
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -55,6 +76,13 @@ export default async function ProductPage({
 
   const related = await getRelatedProducts(product);
 
+  // Review aggregate for structured data. Google requires rating markup to
+  // match what's visible on the page, so we read it from the same reviews
+  // endpoint and the same computeReviewStats() the on-page ReviewsSummary
+  // badge uses (first page, up to 20) — the two can't diverge. Omitted when
+  // the product has no reviews (the badge is hidden too in that case).
+  const reviewStats = await getReviewStats(product.id);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -63,8 +91,15 @@ export default async function ProductPage({
     description: product.description,
     sku: product.sku,
     brand: { "@type": "Brand", name: siteConfig.name },
-    // No aggregateRating: ratings aren't shown anywhere on the page, and
-    // Google requires review markup to match visible on-page content.
+    ...(reviewStats && reviewStats.total > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: reviewStats.average.toFixed(1),
+            reviewCount: reviewStats.total,
+          },
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",

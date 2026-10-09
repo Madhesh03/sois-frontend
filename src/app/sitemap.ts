@@ -1,13 +1,18 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/data";
-import { getAllProducts, getCategories } from "@/lib/catalog";
+import {
+  getAllProducts,
+  getCategories,
+  getGiftHampers,
+} from "@/lib/catalog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url.replace(/\/$/, "");
   const now = new Date();
-  const [allCategories, allProducts] = await Promise.all([
+  const [allCategories, allProducts, giftHampers] = await Promise.all([
     getCategories(),
     getAllProducts(),
+    getGiftHampers(),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -18,11 +23,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    {
+      url: `${base}/gift-hampers`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${base}/about`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
     ...[
       "/contact",
       "/faq",
       "/shipping-policy",
       "/return-policy",
+      "/refund-policy",
       "/privacy-policy",
       "/terms",
     ].map((path) => ({
@@ -47,5 +65,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
+  const giftHamperRoutes: MetadataRoute.Sitemap = giftHampers.map((h) => ({
+    url: `${base}/gift-hampers/${h.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...categoryRoutes,
+    ...productRoutes,
+    ...giftHamperRoutes,
+  ];
 }
