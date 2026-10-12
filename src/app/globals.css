@@ -921,6 +921,7 @@ video {
   gap: 20px;
   max-width: 1280px;
   margin: 0 auto;
+  justify-content: safe center;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -947,31 +948,10 @@ video {
   background: #e6f0ee;
 }
 
-.sois-testi-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: #115e59;
-}
-.sois-testi-placeholder svg {
-  fill: #b9d9d4;
-  color: #b9d9d4;
-}
-.sois-testi-placeholder span {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background: #115e59;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
+.sois-testi-quote {
+  fill: #cfe3df;
+  color: #cfe3df;
+  margin-bottom: 4px;
 }
 
 .sois-testi-content {

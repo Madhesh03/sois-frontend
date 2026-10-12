@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
-import { catalogApi, mediaUrl } from "@/lib/api";
+import { catalogApi, mapListItem, mediaUrl } from "@/lib/api";
 import type { Review } from "@/lib/api";
 import { Stars } from "./Stars";
-import { computeReviewStats, reviewerInitials } from "./reviewStats";
+import { computeReviewStats } from "./reviewStats";
 
 const MIN_REVIEWS_TO_SHOW = 3;
 
@@ -23,6 +23,7 @@ export function ReviewsStrip({ title = "Testimonials" }: { title?: string }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,10 +32,21 @@ export function ReviewsStrip({ title = "Testimonials" }: { title?: string }) {
     catalogApi
       .listReviews({ page: 1, page_size: 12 }, controller.signal)
       .then(({ items, meta }) => {
-        if (active) {
-          setReviews(items);
-          setTotal(meta.total);
-        }
+        if (!active) return;
+        setReviews(items);
+        setTotal(meta.total);
+        // Reviews without a customer photo borrow the reviewed product's
+        // photo instead of leaving an empty tile; best-effort only.
+        const ids = [...new Set(items.filter((r) => !r.images.length).map((r) => r.product))];
+        catalogApi
+          .listProductsByIds(ids, controller.signal)
+          .then((products) => {
+            if (!active) return;
+            const map: Record<string, string> = {};
+            for (const p of products) map[p.id] = mapListItem(p).images[0];
+            setProductImages(map);
+          })
+          .catch(() => {});
       })
       .catch(() => {
         if (active) setFailed(true);
@@ -75,25 +87,24 @@ export function ReviewsStrip({ title = "Testimonials" }: { title?: string }) {
       <div className="sois-testi-track" ref={trackRef}>
         {reviews.map((r) => {
           const photo = r.images[0];
+          const src = photo
+            ? mediaUrl(photo.view_url || photo.s3_key)
+            : productImages[r.product];
           return (
             <article key={r.id} className="sois-testi-card">
-              <div className="sois-testi-media">
-                {photo ? (
+              {src && (
+                <div className="sois-testi-media">
                   <Image
-                    src={mediaUrl(photo.view_url || photo.s3_key)}
+                    src={src}
                     alt=""
                     fill
                     sizes="(max-width: 767px) 80vw, (max-width: 1024px) 40vw, 300px"
                     style={{ objectFit: "cover" }}
                   />
-                ) : (
-                  <div className="sois-testi-placeholder" aria-hidden="true">
-                    <Quote size={40} />
-                    <span>{reviewerInitials(r.customer_name)}</span>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
               <div className="sois-testi-content">
+                {!src && <Quote className="sois-testi-quote" size={34} aria-hidden="true" />}
                 {(r.body || r.title) && (
                   <p className="sois-testi-body">{r.body || r.title}</p>
                 )}
