@@ -16,15 +16,9 @@ const PHOTO_PREVIEW_COUNT = 6;
 /**
  * Compact "Ratings & Reviews" teaser for the product page — rating badge,
  * a customer-photos strip, two review previews, and "View All", which links
- * to the full ReviewsModule at /product/[slug]/reviews.
+ * to the full ReviewsModule at /reviews. Site-wide feed, same on every product page.
  */
-export function ReviewsSummary({
-  productId,
-  productSlug,
-}: {
-  productId: string;
-  productSlug: string;
-}) {
+export function ReviewsSummary() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -33,7 +27,7 @@ export function ReviewsSummary({
     let active = true;
     const controller = new AbortController();
     catalogApi
-      .listReviews({ product: productId, page: 1, page_size: PAGE_SIZE }, controller.signal)
+      .listReviews({ page: 1, page_size: PAGE_SIZE }, controller.signal)
       .then(({ items }) => {
         if (active) setReviews(items);
       })
@@ -47,14 +41,14 @@ export function ReviewsSummary({
       active = false;
       controller.abort();
     };
-  }, [productId]);
+  }, []);
 
   const stats = useMemo(() => computeReviewStats(reviews), [reviews]);
   const photos = useMemo(() => reviews.flatMap((r) => r.images), [reviews]);
 
   if (loading || failed || stats.total === 0) return null;
 
-  const allHref = `/product/${productSlug}/reviews`;
+  const allHref = "/reviews";
 
   return (
     <section className="sois-rvsum">
@@ -90,7 +84,7 @@ export function ReviewsSummary({
 
       <div className="sois-rvsum-preview">
         {reviews.slice(0, PREVIEW_COUNT).map((r) => (
-          <ReviewCard key={r.id} review={r} showProduct={false} />
+          <ReviewCard key={r.id} review={r} />
         ))}
       </div>
 

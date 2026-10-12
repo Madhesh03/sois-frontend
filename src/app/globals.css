@@ -1455,7 +1455,7 @@ video {
   object-fit: contain;
 }
 
-/* ─── Product reviews page (/product/[slug]/reviews) ─── */
+/* ─── Reviews page (/reviews) ─── */
 .sois-rvpage {
   max-width: 900px;
   margin: 0 auto;
@@ -1478,44 +1478,10 @@ video {
   font-weight: 600;
   color: #4b5563;
   text-decoration: none;
-  margin-bottom: 18px;
+  margin-bottom: 4px;
 }
 .sois-rvpage-back:hover {
   color: #115e59;
-}
-.sois-rvpage-product {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px;
-  border: 1px solid #e8e8e8;
-  border-radius: 14px;
-  text-decoration: none;
-  background: #ffffff;
-}
-.sois-rvpage-thumb {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #f3f4f6;
-  flex-shrink: 0;
-}
-.sois-rvpage-product-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.sois-rvpage-product-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0a0a0a;
-}
-.sois-rvpage-product-price {
-  font-size: 0.85rem;
-  color: #4b5563;
 }
 
 /* ═══════════════════════════════════════════════════════════════

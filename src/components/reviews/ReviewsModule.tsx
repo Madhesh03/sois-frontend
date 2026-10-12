@@ -16,18 +16,11 @@ type SortKey = "recent" | "highest" | "lowest";
 type StarFilter = 0 | 1 | 2 | 3 | 4 | 5; // 0 = All
 
 /**
- * Full ratings & reviews module for one product (the /product/[slug]/reviews
- * page) — breakdown bars, star filter chips, sort, a customer-photos grid,
- * and an expandable review list. Scoped to `productId`, the backend product
- * UUID (see catalog.ts's backend-first-with-mock-fallback `getProductBySlug`).
+ * Full ratings & reviews module (the /reviews page) over the site-wide
+ * approved-reviews feed — breakdown bars, star filter chips, sort, a
+ * customer-photos grid, and an expandable review list.
  */
-export function ReviewsModule({
-  productId,
-  title = "Ratings & Reviews",
-}: {
-  productId: string;
-  title?: string;
-}) {
+export function ReviewsModule({ title = "Ratings & Reviews" }: { title?: string }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -40,7 +33,7 @@ export function ReviewsModule({
     let active = true;
     const controller = new AbortController();
     catalogApi
-      .listReviews({ product: productId, page: 1, page_size: PAGE_SIZE }, controller.signal)
+      .listReviews({ page: 1, page_size: PAGE_SIZE }, controller.signal)
       .then(({ items }) => {
         if (active) setReviews(items);
       })
@@ -54,7 +47,7 @@ export function ReviewsModule({
       active = false;
       controller.abort();
     };
-  }, [productId]);
+  }, []);
 
   const stats = useMemo(() => computeReviewStats(reviews), [reviews]);
 
@@ -83,7 +76,7 @@ export function ReviewsModule({
       <section className="sois-rvw">
         <h1 className="sois-rvw-title">{title}</h1>
         <p className="sois-rvw-empty">
-          {failed ? "Reviews couldn't be loaded right now." : "No reviews for this product yet."}
+          {failed ? "Reviews couldn't be loaded right now." : "No reviews yet."}
         </p>
       </section>
     );
@@ -162,7 +155,7 @@ export function ReviewsModule({
       ) : (
         <div className="sois-rvw-list">
           {visibleReviews.slice(0, visibleCount).map((r) => (
-            <ReviewCard key={r.id} review={r} variant="list" showProduct={false} />
+            <ReviewCard key={r.id} review={r} variant="list" />
           ))}
         </div>
       )}

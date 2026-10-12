@@ -482,8 +482,8 @@ export function ProductDetail({
         </section>
       )}
 
-      {/* Ratings summary — full breakdown/filters/sort live at /product/[slug]/reviews */}
-      <ReviewsSummary productId={product.id} productSlug={product.slug} />
+      {/* Site-wide ratings summary — full breakdown/filters/sort live at /reviews */}
+      <ReviewsSummary />
 
       {/* Recently viewed — hydrated client-side from localStorage history */}
       <RecentlyViewed excludeId={product.id} />
