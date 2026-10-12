@@ -16,7 +16,7 @@ Production runs on the `sois` server (SSH alias `sois`), at `/var/www/sois-front
 2. On the server: `cd /var/www/sois-frontend && git fetch origin main && git reset --hard origin/main`.
 3. `npm install` (only needed if package.json/lock changed), then `npm run build`.
 4. `pm2 restart sois-frontend`.
-5. Verify: `curl -s -o /dev/null -w '%{http_code}\n' https://app.soisstore.com/` should return 200.
+5. Verify: `curl -s -o /dev/null -w '%{http_code}\n' https://soisstore.com/` should return 200.
 
 Never skip step 1 to "save time" — a change that's live but not committed is a change that will be silently lost or contradicted the next time this repo is synced from git.
 
