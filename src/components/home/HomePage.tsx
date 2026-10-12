@@ -76,7 +76,7 @@ export function HomePage() {
           <Commitment />
           <JewelleryCareGuide />
           <BrandStory />
-          <ReviewsStrip title="Loved by our customers" />
+          <ReviewsStrip title="Testimonials" />
           <Faq />
           <Newsletter />
         </main>

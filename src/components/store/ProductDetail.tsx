@@ -45,7 +45,7 @@ function RingSizeIcon() {
 import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/store/ProductCard";
 import { RecentlyViewed } from "@/components/store/RecentlyViewed";
-import { ReviewsSummary } from "@/components/reviews/ReviewsSummary";
+import { ReviewsStrip } from "@/components/reviews/ReviewsStrip";
 import { Modal } from "@/components/modals/Modal";
 import { recordRecentlyViewed } from "@/lib/recentlyViewed";
 
@@ -482,8 +482,8 @@ export function ProductDetail({
         </section>
       )}
 
-      {/* Site-wide ratings summary — full breakdown/filters/sort live at /reviews */}
-      <ReviewsSummary />
+      {/* Site-wide testimonials — full breakdown/filters/sort live at /reviews */}
+      <ReviewsStrip />
 
       {/* Recently viewed — hydrated client-side from localStorage history */}
       <RecentlyViewed excludeId={product.id} />
