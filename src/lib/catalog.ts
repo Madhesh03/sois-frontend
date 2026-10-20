@@ -855,7 +855,7 @@ export function badgeColors(
     case "Best Seller":
       return { background: "#B7791F", color: "#FFFFFF" };
     case "Sale":
-      return { background: "#15803D", color: "#FFFFFF" };
+      return { background: "#115E59", color: "#D1FAE5" };
     default:
       return { background: "rgba(255,255,255,0.94)", color: "#115E59" };
   }
