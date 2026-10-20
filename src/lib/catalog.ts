@@ -61,8 +61,12 @@ export interface Product {
   isBestSeller: boolean;
   rating: number;
   reviewCount: number;
-  /** Marketing badge shown on the card — derived, never hand-set. */
-  badge: "New" | "Best Seller" | "Sale" | null;
+  /**
+   * Marketing badge shown on the card. "New" / "Best Seller" / "Sale" get
+   * their own styling (see `badgeColors`); any other string is a custom tag
+   * staff set in admin and is shown verbatim with the default styling.
+   */
+  badge: "New" | "Best Seller" | "Sale" | (string & {}) | null;
   /**
    * Free-text merchandising labels set in admin (e.g. "New Arrivals", "Best
    * Selling"). Drives the storefront's tag-based sections/filters in addition

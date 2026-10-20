@@ -97,13 +97,18 @@ function derivedBadge(opts: {
   createdAt: string;
   tags?: string[];
 }): UIProduct["badge"] {
-  // An explicit tag set by staff (e.g. via bulk edit) is the strongest
-  // signal and must win over the automatic price/recency heuristics below —
-  // otherwise re-tagging a discounted product "new" would silently keep
-  // showing "Sale" forever, since discount_percent never clears itself.
+  // An explicit tag set by staff (e.g. via bulk edit) is the strongest signal
+  // and must win over the automatic heuristics below — otherwise a featured
+  // product keeps showing "Best Seller" no matter what staff tag it, and a
+  // re-tagged discounted product would show "Sale" forever (discount_percent
+  // never clears itself). The three recognised tags get their own styled badge;
+  // any other custom tag is shown verbatim so whatever staff type reflects on
+  // the card.
   if (hasTag(opts.tags, TAG_ALIASES.bestSeller)) return "Best Seller";
   if (hasTag(opts.tags, TAG_ALIASES.sale)) return "Sale";
   if (hasTag(opts.tags, TAG_ALIASES.new)) return "New";
+  const custom = opts.tags?.map((t) => t.trim()).find(Boolean);
+  if (custom) return custom;
 
   // No explicit tag — fall back to automatic merchandising signals
   // (is_featured / discount / recency), otherwise a freshly-seeded
