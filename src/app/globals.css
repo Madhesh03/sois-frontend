@@ -5548,6 +5548,32 @@ video {
   color: #6b7280;
 }
 
+.sois-order-invoice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #ececec;
+}
+.sois-order-invoice-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #115e59;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.sois-order-invoice-link:hover {
+  background: #f3faf8;
+  border-color: #115e59;
+}
+
 /* Address book + profile form */
 .sois-address-form {
   border: 1px solid #e8e8e8;

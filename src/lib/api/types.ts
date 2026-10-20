@@ -428,6 +428,14 @@ export interface Order {
   updated_at: string;
 }
 
+/** Short-lived presigned links to an order's GST tax invoice PDF (in S3).
+ *  `view_url` opens inline; `download_url` forces a file download. */
+export interface InvoiceLinks {
+  invoice_number: string;
+  view_url: string;
+  download_url: string;
+}
+
 // ── Returns ────────────────────────────────────────────────────────────────
 export interface ReturnMedia {
   id: string;

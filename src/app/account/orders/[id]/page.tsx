@@ -2,7 +2,7 @@
 
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Truck, Package, ExternalLink } from "lucide-react";
+import { Truck, Package, ExternalLink, FileText, Download } from "lucide-react";
 import { AccountShell } from "@/components/account/AccountShell";
 import { useOrders } from "@/context/OrdersContext";
 import {
@@ -11,8 +11,8 @@ import {
   OrderTimeline,
 } from "@/components/account/orderView";
 import { formatPrice } from "@/lib/catalog";
-import { shippingApi } from "@/lib/api";
-import type { TrackingInfo } from "@/lib/api";
+import { ordersApi, shippingApi } from "@/lib/api";
+import type { InvoiceLinks, TrackingInfo } from "@/lib/api";
 import { ItemReviewPanel } from "@/components/reviews/ItemReviewPanel";
 
 export default function OrderDetailPage({
@@ -61,6 +61,30 @@ export default function OrderDetailPage({
       active = false;
     };
   }, [order]);
+
+  // GST tax invoice (PDF in S3, fetched as short-lived presigned links). Only
+  // exists once the order is paid — skip the unpaid ("placed") and cancelled
+  // states, and treat a 404 as "not ready yet" so the buttons simply stay
+  // hidden rather than erroring.
+  const hasInvoice =
+    !!order && order.status !== "placed" && order.status !== "cancelled";
+  const [invoice, setInvoice] = useState<InvoiceLinks | null>(null);
+
+  useEffect(() => {
+    if (!order || !hasInvoice) return;
+    let active = true;
+    ordersApi
+      .getInvoice(order.id)
+      .then((inv) => {
+        if (active) setInvoice(inv);
+      })
+      .catch(() => {
+        if (active) setInvoice(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [order, hasInvoice]);
 
   // Arriving from the review-request email (?review=1): scroll the items
   // panel into view and, if there's exactly one item left to review, open
@@ -230,6 +254,25 @@ export default function OrderDetailPage({
               <div className="sois-order-summary-pay">
                 Paid via {order.paymentMethod}
               </div>
+
+              {invoice && (
+                <div className="sois-order-invoice">
+                  <a
+                    href={invoice.view_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sois-order-invoice-link"
+                  >
+                    <FileText size={14} /> View Invoice
+                  </a>
+                  <a
+                    href={invoice.download_url}
+                    className="sois-order-invoice-link"
+                  >
+                    <Download size={14} /> Download
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
