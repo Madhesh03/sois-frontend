@@ -861,6 +861,7 @@ export function badgeColors(
     case "Sale":
       return { background: "#115E59", color: "#D1FAE5" };
     default:
-      return { background: "rgba(255,255,255,0.94)", color: "#115E59" };
+      // Custom tags staff set in admin — styled like the New badge.
+      return { background: "#115E59", color: "#D1FAE5" };
   }
 }
