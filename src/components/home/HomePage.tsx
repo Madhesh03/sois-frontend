@@ -18,6 +18,7 @@ import { Footer } from "@/components/home/Footer";
 import { CartDrawer } from "@/components/drawers/CartDrawer";
 import { WishlistDrawer } from "@/components/drawers/WishlistDrawer";
 import { AuthDrawer } from "@/components/drawers/AuthDrawer";
+import { FloatingWhatsApp } from "@/components/store/FloatingWhatsApp";
 import { globalStyles, T } from "@/lib/tokens";
 
 export function HomePage() {
@@ -82,6 +83,8 @@ export function HomePage() {
         </main>
         <Footer />
       </div>
+
+      <FloatingWhatsApp />
 
       {/* Inline drawers - open/close via context without URL change */}
       <AuthDrawer />
